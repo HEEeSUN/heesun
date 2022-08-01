@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { deleteChatting } from "../controller/chatting.js";
+import { deleteChatting } from "../controller/customer/chatting.js";
 
 class Socket {
   constructor(server, clientUrl) {
