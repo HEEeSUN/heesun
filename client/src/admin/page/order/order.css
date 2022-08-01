@@ -1,0 +1,177 @@
+.order-list {
+  margin: 0 auto;
+}
+
+.order-list .order-status {
+  display: flex;
+}
+
+.order-list .refund-notice {
+  background-color: yellow;
+  color: red;
+  font-weight: bold;
+  padding: 5px 0;
+  margin-bottom: 30px;
+  border-radius: 5px;
+  box-shadow: 5px 10px 10px 1px rgba(0, 0, 0, .3);
+}
+
+.order-list .refund-notice:hover {
+  cursor: pointer;
+}
+
+.order-list .order-status div {
+  border: 1px solid gainsboro;
+  border-bottom: none;
+  width: 150px;
+  height: 50px;
+  font-weight: bold;
+  line-height: 50px;
+}
+
+.order-list .order-status div:hover {
+  cursor: pointer;
+  background-color: gainsboro;
+}
+
+.order-list .order-status .clicekd {
+  background-color: gainsboro;
+}
+
+.order-list table {
+  font-size: 0.9em;
+}
+
+.order-list table tr .order-date {
+  width: 100px;
+}
+
+.order-list table tr .order-num {
+  width: 200px;
+}
+
+.order-list table tr .order-name {
+  width: 200px;
+}
+
+.order-list table tr .order-quantity {
+  width: 50px;
+}
+
+.order-list table tr .order-orderer {
+  width: 150px;
+}
+
+.order-list table tr .order-delivery-status {
+  width: 150px;
+}
+
+.order-list table tr .order-detail,
+.order-refund {
+  width: 100px;
+}
+
+.order-list table thead tr th p {
+  margin: 0;
+}
+
+.order-list table tbody tr p {
+  margin: 0;
+}
+
+.order-list table tbody tr p {
+  margin: 0;
+}
+
+.order-list table tr td .status-btn {
+  color: maroon;
+  font-weight: bold;
+  font-size: 0.9em;
+  min-width: 50px;
+  min-height: 30px;
+  border-radius: 5px;
+  border: 0.3px solid maroon;
+  padding: 2px 5px;
+  margin: 0 auto;
+  display: block;
+}
+
+.order-list table td .status-btn:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.order-list table th {
+  border-top: 1px solid gainsboro;
+  border-bottom: 5px double gainsboro;
+  background-color: maroon;
+  color: white;
+  font-weight: bold;
+}
+
+.order-list table td {
+  border-bottom: 1px solid gainsboro;
+}
+
+
+.order-list .order-search {
+  display: flex;
+  justify-content: space-evenly;
+  text-align: center;
+  margin: 0 auto 30px auto;
+}
+
+.order-list .order-search .search {
+  margin: 0 auto;
+  font-size: 0.9em;
+  display: flex;
+}
+
+.order-list .order-search .search .search-date {
+  outline: transparent;
+  width: 120px;
+  text-align: center;
+  border: 2px solid maroon;
+  height: 30px;
+}
+
+.order-list .order-search .search .search-date-tilde {
+  width: 20px;
+  text-align: center;
+  height: 30px;
+  line-height: 30px;
+  font-weight: bold;
+}
+
+.order-list .order-search .refund-btn-wrap .refund-btn {
+  border: 1px solid maroon;
+  color: maroon;
+  border-radius: 5px;
+  font-size: 0.9em;
+  width: 150px;
+  font-weight: bold;
+}
+
+.order-list .order-search .refund-btn-wrap .refund-btn:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.refund-list .refund {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border-bottom: 1px solid gainsboro;
+  padding: 5px 0;
+}
+
+.refund-list .refund:first-child {
+  border-top: 1px solid gainsboro;
+}
+
+.refund-list .refund .refund-title {
+  grid-column: 1/6;
+}
+
+.refund-list .refund:hover {
+  background-color: rgb(234, 228, 228)
+}

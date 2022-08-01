@@ -1,0 +1,63 @@
+.community {
+  animation: show;
+  animation-duration: .5s;
+}
+
+.community .content {
+  padding: 10px;
+  width: 100%;
+  max-width: 70vw;
+  margin: 0 auto;
+  position: relative;
+}
+
+.community .content .post-btn {
+  text-align: right;
+  margin-bottom: 10px;
+}
+
+.community .content .post-btn .mypage-btn {
+  min-width: 50px;
+}
+
+.community .content .postBtn button:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.community .content .search .search-category {
+  font-size: 0.8em;
+  color: black;
+  padding-left: 5px;
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  border: 0.5px solid maroon;
+  background-color: rgb(244, 242, 236);
+  outline: transparent;
+}
+
+.community .content .search .search-input {
+  font-size: 0.8em;
+  width: 50%;
+  max-width: 300px;
+  height: 30px;
+  border: none;
+  border-bottom: 1px solid maroon;
+  padding-left: 5px;
+  background-color: rgb(244, 242, 236);
+}
+
+.community .content .search .mypage-btn {
+  width: 50px;
+}
+
+
+@media screen and (max-width: 767px) {
+
+  /* community */
+  .community .content {
+    max-width: none;
+    padding: 0;
+  }
+}

@@ -1,0 +1,62 @@
+.create-account {
+  width: 80%;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.create-account h5 {
+  color: maroon;
+  font-weight: bold;
+}
+
+.create-account hr {
+  color: maroon;
+  border-width: 2px;
+  margin: 20px 0;
+}
+
+.create-account p {
+  color: maroon;
+  font-size: 0.9em;
+  margin: 0;
+  font-weight: bold;
+}
+
+.create-account input {
+  display: block;
+  margin: 0 auto 10px;
+}
+
+.create-account button {
+  display: block;
+  margin: 0 auto;
+  width: 100px;
+  border: 2px solid maroon;
+  color: maroon;
+  font-weight: bold;
+  background-color: white;
+  height: 30px;
+  border-radius: 5px;
+}
+
+.create-account button:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.create-account .menu-list {
+  margin: 10px auto;
+}
+
+.create-account .menu-list .menu:hover {
+  text-decoration: underline;
+}
+
+.create-account .menu-list .menu input {
+  display: inline;
+  margin-right: 10px;
+}
+
+.create-account .menu-list .menu span {
+  font-size: 0.9em;
+}

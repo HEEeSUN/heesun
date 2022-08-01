@@ -1,0 +1,260 @@
+.order {
+  animation: show;
+  animation-duration: .5s;
+}
+
+.order {
+  min-height: 50vh;
+}
+
+.order h5 {
+  margin-bottom: 10px;
+  color: maroon;
+  text-align: left;
+  width: 80%;
+  margin: 0 auto 20px auto;
+
+}
+
+.order .order-table {
+  width: 80%;
+  max-width: 800px;
+  margin: 0 auto 30px auto;
+  border-bottom: 2px solid gainsboro;
+  border-top: 2px solid gainsboro;
+}
+
+.order .order-table thead {
+  background-color: maroon;
+  color: white;
+  height: 30px;
+}
+
+.order .order-table tbody tr td {
+  padding: 5px;
+  border: 1px solid gainsboro;
+  vertical-align: center;
+}
+
+.order .order-table tbody tr td p {
+  margin: 0;
+  padding: 5px 0;
+}
+
+.order .order-table .total-price {
+  font-weight: bold;
+  background-color: rgb(224, 201, 201);
+}
+
+.order .address-form {
+  max-width: 80%;
+  font-size: 0.9em;
+  margin: 0 auto;
+  text-align: left;
+  border-top: 1px solid gainsboro;
+  border-bottom: 1px solid gainsboro;
+  padding: 10px 0;
+  color: maroon;
+}
+
+.order .address-form .checkbox {
+  vertical-align: middle;
+  margin-left: 5px;
+}
+
+.order .address-form label:first-child {
+  font-weight: bold;
+}
+
+.order .payment-option {
+  width: 80%;
+  min-width: 300px;
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: 10px;
+  padding: 10px 0;
+}
+
+.order .payment-option p {
+  color: maroon;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.order .payment-option div {
+  margin-bottom: 10px;
+  font-size: 0.9em;
+}
+
+.order .payment-option div input {
+  margin-right: 5px;
+}
+
+.order .pay-btn {
+  width: 100%;
+  max-width: 800px;
+  height: 30px;
+  border-radius: 0;
+}
+
+
+/* order complete */
+.order-sheet {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.order-sheet h5,
+h6 {
+  text-align: left;
+  font-weight: bold;
+  color: maroon;
+  margin-bottom: 30px;
+}
+
+.order-sheet .order-table {
+  margin-bottom: 30px;
+}
+
+.order-sheet .order-table th {
+  background-color: rgb(228, 217, 217);
+}
+
+.order-sheet .order-table tr {
+  height: 30px;
+}
+
+.order-sheet .order-table .order-shipping-fee {
+  font-size: 0.9em;
+}
+
+.order-sheet .order-table .order-amount {
+  background-color: rgb(228, 217, 217);
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.order-sheet .order-table td {
+  padding: 5px 0;
+  border-bottom: 1px solid rgb(228, 217, 217);
+}
+
+.order-sheet .order-table .order-img {
+  width: 20%;
+}
+
+.order-sheet .order-table .order-img img {
+  width: 50%;
+  border-radius: 10px;
+}
+
+.order-sheet .order-table .order-name {
+  width: 25%;
+}
+
+.order-sheet .order-table .order-price {
+  width: 15%;
+}
+
+.order-sheet .order-table .order-quantity {
+  width: 10%;
+}
+
+.order-sheet .order-table .order-total {
+  width: 25%;
+}
+
+.order-sheet .order-info-form {
+  width: 100%;
+  /* font-size: em; */
+  text-align: center;
+  border-top: 1px solid gainsboro;
+  border-bottom: 1px solid gainsboro;
+  padding: 10px 0;
+  margin: 0 auto 30px auto;
+}
+
+.order-sheet .order-info-form .common-input{
+  display: block;
+}
+
+.order-sheet .order-info-form .address-label {
+  margin-bottom: 10px;
+}
+
+.order-sheet .order-info-form .address-label label {
+  width: 20%;
+  text-align: center;
+  border-right: 1px solid gainsboro;
+  margin-right: 10px;
+}
+
+.order-sheet .order-info-form .address-label input {
+  width: 70%;
+}
+
+.order-sheet .pay-info {
+  width: 100%;
+  font-size: 0.9em;
+  margin-bottom: 10px;
+  border-bottom: 1px solid gainsboro;
+  padding: 5px 0;
+}
+
+.order-sheet .pay-info h6 {
+  text-align: left;
+  font-weight: bold;
+  color: maroon;
+  margin-bottom: 20px;
+}
+
+.order-sheet .pay-info table {
+  margin: 0 auto;
+}
+
+.order-sheet .pay-info table tr {
+  border-bottom: 1px solid gainsboro;
+}
+
+.order-sheet .pay-info table tr:last-child {
+  border-bottom: none
+}
+
+.order-sheet .pay-info table .separator {
+  padding: 0 10px;
+  color: gainsboro;
+  font-weight: bold;
+}
+
+.order-sheet .move-btn {
+  margin: 10px auto 30px auto;
+  border: 2px solid maroon;
+  border-radius: 2px;
+  background-color: rgb(244, 242, 236);
+  color: maroon;
+  font-weight: bold;
+  font-size: 0.8em;
+  height: 30px;
+  width: 100px;
+}
+
+.order-sheet .move-btn:hover {
+  background-color: maroon;
+  color: white;
+}
+
+@media screen and (max-width: 479px) {
+  .order .order-table {
+    width: 100%;
+  }
+
+  .order .address-form {
+    max-width: 100%;
+  }
+
+  /* order complete */
+  .order-sheet {
+    width: 100%;
+    max-width: 100vw;
+  }
+}

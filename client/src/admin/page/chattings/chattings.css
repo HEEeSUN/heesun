@@ -1,0 +1,189 @@
+.adminHome .chatting-list {
+  border: 1px solid gray;
+  border-radius: 5px;
+  height: 600px;
+  width: 50%;
+  min-width: 450px;
+  overflow: auto;
+}
+
+.adminHome .chatting-list .chatting-summary {
+  height: 70px;
+  border-bottom: 1px solid gainsboro;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.adminHome .chatting-list .chatting-summary:hover {
+  background-color: gainsboro;
+}
+
+.adminHome .chatting-list .chatting-summary .chatting-summary-left {
+  text-align: left;
+}
+
+.adminHome .chatting-list .chatting-summary .chatting-summary-left .chatting-username {
+  height: 30px;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.adminHome .chatting-list .chatting-summary .chatting-summary-left .chatting-text {
+  height: 20px;
+  width: 350px;
+  font-size: 0.9em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adminHome .chatting-list .chatting-summary .chatting-badge .chatting-badge-time p {
+  color: black;
+  margin-bottom: 10px;
+}
+
+.adminHome .chatting-list .chatting-summary .chatting-badge .circle {
+  display: inline-block;
+  padding: 5px;
+  margin-right: 5px;
+  font-size: 0.9em;
+  min-width: 20px;
+  background-color: red;
+  border-radius: 50px;
+}
+
+.adminHome .clicked-chatting {
+  background-color: rgb(205, 205, 207);
+  font-weight: bold;
+}
+
+/* 1:1 채팅 */
+.adminHome .chatting-wrapper {
+  height: 600px;
+  width: 50%;
+  min-width: 450px;
+  text-align: center;
+  z-index: 999;
+}
+
+.adminHome .chatting-wrapper .chatting-top-bar {
+  width: 450px;
+  height: 50px;
+  padding: 0 10px;
+  /* background-color:rgb(245, 204, 210);
+   */
+  background-color: rgba(134, 132, 132, 0.952);
+  text-align: left;
+  color: white;
+  font-size: 0.8em;
+  border: 0.5px solid gainsboro;
+  border-radius: 5px 5px 0 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.adminHome .chatting-wrapper .chatting-top-bar p {
+  display: inline-block;
+  text-align: center;
+  line-height: 50px;
+  font-weight: bold;
+}
+
+.adminHome .chatting-wrapper .chatting-top-bar span {
+  text-align: center;
+  line-height: 50px;
+}
+
+.adminHome .chatting-wrapper .top-bar span:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.adminHome .chatting-wrapper .chatting-main {
+  width: 450px;
+  height: 500px;
+  background-color: rgb(238, 235, 235);
+  height: 540px;
+  padding: 10px;
+  overflow: auto;
+}
+
+.adminHome .chatting-wrapper ::-webkit-scrollbar {
+  width: 10px;
+  height: 5px;
+}
+
+.adminHome .chatting-wrapper ::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* white 대신할 색상 rgba(255,255,255,0.8); */
+
+.adminHome .chatting-wrapper ::-webkit-scrollbar-thumb {
+  background-color: rgb(121, 116, 116);
+  border-radius: 5px;
+}
+
+.adminHome .chatting-wrapper .chatting-main .other-chatting {
+  margin: 10px 50px 10px 0;
+  display: flex;
+}
+
+.adminHome .chatting-wrapper .chatting-main .my-chatting {
+  margin: 10px 0 10px 50px;
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.adminHome .chatting-wrapper .chatting-main .my-chatting .chatting-time {
+  display: inline-block;
+  padding: 0 5px;
+  font-size: 0.2em;
+}
+
+.adminHome .chatting-wrapper .chatting-main .my-chatting .chatting-text {
+  display: inline-block;
+  border: 1px solid gainsboro;
+  border-radius: 10px;
+  background-color: rgb(174, 194, 248);
+  padding: 0 10px;
+  text-align: left;
+}
+
+.adminHome .chatting-wrapper .chatting-main .other-chatting .chatting-text {
+  display: inline-block;
+  border: 1px solid gainsboro;
+  border-radius: 10px;
+  background-color: ghostwhite;
+  padding: 0 10px;
+  text-align: left;
+}
+
+.adminHome .chatting-wrapper .chatting-main .other-chatting .chatting-time {
+  display: inline-block;
+  padding: 0 5px;
+  font-size: 0.2em;
+}
+
+.adminHome .chatting-wrapper .chatting-input {
+  bottom: 0;
+  width: 500px;
+  height: 30px;
+  display: flex;
+}
+
+.adminHome .chatting-wrapper .chatting-input input {
+  width: 400px;
+  height: 30px;
+}
+
+.adminHome .chatting-wrapper .chatting-input button {
+  width: 50px;
+  height: 30px;
+  background-color: rgba(165, 162, 162, 0.904);
+  ;
+  color: white;
+  font-weight: bold;
+  border-radius: 2px;
+}

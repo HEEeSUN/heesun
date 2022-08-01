@@ -1,0 +1,205 @@
+.product {
+  width: 100%;
+  animation-duration: .5s;
+  animation-name: show;
+}
+
+.product .product-info-top {
+  display: flex;
+  margin-bottom: 50px;
+}
+
+.product .product-info-top .product-img {
+  width: 50%;
+  max-width: 500px;
+  height: 600px;
+  padding: 10px;
+  padding-right: 50px;
+}
+
+.product .product-info-top .product-img img {
+  width: 100%;
+  height: 600px;
+  background-size: cover;
+}
+
+.product .product-info-top .product-info-list {
+  width: 50%;
+  height: 600px;
+  text-align: left;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.product .product-info-top .product-info-list .product-info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.product .product-info-top .product-info-list .product-info .product-name {
+  color: maroon;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.product .product-info-top .product-info-list .stock-alert {
+  background-color: rgba(255, 0, 0, 0.79);
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.product .product-info-top .product-info-list .product-info .info-title {
+  width: 30%;
+  border-right: 1px solid gray;
+  padding-right: 10px;
+  text-align: center;
+}
+
+.product .product-info-top .product-info-list .product-info .info-option {
+  width: 70%;
+  display: flex;
+  flex-wrap: wrap;
+  padding-left: 10px;
+}
+
+.product .product-info-top .product-info-list .product-info .info-option .quantity {
+  display: inline-block;
+  text-align: center;
+  width: 30px;
+  line-height: 40px;
+}
+
+.product .product-info-top .product-info-list .product-info .info-option .quantity-btn {
+  border: none;
+  background-color: rgb(244, 242, 236);
+  font-size: 1.5em;
+  color: maroon;
+}
+
+.product .product-info-top .product-info-list .product-info .info-option .quantity-btn:hover {
+  font-weight: bold;
+}
+
+.product .product-info-top .product-info-list .product-info .info-option .option-btn {
+  margin: 5px 10px 5px 0;
+  border-radius: 10px;
+  min-width: 40px;
+  height: 30px;
+  line-height: 30px;
+  border: 2px solid maroon;
+}
+
+.product .product-info-top .product-info-list .product-info .info-option .option-btn:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.clicked-btn {
+  background-color: maroon;
+  color: white;
+}
+
+.product .product-info-top .product-info-list .cart-btn-wrapper {
+  margin: 30px auto;
+}
+
+.product .product-info-top .product-info-list .cart-btn-wrapper .cart-btn {
+  width: 300px;
+  height: 40px;
+  border: 2px solid maroon;
+}
+
+.product .product-info-top .product-info-list .cart-btn-wrapper .cart-btn:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.product .paging-wrapper {
+  height: 30px;
+}
+
+.product .paging-wrapper .page-num {
+  margin: 10px 5px;
+  font-size: 0.9em;
+}
+
+.product .paging-wrapper .page-num:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+
+@media screen and (max-width: 767px) {
+
+  /* product */
+  .product .product-info-top {
+    flex-direction: column;
+  }
+
+  .product .product-info-top .product-img {
+    width: 80%;
+    height: auto;
+    padding: 10px;
+    margin: 0 auto 10px auto;
+  }
+
+  .product .product-info-top .product-img img {
+    width: 100%;
+    height: 50%;
+  }
+
+  .product .product-info-top .product-info-list {
+    width: 100%;
+    margin: 0 auto;
+    height: auto;
+  }
+
+  .product .review-table {
+    padding-right: 17px;
+    font-size: 0.8em;
+  }
+
+  .productCard {
+    height: auto;
+  }
+
+  .productCard .productThumbnailWrapper {
+    height: auto;
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  .productCard .productThumbnailWrapper .productThumbnail {
+    width: 100%;
+    height: 70%;
+    min-height: 200px;
+    max-height: 300px;
+  }
+}
+
+.review-table-head {
+  background-color: maroon;
+  color: white;
+  padding: 5px 0;
+  font-weight: bold;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.review-table-head .review-content {
+  grid-column: 2/ 7;
+  text-align: center;
+}
+
+.review-table-head .review-username {
+  grid-column: 7/ 9;
+  text-align: center;
+}
+
+.review-table-head .review-created {
+  grid-column: 9/ 13;
+  text-align: center;
+}

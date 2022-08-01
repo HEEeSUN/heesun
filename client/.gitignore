@@ -1,0 +1,9 @@
+.vscode/
+build/
+public/
+temp/
+node_modules/
+
+react-app-env.d.ts
+tsconfig.json
+.env

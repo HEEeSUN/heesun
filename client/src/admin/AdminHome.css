@@ -1,0 +1,321 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Nanum Gothic', 'Roboto Slab', 'Josefin Sans', 'Stylish', sans-serif;
+}
+
+.App {
+  text-align: center;
+}
+
+input {
+  outline: transparent;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.admin {
+  display: flex;
+  min-height: 80vh;
+  width: 90%;
+  margin: 0 auto;
+  overflow: auto;
+  padding: 5px;
+}
+
+.adminHome {
+  display: flex;
+  padding: 20px;
+  width: 100%;
+  border: 1px solid gainsboro;
+}
+
+/*[components] menulist*/
+.adminMenuList {
+  width: 15%;
+  min-width: 150px;
+}
+
+.adminMenuList ul {
+  padding: 0;
+  border-bottom: 1px solid gainsboro;
+  border-left: 1px solid gainsboro;
+}
+
+.adminMenuList ul a {
+  text-decoration: none;
+}
+
+.adminMenuList ul li {
+  list-style: none;
+  height: 60px;
+  line-height: 60px;
+  border-top: 1px solid gainsboro;
+  color: maroon;
+}
+
+.adminMenuList ul li:hover {
+  cursor: pointer;
+  background-color: ghostwhite;
+  font-weight: bold;
+}
+
+.clicked {
+  background-color: ghostwhite;
+  font-weight: bold;
+}
+
+.chatContext {
+  height: 600px;
+  width: 450px;
+  text-align: center;
+  line-height: 600px;
+  border: 1px solid gainsboro;
+}
+
+.pageNum {
+  margin: 10px 5px;
+  font-size: 0.9em;
+}
+
+.pageNum:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.clickedPageNum {
+  font-weight: bold;
+}
+
+.adminMain {
+  height: 300px;
+}
+
+.adminMenu {
+  width: 1200px;
+}
+
+.flex-column {
+  width: 250px;
+  border: 1px solid gainsboro;
+}
+
+.col-sm-3 {
+  width: 250px;
+  padding: 0;
+}
+
+.col-sm-9 {
+  padding: 0;
+}
+
+/* 팝업창  css*/
+.adminHome .popup-wrap {
+  background-color: rgba(0, 0, 0, .3);
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  padding: 15px;
+}
+
+.adminHome .popup-wrap .popup-body {
+  min-width: 300px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 5px 10px 10px 1px rgba(0, 0, 0, .3);
+}
+
+.adminHome .popup-wrap .popup-body .popup-top-bar {
+  height: 40px;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  background-color: maroon;
+}
+
+.adminHome .popup-wrap .popup-body .popup-top-bar span:last-child:hover {
+  cursor: pointer;
+}
+
+.adminHome .popup-wrap .popup-body .content {
+  padding: 10px 30px;
+}
+
+
+/* order 팝업창  css*/
+.order-popup-wrap {
+  background-color: rgba(0, 0, 0, .3);
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  padding: 15px;
+}
+
+.order-popup {
+  width: 100%;
+  max-width: 500px;
+  max-height: 500px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 5px 10px 10px 1px rgba(0, 0, 0, .3);
+}
+
+.order-popup-head {
+  width: 100%;
+  height: 40px;
+  color: black;
+  background-color: gainsboro;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+}
+
+.order-popup-head span:last-child {
+  font-weight: bold;
+}
+
+.order-popup-head span:last-child:hover {
+  cursor: pointer;
+}
+
+.order-popup-body {
+  width: 100%;
+  font-size: 0.9em;
+  background-color: #ffffff;
+}
+
+.order-popup-body .order-info {
+  width: 100%;
+  height: 30%;
+  margin-bottom: 10px;
+  border-bottom: 1px solid gainsboro;
+}
+
+.order-popup-body .order-info table tr .order-info-label {
+  width: 50px;
+  border-right: 1px solid gainsboro;
+}
+
+.order-popup-body .order-status {
+  width: 100%;
+  /* height: 50%; */
+  max-height: 200px;
+  overflow: auto;
+  border: 1px solid gainsboro;
+  margin-bottom: 30px;
+}
+
+.order-popup-body .order-status table {
+  margin: 0;
+  width: 100%;
+}
+
+.order-popup-body .order-status table tr th {
+  background-color: gainsboro;
+  color: black;
+}
+
+.order-popup-body .order-info table {
+  margin: 0;
+  width: 100%;
+}
+
+.order-popup-body .order-info table tr {
+  border-bottom: 1px solid gainsboro;
+}
+
+.order-popup-body .order-status-option {
+  margin-bottom: 10px;
+}
+
+.order-popup-body .order-refund-info {
+  width: 100%;
+  height: 50%;
+  border: 1px solid gainsboro;
+  margin-bottom: 10px;
+}
+
+.order-popup-body .order-refund-info table {
+  margin: 0;
+  width: 100%;
+}
+
+.order-popup-body .order-refund-info table .refund-notice {
+  color: red;
+  font-size: 0.9em;
+  padding: 5px 0;
+}
+
+/* search form */
+.search .search-wrapper {
+  display: flex;
+  align-items: center;
+  width: 500px;
+  margin: 0 auto 20px;
+  font-size: 0.9em;
+}
+
+.search .search-wrapper .category {
+  width: 120px;
+  text-align: center;
+  border: 2px solid maroon;
+  height: 30px;
+  outline: transparent;
+}
+
+.search .search-wrapper .search-form {
+  display: flex;
+  width: 350px;
+}
+
+.search .search-wrapper .search-form input {
+  width: 300px;
+  border: 2px solid maroon;
+  border-left-width: 0;
+  border-right-width: 0;
+  height: 30px;
+}
+
+.search .search-wrapper .search-form .search-btn {
+  width: 60px;
+  border: 2px solid maroon;
+  color: maroon;
+  font-weight: bold;
+  background-color: white;
+  height: 30px;
+}
+
+.search .search-wrapper .search-form .search-btn:hover {
+  background-color: rgb(193, 193, 185);
+  font-weight: bolder
+}

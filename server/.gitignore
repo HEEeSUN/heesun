@@ -1,0 +1,10 @@
+.vscode/
+node_modules/
+coverage/
+
+.env
+config.js
+jest.config.mjs
+jest.setup.js
+.babelrc
+

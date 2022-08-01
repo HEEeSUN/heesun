@@ -1,0 +1,79 @@
+.signup {
+  width: 80%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  animation-duration: .5s;
+  animation-name: show;
+}
+
+.signup .signup-form {
+  text-align: center;
+  margin: 0 auto;
+}
+
+.signup .notification {
+  text-align: left;
+  padding-bottom: 15px;
+  border-bottom: 2px solid maroon;
+  margin-bottom: 15px;
+}
+
+.signup .notification p:first-child {
+  font-weight: bold;
+  margin: 0;
+}
+
+.signup .notification p:last-child {
+  font-size: 0.7em;
+  color: maroon;
+  font-weight: bold;
+  margin: 0;
+}
+
+.signup .signup-item-with-btn {
+  display: flex;
+}
+
+.signup .signup-item-with-btn .signup-item {
+  margin: 0 auto;
+}
+
+.signup .signup-item {
+  margin: 0 auto 15px auto;
+}
+
+.signup .signup-rule {
+  color: black;
+  font-weight: bold;
+  font-size: 0.7em;
+  text-align: center;
+}
+
+.signup .big-size-btn {
+  width: 250px;
+  height: 40px;
+  margin: 10px auto;
+}
+
+.signup .passwordCheck {
+  width: 300px;
+  height: 20px;
+  text-align: left;
+  font-size: 0.8em;
+  margin-bottom: 10px;
+  animation-duration: .5s;
+  animation-name: show;
+}
+
+.signup .hidden {
+  display: none;
+}
+
+@media screen and (max-width: 767px) {
+  .signup {
+    width: 100%;
+  }
+}

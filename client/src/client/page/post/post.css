@@ -1,0 +1,225 @@
+.post .comment-area {
+  border-top: 2px solid maroon;
+  border-bottom: 2px solid maroon;
+}
+
+.post .comment-area .comment-input {
+  margin: 0 auto;
+}
+
+.post .comment-area .comment-input textarea {
+  width: 100%;
+  height: 80px;
+  resize: none;
+  margin: 0 auto;
+}
+
+.post .comment-area .comment-input button {
+  display: block;
+  margin: 0 auto;
+  width: 50px;
+  height: 30px;
+  font-size: 0.9em;
+  padding: 2px;
+  border: 2px solid maroon;
+  border-radius: 5px;
+  background-color: rgb(244, 242, 236);
+  color: maroon;
+  font-weight: bold;
+}
+
+.post .comment-area .comment-input button:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.post .comment-area .comment-paging {
+  margin: 10px auto;
+}
+
+.post .comment-area .comment-paging span {
+  margin-right: 10px;
+}
+
+.post .comment-area .comment-paging span:hover {
+  cursor: pointer;
+}
+
+.post .comment-area .comments .comment {
+  display: flex;
+  padding: 10px 5px;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid gainsboro;
+}
+
+.post .comment-area .comments .comment .comment-left {
+  width: 90%;
+  text-align: left;
+}
+
+.post .comment-area .comments .comment .comment-left .comment-info {
+  font-size: 0.8em;
+  margin-bottom: 5px;
+}
+
+.post .comment-area .comments .comment .comment-left .comment-info span:first-child {
+  font-weight: bold;
+}
+
+.post .comment-area .comments .comment .comment-right {
+  width: 10%;
+  font-size: 0.5em;
+}
+
+.post .comment-area .comments .comment .comment-right:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.post .comment-area .comments .comment .comment-left span:first-child {
+  margin-right: 10px;
+}
+
+.write-post {
+  margin: 0 auto;
+  animation: show;
+  animation-duration: .5s;
+}
+
+.write-post h4 {
+  color: maroon;
+  font-weight: bold;
+  padding: 5px;
+  margin-bottom: 10px;
+  text-align: left;
+}
+
+.write-post .content-header {
+  border-top: 1px solid gray;
+  border-bottom: 1px solid gray;
+  padding: 5px;
+}
+
+.write-post .content-header .content-title {
+  text-align: left;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.write-post .content-header .post-title {
+  width: 100%;
+  height: 30px;
+  resize: none;
+  text-align: left;
+  outline: transparent;
+  background-color: white;
+  border: none;
+  border-bottom: 2px solid maroon;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.write-post .content-header .post-title:focus {
+  background-color: rgb(244, 242, 236);
+}
+
+.write-post .content-header .content-info {
+  text-align: left;
+  font-size: 0.8em;
+  display: flex;
+  justify-content: space-between;
+}
+
+.write-post .content-header .content-info div:first-child span:first-child {
+  margin-right: 5px;
+}
+
+.write-post .content-header .content-info div:first-child span:last-child {
+  margin-left: 5px;
+}
+
+.write-post .content-header .content-info div:last-child span:first-child {
+  margin-right: 5px;
+}
+
+.write-post .content-header .content-info div:nth-child(2) span:last-child {
+  margin-left: 5px;
+}
+
+.write-post .content-header .content-info div:nth-child(2) span:hover {
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.write-post .content {
+  min-height: 30vw;
+  text-align: left;
+  padding: 10px;
+  white-space: pre-line;
+  /* white-space: pre-line; 줄바꿈만 적용*/
+  /* white-space:pre; 줄바꿈및띄어쓰기전부적용*/
+}
+
+.write-post .content .post-content {
+  width: 100%;
+  height: 40vw;
+  max-height: 500px;
+  resize: none;
+  text-align: left;
+  outline: transparent;
+  padding: 10px;
+  overflow: auto;
+  background-color: white;
+  border: none;
+  margin-bottom: 10px;
+}
+
+.write-post .submit-btn {
+  width: 60px;
+  font-size: 0.9em;
+  padding: 2px;
+  border: 2px solid maroon;
+  border-radius: 5px;
+  background-color: rgb(244, 242, 236);
+  color: maroon;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.write-post .cancel-btn {
+  width: 60px;
+  font-size: 0.9em;
+  padding: 2px;
+  border: 2px solid maroon;
+  border-radius: 5px;
+  background-color: rgb(244, 242, 236);
+  color: maroon;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.write-post .submit-btn:hover {
+  background-color: maroon;
+  color: white;
+}
+
+.write-post .cancel-btn:hover {
+  background-color: blue;
+  color: white;
+}
+
+@media screen and (max-width: 767px) {
+  .post .comment-area {
+    padding: 0;
+  }
+
+  .post .content-header {
+    padding: 0 30px 0 10px;
+  }
+
+  .post .comment-area .comment-input {
+    padding: 10px 0;
+  }
+}

@@ -1,0 +1,186 @@
+.add-product {
+  width: 800px;
+  margin: 0 auto;
+}
+
+.add-product .add-form .add-product-top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.add-product .add-form .add-product-notice {
+  text-align: left;
+  font-size: 0.8em;
+  font-weight: bold;
+  margin-bottom: 30px;
+  margin-right: 50px;
+}
+
+.add-product .add-form .add-product-top .product-table {
+  border-right: 1px solid gainsboro;
+  padding-right: 5px;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper {
+  margin: 0 auto;
+  height: 150px;
+  width: 150px;
+  padding: 5px;
+  position: relative;
+  border: 1px solid gainsboro;
+  border-radius: 5px;
+  background-color: white;
+  margin-bottom: 10px;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper .image-preview {
+  height: 140px;
+  width: 140px;
+  border-radius: 5px;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 100;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper .image-remove-btn {
+  position: absolute;
+  top: 5px;
+  right: 0;
+  z-index: 999;
+  padding: 5px;
+  color: black;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper .image-remove-btn:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper .image-add-btn {
+  width: 140px;
+  height: 100px;
+  position: absolute;
+  top: 30px;
+  left: 5px;
+  z-index: 900;
+  opacity: 0;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper .image-add-btn:hover {
+  cursor: pointer;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .image-input-wrapper .image-fake-add-btn {
+  width: 100px;
+  height: 40px;
+  margin: 30px 20px;
+  background-color: white;
+  border: none;
+  border-radius: 10px;
+  position: absolute;
+  top: 30px;
+  left: 5px;
+  z-index: 1;
+}
+
+.add-product .add-form .add-product-top .product-table .product-info-input .product_desc {
+  width: 200px;
+  height: 150px;
+  resize: none;
+  overflow: auto;
+  outline: none;
+}
+
+.add-product .add-form .add-product-top .temp-btn-wrapper {
+  width: 50px;
+  height: 100px;
+  margin: auto 5px;
+}
+
+.add-product .add-form .add-product-top .temp-btn-wrapper button {
+  width: 50px;
+  background-color: maroon;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+  margin: 30px 0;
+}
+
+.add-product .add-form .add-product-top .product-option-list {
+  min-width: 30vw;
+  border-left: 1px solid gainsboro;
+  overflow: auto;
+  color: lightslategrey;
+  font-size: 0.9em;
+  height: 570px;
+}
+
+.add-product .add-form .add-product-top .product-option-list table .product-option {
+  margin-bottom: 20px;
+  height: 30px;
+}
+
+.add-product .add-form .add-product-top .product-option-list table .product-option td {
+  width: 60px;
+}
+
+.add-product .add-form .add-product-top .product-option-list table .product-option td:first-child {
+  width: 50px;
+}
+
+.add-product .add-form .add-btn-wrapper button {
+  width: 400px;
+  color: maroon;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+/* [comnponenets] productInput*/
+.product-info-input {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  color: lightslategrey;
+  font-size: 0.9em;
+}
+
+.product-info-input .product-label {
+  width: 100px;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+
+.product-info-input .product-input {
+  width: 230px;
+  outline: none;
+}
+
+.product-info-input .product-input input {
+  outline: none;
+  width: 220px;
+  height: 30px;
+}
+
+.product-info-input .codecheck-btn-wrapper button {
+  width: 50px;
+  background-color: maroon;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.delete-option {
+  text-decoration: line-through;
+  color: red;
+}
+
+.sale-option {
+  text-decoration: line-through;
+  color: blue;
+}
+
+.require {
+  border: 2px solid red;
+}

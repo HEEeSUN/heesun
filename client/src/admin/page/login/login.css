@@ -1,0 +1,36 @@
+.login-form {
+  width: 500px;
+  height: 300px;
+  margin: 100px auto 0;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.login-form p {
+  color: maroon;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.login-form input {
+  display: flex;
+  justify-content: space-between;
+  color: maroon;
+  font-weight: bold;
+  width: 180px;
+  height: 30px;
+  margin: 0 auto 10px;
+  border: none;
+  border-bottom: 1px solid maroon;
+  background-color: whitesmoke;
+}
+
+.login-form button {
+  width: 80px;
+  height: 30px;
+  margin: 10px auto;
+  background-color: maroon;
+  color: white;
+}
