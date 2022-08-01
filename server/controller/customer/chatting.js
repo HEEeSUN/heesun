@@ -1,4 +1,4 @@
-import { deleteExpiredChatting } from "../data/chatting.js";
+import { deleteExpiredChatting } from "../../data/customer/chatting.js";
 
 export const deleteChatting = async (socketId) => {
   try {

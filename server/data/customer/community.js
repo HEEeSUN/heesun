@@ -1,4 +1,4 @@
-import db from "../db/database.js";
+import db from "../../db/database.js";
 
 export async function writePost(title, content, username) {
   return db

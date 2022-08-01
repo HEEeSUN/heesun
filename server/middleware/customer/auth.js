@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import * as userRepository from "../data/user.js";
+import * as userRepository from "../../data/customer/user.js";
 
 const AUTH_ERROR = { code: "ERROR00001" };
 

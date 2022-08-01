@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
-import * as adminRepository from "../data/admin.js";
+import * as adminRepository from "../../data/admin/admin.js";
 
 const AUTH_ERROR = { code: "ERROR00001" };
 
-export const authForAdmin = async (req, res, next) => {
+export const auth = async (req, res, next) => {
   const token = req.cookies["token"];
 
   if (!token) {

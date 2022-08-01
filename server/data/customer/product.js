@@ -1,4 +1,4 @@
-import db from "../db/database.js";
+import db from "../../db/database.js";
 
 export async function getByProduct_code(product_code) {
   return db
