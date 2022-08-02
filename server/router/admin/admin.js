@@ -1,140 +1,135 @@
 import express from "express";
-import { upload, resize } from "../middleware/fileUpload.js";
-import {
-  authForAdmin,
-  accessableMenu,
-  refresh,
-} from "../middleware/authForAdmin.js";
+import { upload, resize } from "../../middleware/admin/fileUpload.js";
 
 const router = express.Router();
 
-function adminRouter(adminController) {
-  router.get("/", authForAdmin, adminController.getMenuList);
+function adminRouter(adminAuth, adminController) {
+  router.get("/", adminAuth.auth, adminController.getMenuList);
   router.post("/", adminController.login);
   router.get("/logout", adminController.logout);
-  router.get("/auth", refresh, adminController.refresh);
-  router.get("/home", authForAdmin, adminController.getDashboardData);
-  router.post("/account", authForAdmin, accessableMenu, adminController.create);
+  router.get("/auth", adminAuth.refresh, adminController.refresh);
+  router.get("/home", adminAuth.auth, adminController.getDashboardData);
+  router.post("/account", adminAuth.auth, adminAuth.accessableMenu, adminController.create);
  
   router.get(
     "/products",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getProducts
   );
   router.post(
     "/products",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     upload.single("uploadedImage"),
     resize,
     adminController.addProduct
   );
   router.post(
     "/products/codeCheck",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.checkProductCode
   );
   router.get(
     "/products/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getProduct
   );
   router.patch(
     "/products/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     upload.single("uploadedImage"),
     resize,
     adminController.updateProduct
   );
   router.delete(
     "/products/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deleteProduct
   );
 
   router.get(
     "/discount",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getSaleProducts
   );
   router.post(
     "/discount",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.addSaleProduct
   );
   router.patch(
     "/discount",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.updateSaleProduct
   );
   router.delete(
     "/discount/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deleteSaleProduct
   );
 
   router.get(
     "/orders",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getOrders
   );
   router.get(
     "/orders/status",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getOrderBySpecificStatus
   );
   router.get(
     "/orders/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deliveryStatus
   );
   router.patch(
     "/orders/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.updateStatus
   );
   router.post(
     "/orders/refund",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.refund
   );
 
   router.get(
     "/inquiries",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getInquiries
   );
   router.get(
     "/inquiries/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.testGetInquiry
   );
   router.post(
     "/inquiries/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.sendMessage
   );
   router.delete(
     "/inquiries/:id",
-    authForAdmin,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deleteInquiry
   );
 

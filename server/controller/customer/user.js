@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { requestRefund } from "./payment.js";
+import { requestRefund } from "../payment.js";
 
 export default class UserController {
   constructor(userRepository) {

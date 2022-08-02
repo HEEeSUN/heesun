@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import { deleteChatting } from "../controller/chatting.js";
 
 class Socket {
-  constructor(server, clientUrl) {
+  constructor(server, clientUrl, deleteChatting) {
+    this.deleteChatting = deleteChatting;
     this.io = new Server(server, {
       cors: {
         origin: clientUrl,
@@ -34,7 +34,7 @@ class Socket {
       });
 
       socket.on("disconnect", () => {
-        deleteChatting(socket.id);
+        this.deleteChatting(socket.id);
       });
     });
   }

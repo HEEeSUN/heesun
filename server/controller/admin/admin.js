@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { requestRefund } from "./payment.js";
+import { requestRefund } from "../payment.js";
 
 export default class AdminController {
   constructor(adminRepository) {
