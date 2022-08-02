@@ -11,7 +11,7 @@ import communityRouter from "./router/customer/community.js";
 import productRouter from "./router/customer/product.js";
 import userRouter from "./router/customer/user.js";
 import AdminController from "./controller/admin/admin.js";
-import { ChattingController } from "./controller/customer/chatting.js";
+import ChattingController from "./controller/customer/chatting.js";
 import CommunityController from "./controller/customer/community.js";
 import ProductController from "./controller/customer/product.js";
 import UserController from "./controller/customer/user.js";
@@ -60,4 +60,4 @@ app.use((error, req, res, next) => {
 });
 
 const server = app.listen(parseInt(process.env.PORT));
-initSocket(server, parseInt(process.env.PORT));
+initSocket(server, parseInt(process.env.PORT), chattingController.deleteExpiredChatting);

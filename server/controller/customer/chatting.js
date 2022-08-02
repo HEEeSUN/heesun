@@ -1,14 +1,4 @@
-import { deleteExpiredChatting } from "../../data/customer/chatting.js";
-
-export const deleteChatting = async (socketId) => {
-  try {
-    deleteExpiredChatting(socketId);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export class ChattingController {
+export default class ChattingController {
   constructor(chattingRepository) {
     this.chatting = chattingRepository;
   }
@@ -173,6 +163,14 @@ export class ChattingController {
     } catch (error) {
       console.log(error);
       res.sendStatus(400);
+    }
+  };
+
+  deleteExpiredChatting = async (socketId) => {
+    try {
+      this.chatting.deleteExpiredChatting(socketId);
+    } catch (error) {
+      console.log(error);
     }
   };
 }
