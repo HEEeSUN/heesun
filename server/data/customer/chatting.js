@@ -1,4 +1,4 @@
-export class ChattingRepository {
+export default class ChattingRepository {
   #db;
 
   constructor(db) {
