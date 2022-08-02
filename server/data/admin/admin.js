@@ -7,13 +7,13 @@ export default class AdminRepository {
 
   findByUsername = async (admin) => {
     return this.#db
-      .execute(`SELECT * FROM admin WHERE admin=?`, [admin])
+      .execute(`SELECT * FROM admin WHERE username=?`, [admin])
       .then((result) => result[0][0]);
   };
 
-  findByAdminId = async (admin) => {
+  findById = async (admin) => {
     return this.#db
-      .execute(`SELECT * FROM admin WHERE admin_id=?`, [admin])
+      .execute(`SELECT * FROM admin WHERE id=?`, [admin])
       .then((result) => result[0][0]);
   };
 
@@ -21,13 +21,13 @@ export default class AdminRepository {
     return this.#db
       .execute(`SELECT * 
                 FROM access_authority NATURAL JOIN admin_menu_list 
-                WHERE admin_id=?`, [admin])
+                WHERE id=?`, [admin])
       .then((result) => result[0]);
   };
 
   createAdmin = async (admin, password) => {
     return this.#db
-      .execute(`INSERT INTO admin (admin, password) VALUES (?, ?)`, [
+      .execute(`INSERT INTO admin (username, password) VALUES (?, ?)`, [
         admin,
         password,
       ])
@@ -43,7 +43,7 @@ export default class AdminRepository {
 
       for (let i = 0; i < menuList.length; i++) {
         await conn.execute(
-          `INSERT INTO access_authority (admin_id, menu_id) VALUES (?, ?)`, [
+          `INSERT INTO access_authority (id, menu_id) VALUES (?, ?)`, [
             admin_id, 
             menuList[i]
           ]);

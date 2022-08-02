@@ -47,8 +47,8 @@ class Socket {
 let socket;
 
 /* socket 생성 */
-export default function initSocket(server, app) {
+export default function initSocket(server, clientUrl, deleteChatting) {
   if (!socket) {
-    socket = new Socket(server, app);
+    socket = new Socket(server, clientUrl, deleteChatting);
   }
 }
