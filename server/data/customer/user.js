@@ -44,7 +44,7 @@ export default class UserRepository {
       .then((result) => result[0].insertId);
   };
 
-  findByUserId = async (id) => {
+  findById = async (id) => {
     return this.#db
       .execute("SELECT * FROM users WHERE id=?", [id])
       .then((result) => result[0][0]);

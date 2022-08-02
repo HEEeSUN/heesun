@@ -4,22 +4,22 @@ import { upload, resize } from "../../middleware/admin/fileUpload.js";
 const router = express.Router();
 
 function adminRouter(adminAuth, adminController) {
-  router.get("/", adminAuth.auth, adminController.getMenuList);
+  router.get("/", adminAuth.isAuth, adminController.getMenuList);
   router.post("/", adminController.login);
   router.get("/logout", adminController.logout);
   router.get("/auth", adminAuth.refresh, adminController.refresh);
-  router.get("/home", adminAuth.auth, adminController.getDashboardData);
-  router.post("/account", adminAuth.auth, adminAuth.accessableMenu, adminController.create);
+  router.get("/home", adminAuth.isAuth, adminController.getDashboardData);
+  router.post("/account", adminAuth.isAuth, adminAuth.accessableMenu, adminController.create);
  
   router.get(
     "/products",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.getProducts
   );
   router.post(
     "/products",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     upload.single("uploadedImage"),
     resize,
@@ -27,19 +27,19 @@ function adminRouter(adminAuth, adminController) {
   );
   router.post(
     "/products/codeCheck",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.checkProductCode
   );
   router.get(
     "/products/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.getProduct
   );
   router.patch(
     "/products/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     upload.single("uploadedImage"),
     resize,
@@ -47,88 +47,88 @@ function adminRouter(adminAuth, adminController) {
   );
   router.delete(
     "/products/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.deleteProduct
   );
 
   router.get(
     "/discount",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.getSaleProducts
   );
   router.post(
     "/discount",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.addSaleProduct
   );
   router.patch(
     "/discount",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.updateSaleProduct
   );
   router.delete(
     "/discount/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.deleteSaleProduct
   );
 
   router.get(
     "/orders",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.getOrders
   );
   router.get(
     "/orders/status",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.getOrderBySpecificStatus
   );
   router.get(
     "/orders/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.deliveryStatus
   );
   router.patch(
     "/orders/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.updateStatus
   );
   router.post(
     "/orders/refund",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.refund
   );
 
   router.get(
     "/inquiries",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.getInquiries
   );
   router.get(
     "/inquiries/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.testGetInquiry
   );
   router.post(
     "/inquiries/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.sendMessage
   );
   router.delete(
     "/inquiries/:id",
-    adminAuth.auth,
+    adminAuth.isAuth,
     adminAuth.accessableMenu,
     adminController.deleteInquiry
   );
