@@ -1,12 +1,21 @@
 import mysql from "mysql2";
-import config from "../config.js";
 
-const pool = mysql.createPool({
-  host: config.host.host,
-  user: config.host.user,
-  database: config.host.database,
-  password: config.host.password,
-});
+export default class Database {
+  #pool;
 
- const db = pool.promise();
- export default db;
+  constructor() {
+    this.#createPool();
+  }
+
+  #createPool() {
+    this.#pool = mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USERNAME,
+      database: process.env.DB_DATABASE,
+      password: process.env.DB_PASSWORD,
+      port: parseInt(process.env.DB_PORT),
+    });
+
+    this.db = this.#pool.promise();
+  }
+}
