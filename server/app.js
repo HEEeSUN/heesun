@@ -71,4 +71,4 @@ app.use((error, req, res, next) => {
 });
 
 const server = app.listen(parseInt(process.env.PORT));
-initSocket(server, parseInt(process.env.PORT), chattingController.deleteExpiredChatting);
+initSocket(server, process.env.CLIENT_URL, chattingController.deleteExpiredChatting);
