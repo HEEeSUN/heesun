@@ -1,19 +1,18 @@
 import express from "express";
-import { isAuth } from "../../middleware/customer/auth.js";
 
 const router = express.Router();
 
-function communityRouter(communityController) {
+function communityRouter(customerAuth, communityController) {
   router.get("/comment", communityController.getComments);
   router.delete(
     "/comment/:id",
-    isAuth,
+    customerAuth.isAuth,
     communityController.checkUniqueId,
     communityController.deleteComment
-  ); //
+  ); 
 
   router.get("/", communityController.getAllPosts);
-  router.post("/", isAuth, communityController.writePost);
+  router.post("/", customerAuth.isAuth, communityController.writePost);
   router.get(
     "/:id",
     communityController.checkUniqueId,
@@ -21,19 +20,19 @@ function communityRouter(communityController) {
   );
   router.post(
     "/:id",
-    isAuth,
+    customerAuth.isAuth,
     communityController.checkUniqueId,
     communityController.writeComment
   );
   router.delete(
     "/:id",
-    isAuth,
+    customerAuth.isAuth,
     communityController.checkUniqueId,
     communityController.deletePost
   );
   router.patch(
     "/:id",
-    isAuth,
+    customerAuth.isAuth,
     communityController.checkUniqueId,
     communityController.modifyPost
   );

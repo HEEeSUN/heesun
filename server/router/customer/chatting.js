@@ -1,13 +1,12 @@
 import express from "express";
-import { refresh } from "../../middleware/customer/auth.js";
 
 const router = express.Router();
 
-function chattingRouter(chattingController) {
-  router.get("/", refresh, chattingController.getChattings);
+function chattingRouter(customerAuth, chattingController) {
+  router.get("/", customerAuth.refresh, chattingController.getChattings);
   router.post("/", chattingController.joinRoom);
-  router.get("/:id", refresh, chattingController.getMessage);
-  router.post("/:id", refresh, chattingController.sendMessage);
+  router.get("/:id", customerAuth.refresh, chattingController.getMessage);
+  router.post("/:id", customerAuth.refresh, chattingController.sendMessage);
   router.delete("/:id", chattingController.deleteChatting);
 
   return router;

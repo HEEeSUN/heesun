@@ -1,140 +1,135 @@
 import express from "express";
 import { upload, resize } from "../../middleware/admin/fileUpload.js";
-import {
-  auth,
-  accessableMenu,
-  refresh,
-} from "../../middleware/admin/auth.js";
 
 const router = express.Router();
 
-function adminRouter(adminController) {
-  router.get("/", auth, adminController.getMenuList);
+function adminRouter(adminAuth, adminController) {
+  router.get("/", adminAuth.auth, adminController.getMenuList);
   router.post("/", adminController.login);
   router.get("/logout", adminController.logout);
-  router.get("/auth", refresh, adminController.refresh);
-  router.get("/home", auth, adminController.getDashboardData);
-  router.post("/account", auth, accessableMenu, adminController.create);
+  router.get("/auth", adminAuth.refresh, adminController.refresh);
+  router.get("/home", adminAuth.auth, adminController.getDashboardData);
+  router.post("/account", adminAuth.auth, adminAuth.accessableMenu, adminController.create);
  
   router.get(
     "/products",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getProducts
   );
   router.post(
     "/products",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     upload.single("uploadedImage"),
     resize,
     adminController.addProduct
   );
   router.post(
     "/products/codeCheck",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.checkProductCode
   );
   router.get(
     "/products/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getProduct
   );
   router.patch(
     "/products/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     upload.single("uploadedImage"),
     resize,
     adminController.updateProduct
   );
   router.delete(
     "/products/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deleteProduct
   );
 
   router.get(
     "/discount",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getSaleProducts
   );
   router.post(
     "/discount",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.addSaleProduct
   );
   router.patch(
     "/discount",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.updateSaleProduct
   );
   router.delete(
     "/discount/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deleteSaleProduct
   );
 
   router.get(
     "/orders",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getOrders
   );
   router.get(
     "/orders/status",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getOrderBySpecificStatus
   );
   router.get(
     "/orders/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deliveryStatus
   );
   router.patch(
     "/orders/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.updateStatus
   );
   router.post(
     "/orders/refund",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.refund
   );
 
   router.get(
     "/inquiries",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.getInquiries
   );
   router.get(
     "/inquiries/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.testGetInquiry
   );
   router.post(
     "/inquiries/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.sendMessage
   );
   router.delete(
     "/inquiries/:id",
-    auth,
-    accessableMenu,
+    adminAuth.auth,
+    adminAuth.accessableMenu,
     adminController.deleteInquiry
   );
 

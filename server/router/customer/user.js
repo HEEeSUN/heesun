@@ -1,45 +1,44 @@
 import express from "express";
-import { isAuth, refresh } from "../../middleware/customer/auth.js";
 
 const router = express.Router();
 
-function userRouter(userController) {
-  router.get("/auth", refresh, userController.refreshAuth);
+function userRouter(customerAuth, userController) {
+  router.get("/auth", customerAuth.refresh, userController.refreshAuth);
   router.get("/logout", userController.logout);
   router.post("/login", userController.login);
   router.post("/login/:id", userController.kakaoLogin);
   router.post("/signup", userController.signup);
   router.post("/search", userController.searchUserInfo);
 
-  router.get("/order", isAuth, userController.getMyInfo);
-  router.post("/order", isAuth, userController.payment, userController.order);
-  router.post("/order/paycomplete", isAuth, userController.paycomplete);
+  router.get("/order", customerAuth.isAuth, userController.getMyInfo);
+  router.post("/order", customerAuth.isAuth, userController.payment, userController.order);
+  router.post("/order/paycomplete", customerAuth.isAuth, userController.paycomplete);
   router.post(
     "/order/cancel",
-    isAuth,
+    customerAuth.isAuth,
     userController.cancelPayment,
     userController.addCart
   );
 
-  router.get("/refund/:id", isAuth, userController.getOrder);
-  router.post("/refund", isAuth, userController.refund);
-  router.post("/refund/paycomplete", isAuth, userController.paycomplete);
-  router.post("/refund/cancel", isAuth, userController.cancelRefund);
-  router.post("/refund/:id", isAuth, userController.cancelOrder);
+  router.get("/refund/:id", customerAuth.isAuth, userController.getOrder);
+  router.post("/refund", customerAuth.isAuth, userController.refund);
+  router.post("/refund/paycomplete", customerAuth.isAuth, userController.paycomplete);
+  router.post("/refund/cancel", customerAuth.isAuth, userController.cancelRefund);
+  router.post("/refund/:id", customerAuth.isAuth, userController.cancelOrder);
 
-  router.get("/cart", isAuth, userController.cart);
-  router.post("/cart", isAuth, userController.addCart);
-  router.delete("/cart", isAuth, userController.removeProductInCART);
+  router.get("/cart", customerAuth.isAuth, userController.cart);
+  router.post("/cart", customerAuth.isAuth, userController.addCart);
+  router.delete("/cart", customerAuth.isAuth, userController.removeProductInCART);
 
-  router.get("/info", isAuth, userController.info);
-  router.get("/info/myInfo", isAuth, userController.getMyInfo);
-  router.post("/info/myInfo", isAuth, userController.modifyUserInfo);
-  router.get("/info/delivery", isAuth, userController.deliveryStatus);
+  router.get("/info", customerAuth.isAuth, userController.info);
+  router.get("/info/myInfo", customerAuth.isAuth, userController.getMyInfo);
+  router.post("/info/myInfo", customerAuth.isAuth, userController.modifyUserInfo);
+  router.get("/info/delivery", customerAuth.isAuth, userController.deliveryStatus);
 
-  router.get("/review", isAuth, userController.getMyReview);
-  router.post("/review", isAuth, userController.writeReview);
+  router.get("/review", customerAuth.isAuth, userController.getMyReview);
+  router.post("/review", customerAuth.isAuth, userController.writeReview);
 
-  router.get("/post", isAuth, userController.getMyPost);
+  router.get("/post", customerAuth.isAuth, userController.getMyPost);
 
   return router;
 }
