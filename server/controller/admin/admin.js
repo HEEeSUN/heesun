@@ -12,9 +12,9 @@ export default class AdminController {
   /* 새로고침 */
   refresh = async (req, res) => {
     try {
-      const { admin } = req;
+      const { username } = req;
 
-      return res.status(200).json({ admin });
+      return res.status(200).json({ username });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -24,7 +24,7 @@ export default class AdminController {
   /* 관리자 별로 부여된 메뉴 */
   getMenuList = async (req, res) => {
     try {
-      const accessableMenu = await this.admin.getMenuList(req.admin_id);
+      const accessableMenu = await this.admin.getMenuList(req.userId);
 
       res.status(200).json({ menuList: accessableMenu });
     } catch (error) {
@@ -120,12 +120,13 @@ export default class AdminController {
         return res.status(401).json({ code: "ERROR00002" });
       }
 
-      const menuList = await this.admin.getMenuList(user.admin_id);
+      const menuList = await this.admin.getMenuList(user.id);
 
-      const token = this.createJwtToken(user.admin_id);
+      const token = this.createJwtToken(user.id);
       this.setToken(res, token);
 
-      res.status(200).json({ menuList, username: user.admin });
+      console.log(menuList, user.username, user.id)
+      res.status(200).json({ menuList, username: user.username });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);

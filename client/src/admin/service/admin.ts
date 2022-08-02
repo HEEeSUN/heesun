@@ -24,9 +24,9 @@ export default class AdminService {
       };
 
       const result = await this.http.axiosAPI(axiosAPI);
-      const { admin } = result;
+      const { username } = result;
 
-      admin ? this.login(admin) : this.logout();
+      username ? this.login(username) : this.logout();
     } catch (error: any) {
       alert(error.message);
     }
@@ -44,7 +44,7 @@ export default class AdminService {
 
     const result = await this.http.axiosAPI(axiosAPI);
 
-    this.login(result.admin);
+    this.login(result.username);
   }
 
   async logoff() {
