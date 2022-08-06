@@ -3,6 +3,7 @@ import { parseDate } from "../../util/date";
 import { ChattingService, Chat } from "../../model/chatting.model";
 import Chatting from "./Chattings";
 import CloseButton from "../../components/CloseButton";
+import { leaveRoom } from "../../service/socket";
 
 type Props = {
   chattingService: ChattingService;
@@ -99,6 +100,7 @@ function ChattingList(props: Props) {
   const backToList = () => {
     newRoom ? setNewRoom(false) : setJoinRoom(false);
 
+    leaveRoom(roomName)
     setRoomName("");
     getChattings();
   };
