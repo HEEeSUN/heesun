@@ -59,6 +59,10 @@ class Socket {
     });
   }
 
+  async leaveRoom(roomname: string) {
+    this.socket.emit("leaveRoom", roomname);
+  }
+
   async joinRoom(roomname: string) {
     this.roomname = roomname;
     this.socket.emit("joinRoom", roomname);
@@ -164,4 +168,8 @@ export const getMessage = async (pageNumber: number) => {
 
 export const getNewMessage = async () => {
   return socket.getNewMessage();
+};
+
+export const leaveRoom = async (roomname: string) => {
+  return socket.leaveRoom(roomname);
 };
