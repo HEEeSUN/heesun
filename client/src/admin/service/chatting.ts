@@ -8,10 +8,11 @@ export default class AdminChattingService {
     this.http = http;
   }
 
-  async getInquiry() {
+  async getInquiry(socketId: string) {
+    console.log('this : '+socketId)
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/admin/inquiries`,
+      url: `/admin/inquiries?id=${socketId}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -48,7 +49,8 @@ export default class AdminChattingService {
     uniqueId: string,
     chat: string,
     roomname: string,
-    master: boolean
+    master: boolean,
+    socketId: string
   ) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
@@ -57,6 +59,7 @@ export default class AdminChattingService {
         uniqueId,
         text: chat,
         masterLeaveOrNot: master,
+        socketId
       },
     };
 

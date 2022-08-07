@@ -14,6 +14,7 @@ type Props = {
 };
 
 function ChattingList({ adminChattingService }: Props) {
+  let [socketId, setSocketId] = useState<string>("");
   let [chatRoomName, setChatRoomName] = useState<string>("");
   let [privateChat, setPrivatechat] = useState<boolean>(false);
   let [clickedChat, setClickedChat] = useState<string>("");
@@ -37,6 +38,10 @@ function ChattingList({ adminChattingService }: Props) {
     setChatList(newChatList);
   };
 
+  const setInitialSocketId = async (socketId: string) => {
+    setSocketId(socketId)
+  }
+  
   /* 소켓 이벤트 발생시 소켓 이벤트 변경 (소켓 클래스의 콜백함수로 전달)*/
   const socketEventOccur = async (socketEventData: SocketEvent) => {
     setSocketEvent(socketEventData);
@@ -45,7 +50,7 @@ function ChattingList({ adminChattingService }: Props) {
   /* 전체 채팅 리스트 가져오기 */
   const getInquiry = async () => {
     try {
-      const { chatList } = await adminChattingService.getInquiry();
+      const { chatList } = await adminChattingService.getInquiry(socketId);
 
       await modifyDate(chatList);
     } catch (error: any) {
@@ -57,7 +62,7 @@ function ChattingList({ adminChattingService }: Props) {
    현재 컴포넌트에서는 newMessage  이벤트가 발생할 시에만 변동이 있고, 나머지 이벤트는 모두
    개인 채팅방에 해당하는 이벤트이기 때문에 개인채팅방이 알수있도록 privateSocketEvent state를 변경*/
   const socketEventProcess = async () => {
-    if (socketEvent === "newMessage") {
+    if (socketEvent === "updateChatList") {
       getInquiry();
     } else {
       setPrivateSocketEvent(socketEvent);
@@ -80,17 +85,23 @@ function ChattingList({ adminChattingService }: Props) {
     setPrivatechat(false);
     socketService.leaveRoom(chatRoomName);
   };
+
   useEffect(() => {
     if (socketEvent) socketEventProcess();
   }, [socketEvent]);
 
   useEffect(() => {
-    socketService.initSocket(socketEventOccur, adminChattingService);
+    socketService.initSocket(socketEventOccur, setInitialSocketId, adminChattingService);
   }, []);
 
+  useEffect(()=>{
+    if(socketId) getInquiry();
+  },[socketId])
+
   useEffect(() => {
+    getInquiry()
     if (!privateChat) {
-      getInquiry();
+      // getInquiry();
       setClickedChat("");
     }
   }, [privateChat]);

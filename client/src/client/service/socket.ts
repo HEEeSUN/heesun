@@ -37,6 +37,10 @@ class Socket {
       callback("receiveMessage");
     });
 
+    this.socket.on("updateChatList", () => {
+      callback("updateChatList");
+    });
+
     this.socket.on("joinCheck", (roomname: string) => {
       this.socket.emit("couple", roomname);
     });
@@ -86,15 +90,18 @@ class Socket {
     }
   }
 
-  async sendMessage(uniqueId: string, text: string, masterLeaveOrNot: boolean) {
+  async sendMessage(uniqueId: string, text: string, masterLeaveOrNot: boolean, socketId: string) {
     try {
-      const { newChatting, user } = await this.chattingService.sendMessage(
+      const { newChatting, user, playerList } = await this.chattingService.sendMessage(
         uniqueId,
         text,
         this.roomname,
-        masterLeaveOrNot
+        masterLeaveOrNot,
+        socketId
       );
-      this.socket.emit("newChatting", this.roomname);
+
+      console.log('new chatting.....')
+      this.socket.emit("newChatting", this.roomname, playerList);
 
       return { newChatting, user };
     } catch (error: any) {
@@ -157,9 +164,10 @@ export const joinRoom = async (
 export const sendMessage = async (
   uniqueId: string,
   text: string,
-  masterLeaveOrNot: boolean
+  masterLeaveOrNot: boolean,
+  socketId: string,
 ) => {
-  return socket.sendMessage(uniqueId, text, masterLeaveOrNot);
+  return socket.sendMessage(uniqueId, text, masterLeaveOrNot, socketId);
 };
 
 export const getMessage = async (pageNumber: number) => {

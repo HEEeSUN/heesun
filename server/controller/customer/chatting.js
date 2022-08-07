@@ -10,6 +10,8 @@ export default class ChattingController {
       const { id } = req.query;
       let result;
 
+      await this.testInitSocket(username, id);
+
       if (!username && !id) {
         return res.status(200).json({ username, chatList: [] });
       }
@@ -39,7 +41,8 @@ export default class ChattingController {
 
       username ? (member = 1) : (member = 0);
 
-      const roomname = await this.createChat(username || socketId, member);
+      const roomname = await this.testCreateChatting(username || socketId, member);
+      // const roomname = await this.createChat(username || socketId, member);
 
       res.status(200).json({ roomname });
     } catch (error) {
@@ -171,6 +174,98 @@ export default class ChattingController {
       this.chatting.deleteExpiredChatting(socketId);
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  testInitSocket = async (username, socketId) => {
+    let user;
+
+    if (username) {
+      user = await this.chatting.getPlayer(username);
+
+      if (user) {
+        this.chatting.updateSocketId(socketId, username)
+      } else {
+        this.chatting.recordNewPlayer(username, socketId)
+      }
+    } else {
+      user = await this.chatting.getPlayer(socketId);
+      
+      if (!user) {
+        this.chatting.recordNewPlayer(socketId, socketId)
+      }
+    }
+  }
+
+  testCreateChatting = async (username, member) => {
+    try {
+      let chatListId;
+      try {
+        chatListId = await this.chatting.insertInChattingList(username, member);
+        const room_name = `chat${chatListId}`;
+        const result = await this.chatting.createchattingRoom(
+          room_name,
+          chatListId
+          );
+
+        if (!result) {
+          await this.chatting.cancelChattingList(chatListId);
+          return false;
+        }
+
+        this.chatting.recordRoomnameAndPlayer(room_name, 'master')
+        this.chatting.recordRoomnameAndPlayer(room_name, username)
+  
+        return room_name;
+      } catch (error) {
+        if (chatListId) {
+          await this.chatting.cancelChattingList(chatListId);
+        }
+        console.log(error);
+        return false;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  testSendMessage = async (req, res) => {
+    try {
+      const username = req.username;
+      const roomname = req.params.id;
+      const { uniqueId, message, readAMsg, socketId } = req.body;
+
+      if (!roomname) {
+        return res.status(400).json({ code: "" });
+      }
+
+      const date = new Date();
+
+      const chattingId = await this.chatting.saveChatting(
+        uniqueId,
+        message,
+        roomname,
+        "client",
+        readAMsg,
+        date
+      );
+
+      if (!chattingId) {
+        return res.sendStatus(400);
+      }
+
+      const chatting = await this.chatting.getNewChattingById(
+        roomname,
+        chattingId
+      );
+
+      //chatting에 참여하고 있는 player 리스트 받아오기
+      const playerList = await this.chatting.getPlayersSocketId(roomname, socketId);
+
+      res.status(200).json({ user: username, newChatting: chatting, playerList });
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(400);
     }
   };
 }

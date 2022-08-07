@@ -109,7 +109,8 @@ function Chattings(props: Props) {
       const { newChatting, user } = await socketService.sendMessage(
         tempChattingId,
         text,
-        masterLeaveOrNot
+        masterLeaveOrNot,
+        socketId
       );
 
       if (loginState && !user) {

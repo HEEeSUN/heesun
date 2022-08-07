@@ -1,33 +1,41 @@
 import { io } from "socket.io-client";
 import { AdminChattingService } from "../model/chatting.model";
 
-type SocketEvent = "newMessage" | "receiveMessage" | "messageSave" | "";
+type SocketEvent = "receiveMessage" | "messageSave" | "updateChatList" | "";
 
 class SocketService {
   socket: any;
+  baseUrl: string | undefined;
   callback: (socketEventData: SocketEvent) => void;
+  setSocketId: (socketId: string) => Promise<void>;
   chattingService: AdminChattingService;
 
   constructor(
     callback: (socketEventData: SocketEvent) => void,
+    setInitialSocketId: (socketId: string) => Promise<void>,
     chattingService: AdminChattingService
   ) {
-    this.socket = io("http://localhost:8080", {
-      reconnectionAttempts: 5,
-    });
+    this.baseUrl = process.env.REACT_APP_BASE_URL;
+    if (this.baseUrl) {
+      this.socket = io(this.baseUrl, {
+        reconnectionAttempts: 5,
+      });
+    }
     this.callback = callback;
+    this.setSocketId = setInitialSocketId;
     this.chattingService = chattingService;
 
-    this.socket.on("connect", () => {
+    this.socket.on("connect", async () => {
       console.log(this.socket.id); //
+      await this.setSocketId(this.socket.id);
     });
 
     this.socket.on("messageSave", () => {
       callback("messageSave");
     });
 
-    this.socket.on("newMessage", () => {
-      callback("newMessage");
+    this.socket.on("updateChatList", () => {
+      callback("updateChatList");
     });
 
     this.socket.on("receiveMessage", () => {
@@ -66,17 +74,19 @@ class SocketService {
     uniqueId: string,
     chat: string,
     roomname: string,
-    master: boolean
+    master: boolean,
   ) {
     // await this.chattingService.sendMessage(uniqueId, chat, roomname, master);
 
-    const { newChatting } = await this.chattingService.sendMessage(
+    const { newChatting, playerList } = await this.chattingService.sendMessage(
       uniqueId,
       chat,
       roomname,
-      master
+      master,
+      this.socket.id
     );
-    this.socket.emit("newChatting", roomname);
+
+    this.socket.emit("newChatting", roomname, playerList);
 
     return { newChatting };
   }
@@ -84,13 +94,12 @@ class SocketService {
 
 let socket: any;
 
-export const initSocket = (
+export const initSocket = async (
   callback: (socketEventData: SocketEvent) => void,
+  setInitialSocketId: (socketId: string) => Promise<void>,
   chattingService: AdminChattingService
-) => {
-  socket = new SocketService(callback, chattingService);
-
-  console.log("init");
+):Promise<void> => {
+  socket = new SocketService(callback, setInitialSocketId, chattingService);
 };
 
 export const joinRoom = async (roomname: string) => {

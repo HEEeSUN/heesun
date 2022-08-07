@@ -118,6 +118,9 @@ function ChattingList(props: Props) {
       setNewRoom(false);
       setJoinRoom(false);
       setSocketEvent("");
+    } else if(socketEvent === "updateChatList") {
+      getChattings();
+      setSocketEvent("");
     }
   }, [socketEvent]);
 

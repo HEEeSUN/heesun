@@ -147,4 +147,44 @@ export default class ChattingRepository {
         socketId
       ]);
   };
+
+  getPlayer = async (username) => {
+    return this.#db
+      .execute(`SELECT * 
+                FROM socket_id_list 
+                WHERE username=?`,[username])
+      .then((result) => result[0][0]);
+  }
+
+  updateSocketId = async (socketId, username) => {
+    return this.#db
+      .execute(`UPDATE socket_id_list SET socketId=? WHERE username=?`,[socketId, username])
+  }
+
+  recordNewPlayer = async (username, socketId) => {
+    return this.#db
+      .execute(`INSERT INTO socket_id_list (username, socketId) VALUES (?, ?)`, [
+        username,
+        socketId,
+      ])
+      .then((result) => result[0].insertId);
+  }
+
+  recordRoomnameAndPlayer = async (roomname, username) => {
+    return this.#db
+      .execute(`INSERT INTO chatting_roomname_list (roomname, player) VALUES (?, ?)`, [
+        roomname,
+        username,
+      ])
+      .then((result) => result[0].insertId);
+  }
+
+  getPlayersSocketId = async (roomname, socketId) => {
+    return this.#db
+      .execute(`SELECT socketId 
+                FROM chatting_roomname_list JOIN socket_id_list 
+                ON chatting_roomname_list.player = socket_id_list.username 
+                WHERE roomname=? AND socketId != ?`,[roomname, socketId])
+      .then((result) => result[0]);
+  }
 };
