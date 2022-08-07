@@ -187,4 +187,17 @@ export default class ChattingRepository {
                 WHERE roomname=? AND socketId != ?`,[roomname, socketId])
       .then((result) => result[0]);
   }
+
+  getNoReadMessage = async (roomname) => {
+    return this.#db
+      .execute(`SELECT COUNT(*) AS number 
+                FROM ${this.#db.escapeId(roomname)} 
+                WHERE uniqueId IS NOT null AND username='master'`)
+      .then((result) => result[0][0]);
+  };
+
+  readAllMsg = async (roomname) => {
+    return this.#db
+      .execute(`UPDATE ${this.#db.escapeId(roomname)} SET uniqueId=null WHERE username='master'`);
+  };
 };

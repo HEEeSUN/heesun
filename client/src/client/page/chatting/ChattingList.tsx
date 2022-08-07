@@ -40,16 +40,10 @@ function ChattingList(props: Props) {
   /* 전체 채팅 리스트 가져오기 */
   const getChattings = async () => {
     try {
-      let result;
+      let result = await chattingService.getChattings(socketId);
 
-      if (!username) {
-        result = await chattingService.getChattings(socketId);
-      } else {
-        result = await chattingService.getChattings("");
-
-        if (loginState && !result.username) {
-          logout();
-        }
+      if (loginState && !result.username) {
+        logout();
       }
 
       await modifyDate(result.chatList);
@@ -172,7 +166,7 @@ function ChattingList(props: Props) {
                       className="content"
                       onClick={() => joinChatting(chat.room_name)}
                     >
-                      <div className="text">{chat.lastChat}</div>
+                      <div className="text">{chat.lastChat}/{chat.noReadMsg}</div>
                       <div className="time">{chat.lastChatTime}</div>
                     </div>
                     <CloseButton

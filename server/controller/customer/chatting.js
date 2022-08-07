@@ -9,24 +9,36 @@ export default class ChattingController {
       const username = req.username;
       const { id } = req.query;
       let result;
+      let chatList = [];
 
       await this.testInitSocket(username, id);
 
       if (!username && !id) {
-        return res.status(200).json({ username, chatList: [] });
+        return res.status(200).json({ username, chatList });
       }
 
-      if (!id) {
-        result = await this.chatting.getChattings(username);
-      } else {
+      if (!username) {
         result = await this.chatting.getChattings(id);
+      } else {
+        result = await this.chatting.getChattings(username);
       }
 
       if (result.length === 0) {
-        return res.status(200).json({ username, chatList: [] });
+        return res.status(200).json({ username, chatList });
+      }
+      
+      for (let i = 0; i < result.length; i++) {
+        const notReadMsg = await this.chatting.getNoReadMessage(
+          result[i].room_name
+        );
+
+        if (notReadMsg.number) {
+          result[i].noReadMsg = notReadMsg.number;
+        }
+        chatList.push(result[i]);
       }
 
-      res.status(200).json({ username, chatList: result });
+      res.status(200).json({ username, chatList });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -120,6 +132,8 @@ export default class ChattingController {
           hasmore = false;
         }
         const reverse = chatting.reverse();
+
+        await this.chatting.readAllMsg(roomname);
 
         return res
           .status(200)
