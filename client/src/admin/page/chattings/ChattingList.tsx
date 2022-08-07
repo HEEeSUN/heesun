@@ -142,6 +142,7 @@ function ChattingList({ adminChattingService }: Props) {
       {privateChat ? (
         <Chattings
           adminChattingService={adminChattingService}
+          socketEventOccur={socketEventOccur}
           socketService={socket}
           privateSocketEvent={privateSocketEvent}
           setPrivateSocketEvent={setPrivateSocketEvent}

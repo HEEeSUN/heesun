@@ -2,12 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Chatting from "./Chatting";
 import {
   AdminChattingService,
+  SocketEvent,
   TempChat,
   TempChattingCheck,
 } from "../../../model/chatting.model";
 
 type Props = {
   adminChattingService: AdminChattingService;
+  
+  socketEventOccur: (ssocketEventData: SocketEvent) => Promise<void>;
   socketService: {
     joinRoom: (roomname: string) => Promise<any>;
     leaveRoom: (roomname: string) => Promise<any>;
@@ -43,6 +46,7 @@ function Chattings(props: Props) {
   let chatTime: string = "";
   let {
     adminChattingService,
+    socketEventOccur,
     socketService,
     privateSocketEvent,
     setPrivateSocketEvent,
@@ -130,6 +134,8 @@ function Chattings(props: Props) {
       setChatting(temp);
       setTempChatting(tempArray2);
       scrollToBottom();
+
+      socketEventOccur('updateChatList')
     }
   };
 
