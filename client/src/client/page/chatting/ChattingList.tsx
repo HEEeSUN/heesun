@@ -166,8 +166,17 @@ function ChattingList(props: Props) {
                       className="content"
                       onClick={() => joinChatting(chat.room_name)}
                     >
-                      <div className="text">{chat.lastChat}/{chat.noReadMsg}</div>
+                      <div className="text">{chat.lastChat}</div>
                       <div className="time">{chat.lastChatTime}</div>
+                    </div>
+                    <div className="badge-wrapper">
+                      {
+                        chat.noReadMsg > 0 && 
+                        <span>
+                        {chat.noReadMsg}
+                      </span>
+                      }
+
                     </div>
                     <CloseButton
                       clickEventHandler={() => leaveChatting(chat.room_name)}
