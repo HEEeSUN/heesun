@@ -54,6 +54,7 @@ export type TempChatting = {
   username?: string;
   date?: string;
   createdAt: string;
+  uniqueId?: string;
 };
 
 export type TempChattingCheck = {

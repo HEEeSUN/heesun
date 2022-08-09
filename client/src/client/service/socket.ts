@@ -42,6 +42,7 @@ class Socket {
     });
 
     this.socket.on("joinCheck", (roomname: string) => {
+      callback("couple");
       this.socket.emit("couple", roomname);
     });
 
@@ -100,7 +101,6 @@ class Socket {
         socketId
       );
 
-      console.log('new chatting.....')
       this.socket.emit("newChatting", this.roomname, playerList);
 
       return { newChatting, user };

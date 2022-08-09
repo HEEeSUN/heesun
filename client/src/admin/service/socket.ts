@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 import { AdminChattingService } from "../model/chatting.model";
 
-type SocketEvent = "receiveMessage" | "messageSave" | "updateChatList" | "";
+type SocketEvent = "receiveMessage" | "messageSave" | "updateChatList" | "couple" | "leave" | "";
 
 class SocketService {
   socket: any;
@@ -26,7 +26,6 @@ class SocketService {
     this.chattingService = chattingService;
 
     this.socket.on("connect", async () => {
-      console.log(this.socket.id); //
       await this.setSocketId(this.socket.id);
     });
 
@@ -43,14 +42,21 @@ class SocketService {
     });
 
     this.socket.on("joinCheck", (roomname: string) => {
+      callback("couple");
       this.socket.emit("couple", roomname);
     });
 
-    this.socket.on("couple", (roomname: string) => {});
+    this.socket.on("couple", (roomname: string) => {
+      callback("couple");
+    });
+
+    this.socket.on("leave", () => {
+      callback("leave");
+    });
+
   }
 
   async joinRoom(roomname: string) {
-    console.log(roomname);
     this.socket.emit("joinRoom", roomname);
   }
 

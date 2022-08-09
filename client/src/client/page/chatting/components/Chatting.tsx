@@ -14,6 +14,12 @@ function Chatting({ chat, firstElement }: Props) {
       <p className="chatting-time">
         {chat.createdAt ? chat.createdAt : "전송중"}
       </p>
+      {
+        chat.username!=="master" &&
+        <p className="chatting-time">
+        {chat.uniqueId ? "안읽음" : "읽음"}
+        </p>
+      }
     </div>
   );
 }

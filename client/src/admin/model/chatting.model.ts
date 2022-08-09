@@ -39,6 +39,7 @@ export type Chat = {
 };
 
 export type TempChat = {
+  uniqueId?: string;
   text: string;
   username: string;
   date?: string;
@@ -52,7 +53,7 @@ export type TempChattingCheck = {
   createdAt: string;
 };
 
-export type SocketEvent = "newMessage" | "receiveMessage" | "messageSave" | "updateChatList" | "";
+export type SocketEvent = "newMessage" | "receiveMessage" | "messageSave" | "updateChatList" | "couple" | "leave" | "";
 
 type PlayerList = {
   socketId: string

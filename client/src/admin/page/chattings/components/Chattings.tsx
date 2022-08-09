@@ -39,6 +39,7 @@ function Chattings(props: Props) {
   let [myChat, setMyChat] = useState<string>("");
   let [chatting, setChatting] = useState<TempChat[]>([]);
   let [tempChatting, setTempChatting] = useState<TempChattingCheck[]>([]);
+  let [connection, setConnection] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesEndRef1 = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver>();
@@ -80,8 +81,16 @@ function Chattings(props: Props) {
 
   /* socket 이벤트 발생시 어떠한 이벤트인지 확인 후 해당 이벤트에 맞는 작업 실행 */
   const socketEventProcess = () => {
-    if (privateSocketEvent === "receiveMessage") {
-      getNewMessage();
+    switch (privateSocketEvent) {
+      case "receiveMessage": 
+        getNewMessage();
+        break;
+      case "couple": 
+        setConnection(true);
+        break;
+      case "leave": 
+        setConnection(false);
+        break;
     }
     setPrivateSocketEvent("");
   };
@@ -121,6 +130,7 @@ function Chattings(props: Props) {
       let time = newChatting.createdAt;
       time = time.substr(11, 5);
       tmpChatting.push({
+        uniqueId: connection? '' : newChatting.uniqueId,
         text: newChatting.text,
         username: newChatting.username,
         date: date,
@@ -156,6 +166,7 @@ function Chattings(props: Props) {
         let time = newChatting.createdAt;
         time = time.substr(11, 5);
         tmpChatting.push({
+          uniqueId: newChatting.uniqueId,
           text: newChatting.text,
           username: newChatting.username,
           date: date,
@@ -195,6 +206,7 @@ function Chattings(props: Props) {
           let time = chat.createdAt;
           time = time.substr(11, 5);
           tmpChatting.push({
+            uniqueId: chat.uniqueId,
             text: chat.text,
             username: chat.username,
             date: date,
@@ -234,6 +246,30 @@ function Chattings(props: Props) {
   const backToList = async () => {
     setPrivatechat(false);
   };
+
+  const readAll = async () => {
+    const temp = [...chatting];
+    temp.map((chat) => {
+      chat.uniqueId = ''
+    })
+    setChatting(temp);
+
+    const find = prevChatting.find(chat=>chat.uniqueId!=='');
+
+    if (find) {
+      const temp = [...prevChatting];
+      temp.map((chat) => {
+        chat.uniqueId = ''
+      })
+      setPrevChatting(temp);
+    }
+  }
+
+  useEffect(()=>{
+    if(connection) {
+      readAll()
+    }
+  },[connection])
 
   useEffect(() => {
     if (privateSocketEvent) {
@@ -288,10 +324,14 @@ function Chattings(props: Props) {
               );
             }
             if (chat.date && prevChatTIme < chat.date) {
-              <>
-                <p>{chat.date}</p>
-                <Chatting chat={chat} />
-              </>;
+              prevChatTIme = chat.date;
+              return (
+                <>
+                  <p>{chat.date}</p>
+                  <Chatting chat={chat} />
+                </>
+              )
+
             }
             return <Chatting chat={chat} />;
           })}

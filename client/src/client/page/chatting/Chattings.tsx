@@ -26,6 +26,7 @@ function Chattings(props: Props) {
   let [chatting, setChatting] = useState<TempChatting[]>([]);
   let [tempChatting, setTempChatting] = useState<TempChattingCheck[]>([]);
   let [masterLeaveOrNot, setMasterLeaveOrNot] = useState<boolean>(false);
+  let [connection, setConnection] = useState<boolean>(false);
   const {
     username,
     loginState,
@@ -51,20 +52,15 @@ function Chattings(props: Props) {
         break;
       case "masterLeave":
         setMasterLeaveOrNot(false);
+        setConnection(false);
         break;
       case "couple":
         setMasterLeaveOrNot(true);
+        setConnection(true);
         break;
     }
     setSocketEvent("");
   };
-
-  useEffect(() => {
-    if (!socketEvent) {
-      return;
-    }
-    socketEventProcess();
-  }, [socketEvent]);
 
   /* 화면에 출력된 element중 마지막 element가 현재 브라우저에 교차상태일 경우 새로운 데이터를 받아올 수 있게 무한 스크롤링 구현*/
   const firstElement = useCallback(
@@ -138,6 +134,24 @@ function Chattings(props: Props) {
     }
   };
 
+  const readAll = async () => {
+    const temp = [...chatting];
+    temp.map((chat) => {
+      chat.uniqueId = ''
+    })
+    setChatting(temp);
+
+    const find = prevChatting.find(chat=>chat.uniqueId!=='');
+
+    if (find) {
+      const temp = [...prevChatting];
+      temp.map((chat) => {
+        chat.uniqueId = ''
+      })
+      setPrevChatting(temp);
+    }
+  }
+
   const setNewChatting = async (newChatting: TempChattingCheck) => {
     let tmpChatting: TempChatting[] = [];
 
@@ -145,6 +159,7 @@ function Chattings(props: Props) {
     let time = newChatting.createdAt;
     time = time.substr(11, 5);
     tmpChatting.push({
+      uniqueId: connection? '' : newChatting.uniqueId,
       text: newChatting.text,
       username: newChatting.username,
       date: date,
@@ -205,6 +220,7 @@ function Chattings(props: Props) {
           let time = chat.createdAt;
           time = time.substr(11, 5);
           tmpChatting.push({
+            uniqueId: chat.uniqueId,
             text: chat.text,
             username: chat.username,
             date: date,
@@ -234,6 +250,19 @@ function Chattings(props: Props) {
   const scrollToBottom1 = () => {
     messagesEndRef1.current?.scrollIntoView();
   };
+
+  useEffect(() => {
+    if (!socketEvent) {
+      return;
+    }
+    socketEventProcess();
+  }, [socketEvent]);
+
+  useEffect(()=>{
+    if(connection) {
+      readAll()
+    }
+  },[connection])
 
   useEffect(() => {
     if (text.length <= 500) {

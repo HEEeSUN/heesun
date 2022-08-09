@@ -595,7 +595,7 @@ export default class AdminRepository {
 
   getChatting = async (roomname, prevPage, amountOfSendData) => {
     return this.#db
-      .execute(`SELECT text, createdAt, username 
+      .execute(`SELECT uniqueId, text, createdAt, username 
                 FROM ${this.#db.escapeId(roomname)}
                 ORDER BY chatting_id DESC
                 LIMIT ${amountOfSendData} OFFSET ${prevPage}`)
