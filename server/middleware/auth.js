@@ -18,13 +18,13 @@ export class Auth {
 
     jwt.verify(token, process.env.JWT_SECRET, async (error, decoded) => {
       if (error) {
-        return res.status(401).json(AUTH_ERROR);
+        return res.status(401).json(this.#AUTH_ERROR);
       }
 
       const user = await this.dataRepository.findById(decoded.id);
 
       if (!user) {
-        return res.status(401).json(AUTH_ERROR);
+        return res.status(401).json(this.#AUTH_ERROR);
       }
 
       req.userId = user.id;
