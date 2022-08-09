@@ -9,7 +9,7 @@ import {
 
 type Props = {
   adminChattingService: AdminChattingService;
-  
+
   socketEventOccur: (ssocketEventData: SocketEvent) => Promise<void>;
   socketService: {
     joinRoom: (roomname: string) => Promise<any>;
@@ -18,10 +18,15 @@ type Props = {
       uniqueId: string,
       chat: string,
       roomname: string,
-      master: boolean
+      master: boolean,
+      chattingUser: string
     ) => Promise<any>;
-    getChatting: (roomname: string, pageNumber: number) => Promise<any>;
-    getNewChatting: (roomname: string) => Promise<any>;
+    getChatting: (
+      roomname: string,
+      pageNumber: number,
+      chattingUser: string
+    ) => Promise<any>;
+    getNewChatting: (roomname: string, chattingUser: string) => Promise<any>;
   };
   privateSocketEvent: string;
   setPrivateSocketEvent: React.Dispatch<React.SetStateAction<string>>;
@@ -31,6 +36,7 @@ type Props = {
 };
 
 function Chattings(props: Props) {
+  const chattingUser = "master";
   let [prevChatting, setPrevChatting] = useState<TempChat[]>([]);
   let [skip, setSkip] = useState<boolean>(true);
   let [loading, setLoading] = useState<boolean>(true);
@@ -82,13 +88,13 @@ function Chattings(props: Props) {
   /* socket 이벤트 발생시 어떠한 이벤트인지 확인 후 해당 이벤트에 맞는 작업 실행 */
   const socketEventProcess = () => {
     switch (privateSocketEvent) {
-      case "receiveMessage": 
+      case "receiveMessage":
         getNewMessage();
         break;
-      case "couple": 
+      case "couple":
         setConnection(true);
         break;
-      case "leave": 
+      case "leave":
         setConnection(false);
         break;
     }
@@ -119,7 +125,8 @@ function Chattings(props: Props) {
       tempChattingId,
       myChat,
       chatRoomName,
-      true
+      true,
+      chattingUser
     );
 
     if (newChatting) {
@@ -130,7 +137,7 @@ function Chattings(props: Props) {
       let time = newChatting.createdAt;
       time = time.substr(11, 5);
       tmpChatting.push({
-        uniqueId: connection? '' : newChatting.uniqueId,
+        uniqueId: connection ? "" : newChatting.uniqueId,
         text: newChatting.text,
         username: newChatting.username,
         date: date,
@@ -145,7 +152,7 @@ function Chattings(props: Props) {
       setTempChatting(tempArray2);
       scrollToBottom();
 
-      socketEventOccur('updateChatList')
+      socketEventOccur("updateChatList");
     }
   };
 
@@ -156,7 +163,10 @@ function Chattings(props: Props) {
     };
 
     try {
-      const result: Result = await socketService.getNewChatting(chatRoomName);
+      const result: Result = await socketService.getNewChatting(
+        chatRoomName,
+        chattingUser
+      );
       const { newChatting } = result;
 
       if (newChatting) {
@@ -195,7 +205,8 @@ function Chattings(props: Props) {
 
       const result: Result = await socketService.getChatting(
         chatRoomName,
-        pageNumber
+        pageNumber,
+        chattingUser
       );
       const { newChatting, hasmore } = result;
       let tmpChatting: TempChat[] = [];
@@ -250,26 +261,26 @@ function Chattings(props: Props) {
   const readAll = async () => {
     const temp = [...chatting];
     temp.map((chat) => {
-      chat.uniqueId = ''
-    })
+      chat.uniqueId = "";
+    });
     setChatting(temp);
 
-    const find = prevChatting.find(chat=>chat.uniqueId!=='');
+    const find = prevChatting.find((chat) => chat.uniqueId !== "");
 
     if (find) {
       const temp = [...prevChatting];
       temp.map((chat) => {
-        chat.uniqueId = ''
-      })
+        chat.uniqueId = "";
+      });
       setPrevChatting(temp);
     }
-  }
+  };
 
-  useEffect(()=>{
-    if(connection) {
-      readAll()
+  useEffect(() => {
+    if (connection) {
+      readAll();
     }
-  },[connection])
+  }, [connection]);
 
   useEffect(() => {
     if (privateSocketEvent) {
@@ -330,8 +341,7 @@ function Chattings(props: Props) {
                   <p>{chat.date}</p>
                   <Chatting chat={chat} />
                 </>
-              )
-
+              );
             }
             return <Chatting chat={chat} />;
           })}

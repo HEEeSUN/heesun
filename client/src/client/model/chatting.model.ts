@@ -1,6 +1,7 @@
 export type ChattingService = {
   getChattings: (
-    socketId: string
+    socketId: string,
+    chattingUser: string
   ) => Promise<{ username: string; chatList: Chat[] }>;
   deleteChatting: (roomname: string) => Promise<void>;
   createRoom: (
@@ -12,7 +13,8 @@ export type ChattingService = {
     text: string,
     roomname: string,
     masterLeaveOrNot: boolean,
-    socketId: string
+    socketId: string,
+    chattingUser: string
   ) => Promise<{
     user: string | undefined;
     newChatting: TempChattingCheck[];
@@ -20,7 +22,8 @@ export type ChattingService = {
   }>;
   getMessage: (
     roomname: string,
-    pageNumber: number
+    pageNumber: number,
+    chattingUser: string
   ) => Promise<{
     result: {
       username: string | undefined;
@@ -28,7 +31,10 @@ export type ChattingService = {
       hasmore: boolean;
     };
   }>;
-  getNewMessage: (roomname: string) => Promise<{
+  getNewMessage: (
+    roomname: string,
+    chattingUser: string
+  ) => Promise<{
     username: string | undefined;
     newChatting: TempChattingCheck;
   }>;
@@ -65,5 +71,5 @@ export type TempChattingCheck = {
 };
 
 type PlayerList = {
-  socketId: string
-}
+  socketId: string;
+};

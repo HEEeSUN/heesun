@@ -17,6 +17,7 @@ type Props = {
 };
 
 function Chattings(props: Props) {
+  const chattingUser = "customer";
   let [prevChatting, setPrevChatting] = useState<TempChatting[]>([]);
   let [skip, setSkip] = useState<boolean>(true);
   let [loading, setLoading] = useState<boolean>(true);
@@ -106,7 +107,8 @@ function Chattings(props: Props) {
         tempChattingId,
         text,
         masterLeaveOrNot,
-        socketId
+        socketId,
+        chattingUser
       );
 
       if (loginState && !user) {
@@ -137,20 +139,20 @@ function Chattings(props: Props) {
   const readAll = async () => {
     const temp = [...chatting];
     temp.map((chat) => {
-      chat.uniqueId = ''
-    })
+      chat.uniqueId = "";
+    });
     setChatting(temp);
 
-    const find = prevChatting.find(chat=>chat.uniqueId!=='');
+    const find = prevChatting.find((chat) => chat.uniqueId !== "");
 
     if (find) {
       const temp = [...prevChatting];
       temp.map((chat) => {
-        chat.uniqueId = ''
-      })
+        chat.uniqueId = "";
+      });
       setPrevChatting(temp);
     }
-  }
+  };
 
   const setNewChatting = async (newChatting: TempChattingCheck) => {
     let tmpChatting: TempChatting[] = [];
@@ -159,7 +161,7 @@ function Chattings(props: Props) {
     let time = newChatting.createdAt;
     time = time.substr(11, 5);
     tmpChatting.push({
-      uniqueId: connection? '' : newChatting.uniqueId,
+      uniqueId: connection ? "" : newChatting.uniqueId,
       text: newChatting.text,
       username: newChatting.username,
       date: date,
@@ -178,7 +180,7 @@ function Chattings(props: Props) {
     };
 
     try {
-      const result: Result = await socketService.getNewMessage();
+      const result: Result = await socketService.getNewMessage(chattingUser);
       const { username, newChatting } = result;
 
       if (loginState && !username) {
@@ -204,7 +206,10 @@ function Chattings(props: Props) {
       };
 
       setLoading(true);
-      const result: Result = await socketService.getMessage(pageNumber);
+      const result: Result = await socketService.getMessage(
+        pageNumber,
+        chattingUser
+      );
       const { username, newChatting, hasmore } = result;
 
       if (loginState && !username) {
@@ -258,11 +263,11 @@ function Chattings(props: Props) {
     socketEventProcess();
   }, [socketEvent]);
 
-  useEffect(()=>{
-    if(connection) {
-      readAll()
+  useEffect(() => {
+    if (connection) {
+      readAll();
     }
-  },[connection])
+  }, [connection]);
 
   useEffect(() => {
     if (text.length <= 500) {

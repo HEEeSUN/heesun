@@ -3,14 +3,14 @@ import { upload, resize } from "../../middleware/admin/fileUpload.js";
 
 const router = express.Router();
 
-function adminRouter(adminAuth, adminController) {
+function adminRouter(adminAuth, adminController, chattingController) {
   router.get("/", adminAuth.isAuth, adminController.getMenuList);
   router.post("/", adminController.login);
   router.get("/logout", adminController.logout);
   router.get("/auth", adminAuth.refresh, adminController.refresh);
   router.get("/home", adminAuth.isAuth, adminController.getDashboardData);
   router.post("/account", adminAuth.isAuth, adminAuth.accessableMenu, adminController.create);
- 
+
   router.get(
     "/products",
     adminAuth.isAuth,
@@ -112,25 +112,25 @@ function adminRouter(adminAuth, adminController) {
     "/inquiries",
     adminAuth.isAuth,
     adminAuth.accessableMenu,
-    adminController.getInquiries
+    chattingController.getChattings
   );
   router.get(
     "/inquiries/:id",
     adminAuth.isAuth,
     adminAuth.accessableMenu,
-    adminController.testGetInquiry
+    chattingController.getMessage
   );
   router.post(
     "/inquiries/:id",
     adminAuth.isAuth,
     adminAuth.accessableMenu,
-    adminController.sendMessage
+    chattingController.sendMesage
   );
   router.delete(
     "/inquiries/:id",
     adminAuth.isAuth,
     adminAuth.accessableMenu,
-    adminController.deleteInquiry
+    chattingController.deleteChatting
   );
 
   return router;

@@ -14,6 +14,7 @@ type Props = {
 };
 
 function ChattingList({ adminChattingService }: Props) {
+  const chattingUser = "master";
   let [socketId, setSocketId] = useState<string>("");
   let [chatRoomName, setChatRoomName] = useState<string>("");
   let [privateChat, setPrivatechat] = useState<boolean>(false);
@@ -39,9 +40,9 @@ function ChattingList({ adminChattingService }: Props) {
   };
 
   const setInitialSocketId = async (socketId: string) => {
-    setSocketId(socketId)
-  }
-  
+    setSocketId(socketId);
+  };
+
   /* 소켓 이벤트 발생시 소켓 이벤트 변경 (소켓 클래스의 콜백함수로 전달)*/
   const socketEventOccur = async (socketEventData: SocketEvent) => {
     setSocketEvent(socketEventData);
@@ -50,7 +51,10 @@ function ChattingList({ adminChattingService }: Props) {
   /* 전체 채팅 리스트 가져오기 */
   const getInquiry = async () => {
     try {
-      const { chatList } = await adminChattingService.getInquiry(socketId);
+      const { chatList } = await adminChattingService.getInquiry(
+        socketId,
+        chattingUser
+      );
 
       await modifyDate(chatList);
     } catch (error: any) {
@@ -91,15 +95,19 @@ function ChattingList({ adminChattingService }: Props) {
   }, [socketEvent]);
 
   useEffect(() => {
-    socketService.initSocket(socketEventOccur, setInitialSocketId, adminChattingService);
+    socketService.initSocket(
+      socketEventOccur,
+      setInitialSocketId,
+      adminChattingService
+    );
   }, []);
 
-  useEffect(()=>{
-    if(socketId) getInquiry();
-  },[socketId])
+  useEffect(() => {
+    if (socketId) getInquiry();
+  }, [socketId]);
 
   useEffect(() => {
-    getInquiry()
+    getInquiry();
     if (!privateChat) {
       // getInquiry();
       setClickedChat("");

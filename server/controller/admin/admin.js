@@ -40,7 +40,7 @@ export default class AdminController {
       let refund = 0;
 
       // new chatting 갯수
-      const chattingList = await this.admin.getChatList();
+      const chattingList = await this.admin.getAllChattings();
 
       let message = 0;
       for (let i = 0; i < chattingList.length; i++) {
@@ -125,7 +125,7 @@ export default class AdminController {
       const token = this.createJwtToken(user.id);
       this.setToken(res, token);
 
-      console.log(menuList, user.username, user.id)
+      console.log(menuList, user.username, user.id);
       res.status(200).json({ menuList, username: user.username });
     } catch (error) {
       console.log(error);
@@ -701,152 +701,6 @@ export default class AdminController {
     }
   };
 
-  /* 채팅 삭제 */
-  deleteInquiry = async (req, res) => {
-    try {
-      const room = req.params.id;
-
-      await this.admin.deleteChatting(room);
-
-      res.sendStatus(204);
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 채팅 목록 가져오기 */
-  getInquiries = async (req, res) => {
-    try {
-      const { id } = req.query;
-      const chattings = await this.admin.getChatList();
-      let chatList = [];
-      
-      await this.testInitSocket('master', id);
-
-      if (chattings.length === 0) {
-        return res.status(200).json({ chatList });
-      }
-
-      for (let i = 0; i < chattings.length; i++) {
-        const notReadMsg = await this.admin.getNoReadMessage(
-          chattings[i].room_name
-        );
-
-        if (notReadMsg.number) {
-          chattings[i].noReadMsg = notReadMsg.number;
-        }
-        chatList.push(chattings[i]);
-      }
-
-      res.status(200).json({ chatList });
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 특정 채팅 내용 가져오기 */
-  testGetInquiry = async (req, res) => {
-    try {
-      const roomname = req.params.id;
-      const amountOfSendData = 20; // 한번에 보낼 데이터의 양
-      let { page } = req.query;
-
-      if (!page) {
-        const chatting = await this.admin.getNewChatting(roomname);
-
-        await this.admin.updateNewChatting(roomname, chatting.chatting_id);
-
-        return res.status(200).json({ newChatting: chatting });
-      } else {
-        if (isNaN(Number(page))) return res.sendStatus(404);
-
-        let prevPage = (page - 1) * amountOfSendData;
-        let hasmore = true;
-
-        const chatting = await this.admin.getChatting(
-          roomname,
-          prevPage,
-          amountOfSendData
-        );
-
-        if (chatting.length < 1) {
-          hasmore = false;
-        }
-
-        const reverse = chatting.reverse();
-
-        await this.admin.readAllMsg(roomname);
-        /* admin 계정이 특정 채팅에 접속(입장)할 경우 고객이 보낸 메시지를 모두 읽음 처리*/
-
-        return res.status(200).json({ newChatting: reverse, hasmore });
-      }
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 채팅 메시지 저장 */
-  sendMessage = async (req, res) => {
-    try {
-      const roomname = req.params.id;
-      const { uniqueId, text, masterLeaveOrNot, socketId } = req.body;
-
-      if (!roomname) {
-        return res.sendStatus(400);
-      }
-
-      const date = new Date();
-
-      const chattingId = await this.admin.saveChatting(
-        uniqueId,
-        text,
-        roomname,
-        "master",
-        masterLeaveOrNot,
-        date
-      );
-
-      if (!chattingId) {
-        return res.sendStatus(400);
-      }
-
-      const chatting = await this.admin.getNewChattingById(
-        roomname,
-        chattingId
-      );
-
-      const playerList = await this.admin.getPlayersSocketId(roomname, socketId);
-
-      res.status(200).json({ newChatting: chatting, playerList });
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 특정 채팅 내용 가져오기 */
-  getMessage = async (req, res) => {
-    try {
-      // new chatting 갯수
-      const chattingList = await this.admin.getChatList();
-
-      let message = 0;
-      for (let i = 0; i < chattingList.length; i++) {
-        const result = await this.admin.getNoReadMessage(
-          chattingList[i].room_name
-        );
-        message += result.number;
-      }
-      res.status(200).json({ message });
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
   /* JWT 생성 */
   createJwtToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -906,16 +760,4 @@ export default class AdminController {
       return res.sendStatus(400);
     }
   };
-
-  testInitSocket = async (username, socketId) => {
-    const user = await this.admin.getPlayer(username);
-
-    if (user) {
-      await this.admin.updateSocketId(socketId, username)
-    } else {
-      await this.admin.recordNewPlayer(username, socketId)
-    }
-
-  }
-
 }

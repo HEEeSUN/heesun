@@ -1,7 +1,13 @@
 import { io } from "socket.io-client";
 import { AdminChattingService } from "../model/chatting.model";
 
-type SocketEvent = "receiveMessage" | "messageSave" | "updateChatList" | "couple" | "leave" | "";
+type SocketEvent =
+  | "receiveMessage"
+  | "messageSave"
+  | "updateChatList"
+  | "couple"
+  | "leave"
+  | "";
 
 class SocketService {
   socket: any;
@@ -53,21 +59,31 @@ class SocketService {
     this.socket.on("leave", () => {
       callback("leave");
     });
-
   }
 
   async joinRoom(roomname: string) {
     this.socket.emit("joinRoom", roomname);
   }
 
-  async getChatting(roomname: string, pageNumber: number) {
-    const result = await this.chattingService.getChatting(roomname, pageNumber);
+  async getChatting(
+    roomname: string,
+    pageNumber: number,
+    chattingUser: string
+  ) {
+    const result = await this.chattingService.getChatting(
+      roomname,
+      pageNumber,
+      chattingUser
+    );
     const { newChatting, hasmore } = result;
     return { newChatting, hasmore };
   }
 
-  async getNewChatting(roomname: string) {
-    const result = await this.chattingService.getNewChatting(roomname);
+  async getNewChatting(roomname: string, chattingUser: string) {
+    const result = await this.chattingService.getNewChatting(
+      roomname,
+      chattingUser
+    );
     const { newChatting } = result;
     return { newChatting };
   }
@@ -81,6 +97,7 @@ class SocketService {
     chat: string,
     roomname: string,
     master: boolean,
+    chattingUser: string
   ) {
     // await this.chattingService.sendMessage(uniqueId, chat, roomname, master);
 
@@ -89,7 +106,8 @@ class SocketService {
       chat,
       roomname,
       master,
-      this.socket.id
+      this.socket.id,
+      chattingUser
     );
 
     this.socket.emit("newChatting", roomname, playerList);
@@ -104,7 +122,7 @@ export const initSocket = async (
   callback: (socketEventData: SocketEvent) => void,
   setInitialSocketId: (socketId: string) => Promise<void>,
   chattingService: AdminChattingService
-):Promise<void> => {
+): Promise<void> => {
   socket = new SocketService(callback, setInitialSocketId, chattingService);
 };
 
@@ -120,15 +138,23 @@ export const sendMessage = async (
   uniqueId: string,
   chat: string,
   roomname: string,
-  master: boolean
+  master: boolean,
+  chattingUser: string
 ) => {
-  return socket.sendMessage(uniqueId, chat, roomname, master);
+  return socket.sendMessage(uniqueId, chat, roomname, master, chattingUser);
 };
 
-export const getChatting = async (roomname: string, pageNumber: number) => {
-  return socket.getChatting(roomname, pageNumber);
+export const getChatting = async (
+  roomname: string,
+  pageNumber: number,
+  chattingUser: string
+) => {
+  return socket.getChatting(roomname, pageNumber, chattingUser);
 };
 
-export const getNewChatting = async (roomname: string) => {
-  return socket.getNewChatting(roomname);
+export const getNewChatting = async (
+  roomname: string,
+  chattingUser: string
+) => {
+  return socket.getNewChatting(roomname, chattingUser);
 };

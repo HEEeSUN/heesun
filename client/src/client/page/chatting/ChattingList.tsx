@@ -17,6 +17,7 @@ type Props = {
 };
 
 function ChattingList(props: Props) {
+  const chattingUser = "customer";
   let [chatList, setChatList] = useState<Chat[]>([]);
   let [roomName, setRoomName] = useState<string>("");
   let [joinRoom, setJoinRoom] = useState<boolean>(false);
@@ -40,7 +41,7 @@ function ChattingList(props: Props) {
   /* 전체 채팅 리스트 가져오기 */
   const getChattings = async () => {
     try {
-      let result = await chattingService.getChattings(socketId);
+      let result = await chattingService.getChattings(socketId, chattingUser);
 
       if (loginState && !result.username) {
         logout();
@@ -94,7 +95,7 @@ function ChattingList(props: Props) {
   const backToList = () => {
     newRoom ? setNewRoom(false) : setJoinRoom(false);
 
-    leaveRoom(roomName)
+    leaveRoom(roomName);
     setRoomName("");
     getChattings();
   };
@@ -112,7 +113,7 @@ function ChattingList(props: Props) {
       setNewRoom(false);
       setJoinRoom(false);
       setSocketEvent("");
-    } else if(socketEvent === "updateChatList") {
+    } else if (socketEvent === "updateChatList") {
       getChattings();
       setSocketEvent("");
     }
@@ -170,13 +171,7 @@ function ChattingList(props: Props) {
                       <div className="time">{chat.lastChatTime}</div>
                     </div>
                     <div className="badge-wrapper">
-                      {
-                        chat.noReadMsg > 0 && 
-                        <span>
-                        {chat.noReadMsg}
-                      </span>
-                      }
-
+                      {chat.noReadMsg > 0 && <span>{chat.noReadMsg}</span>}
                     </div>
                     <CloseButton
                       clickEventHandler={() => leaveChatting(chat.room_name)}

@@ -8,29 +8,33 @@ export default class AdminChattingService {
     this.http = http;
   }
 
-  async getInquiry(socketId: string) {
-    console.log('this : '+socketId)
+  async getInquiry(socketId: string, chattingUser: string) {
+    console.log("this : " + socketId);
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/admin/inquiries?id=${socketId}`,
+      url: `/admin/inquiries?id=${socketId}&user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async getChatting(roomname: string, pageNumber: number) {
+  async getChatting(
+    roomname: string,
+    pageNumber: number,
+    chattingUser: string
+  ) {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/admin/inquiries/${roomname}?page=${pageNumber}`,
+      url: `/admin/inquiries/${roomname}?page=${pageNumber}&user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async getNewChatting(roomname: string) {
+  async getNewChatting(roomname: string, chattingUser: string) {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/admin/inquiries/${roomname}`,
+      url: `/admin/inquiries/${roomname}?user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -50,16 +54,18 @@ export default class AdminChattingService {
     chat: string,
     roomname: string,
     master: boolean,
-    socketId: string
+    socketId: string,
+    chattingUser: string
   ) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
       url: `/admin/inquiries/${roomname}`,
       data: {
         uniqueId,
-        text: chat,
-        masterLeaveOrNot: master,
-        socketId
+        message: chat,
+        readAMsg: master,
+        socketId,
+        chattingUser,
       },
     };
 

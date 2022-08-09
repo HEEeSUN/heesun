@@ -32,7 +32,7 @@ export default async ({ app, middleware, controllers }) => {
   app.use("/image", express.static(path.join(__dirname, "../public/image")));
 
   app.use("/home", verifyClientUrl, productRouter(productController));
-  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController));
+  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, chattingController));
   app.use("/member", verifyClientUrl, userRouter(customerAuth, userController));
   app.use("/community", verifyClientUrl, communityRouter(customerAuth, communityController));
   app.use("/chatting", verifyClientUrl, chattingRouter(customerAuth, chattingController));

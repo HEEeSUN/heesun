@@ -91,15 +91,23 @@ class Socket {
     }
   }
 
-  async sendMessage(uniqueId: string, text: string, masterLeaveOrNot: boolean, socketId: string) {
+  async sendMessage(
+    uniqueId: string,
+    text: string,
+    masterLeaveOrNot: boolean,
+    socketId: string,
+    chattingUser: string
+  ) {
     try {
-      const { newChatting, user, playerList } = await this.chattingService.sendMessage(
-        uniqueId,
-        text,
-        this.roomname,
-        masterLeaveOrNot,
-        socketId
-      );
+      const { newChatting, user, playerList } =
+        await this.chattingService.sendMessage(
+          uniqueId,
+          text,
+          this.roomname,
+          masterLeaveOrNot,
+          socketId,
+          chattingUser
+        );
 
       this.socket.emit("newChatting", this.roomname, playerList);
 
@@ -109,11 +117,12 @@ class Socket {
     }
   }
 
-  async getMessage(pageNumber: number) {
+  async getMessage(pageNumber: number, chattingUser: string) {
     try {
       const result = await this.chattingService.getMessage(
         this.roomname,
-        pageNumber
+        pageNumber,
+        chattingUser
       );
       // const { username, newChatting, hasmore } = result;
       return result;
@@ -122,9 +131,12 @@ class Socket {
     }
   }
 
-  async getNewMessage() {
+  async getNewMessage(chattingUser: string) {
     try {
-      const result = await this.chattingService.getNewMessage(this.roomname);
+      const result = await this.chattingService.getNewMessage(
+        this.roomname,
+        chattingUser
+      );
       // const { username, newChatting } = result;
       return result;
     } catch (error: any) {
@@ -166,16 +178,23 @@ export const sendMessage = async (
   text: string,
   masterLeaveOrNot: boolean,
   socketId: string,
+  chattingUser: string
 ) => {
-  return socket.sendMessage(uniqueId, text, masterLeaveOrNot, socketId);
+  return socket.sendMessage(
+    uniqueId,
+    text,
+    masterLeaveOrNot,
+    socketId,
+    chattingUser
+  );
 };
 
-export const getMessage = async (pageNumber: number) => {
-  return socket.getMessage(pageNumber);
+export const getMessage = async (pageNumber: number, chattingUser: string) => {
+  return socket.getMessage(pageNumber, chattingUser);
 };
 
-export const getNewMessage = async () => {
-  return socket.getNewMessage();
+export const getNewMessage = async (chattingUser: string) => {
+  return socket.getNewMessage(chattingUser);
 };
 
 export const leaveRoom = async (roomname: string) => {

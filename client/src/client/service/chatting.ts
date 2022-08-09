@@ -8,10 +8,10 @@ export default class ChattingService {
     this.http = http;
   }
 
-  async getChattings(socketId: string): Promise<any> {
+  async getChattings(socketId: string, chattingUser: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/chatting?id=${socketId}`,
+      url: `/chatting?id=${socketId}&user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -44,7 +44,8 @@ export default class ChattingService {
     text: string,
     roomname: string,
     masterLeaveOrNot: boolean,
-    socketId: string
+    socketId: string,
+    chattingUser: string
   ): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
@@ -53,17 +54,22 @@ export default class ChattingService {
         uniqueId,
         message: text,
         readAMsg: masterLeaveOrNot,
-        socketId
+        socketId,
+        chattingUser,
       },
     };
 
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async getMessage(roomname: string, pageNumber: number): Promise<any> {
+  async getMessage(
+    roomname: string,
+    pageNumber: number,
+    chattingUser: string
+  ): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/chatting/${roomname}?page=${pageNumber}`,
+      url: `/chatting/${roomname}?page=${pageNumber}&user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -78,10 +84,10 @@ export default class ChattingService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async getNewMessage(roomname: string): Promise<any> {
+  async getNewMessage(roomname: string, chattingUser: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/chatting/${roomname}`,
+      url: `/chatting/${roomname}?user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
