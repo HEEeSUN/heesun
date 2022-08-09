@@ -43,7 +43,8 @@ export default class ChattingService {
     uniqueId: string,
     text: string,
     roomname: string,
-    masterLeaveOrNot: boolean
+    masterLeaveOrNot: boolean,
+    socketId: string
   ): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
@@ -52,6 +53,7 @@ export default class ChattingService {
         uniqueId,
         message: text,
         readAMsg: masterLeaveOrNot,
+        socketId
       },
     };
 

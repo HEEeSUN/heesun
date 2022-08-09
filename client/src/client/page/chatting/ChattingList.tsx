@@ -3,6 +3,7 @@ import { parseDate } from "../../util/date";
 import { ChattingService, Chat } from "../../model/chatting.model";
 import Chatting from "./Chattings";
 import CloseButton from "../../components/CloseButton";
+import { leaveRoom } from "../../service/socket";
 
 type Props = {
   chattingService: ChattingService;
@@ -39,16 +40,10 @@ function ChattingList(props: Props) {
   /* 전체 채팅 리스트 가져오기 */
   const getChattings = async () => {
     try {
-      let result;
+      let result = await chattingService.getChattings(socketId);
 
-      if (!username) {
-        result = await chattingService.getChattings(socketId);
-      } else {
-        result = await chattingService.getChattings("");
-
-        if (loginState && !result.username) {
-          logout();
-        }
+      if (loginState && !result.username) {
+        logout();
       }
 
       await modifyDate(result.chatList);
@@ -99,6 +94,7 @@ function ChattingList(props: Props) {
   const backToList = () => {
     newRoom ? setNewRoom(false) : setJoinRoom(false);
 
+    leaveRoom(roomName)
     setRoomName("");
     getChattings();
   };
@@ -115,6 +111,9 @@ function ChattingList(props: Props) {
     if (socketEvent === "joinError") {
       setNewRoom(false);
       setJoinRoom(false);
+      setSocketEvent("");
+    } else if(socketEvent === "updateChatList") {
+      getChattings();
       setSocketEvent("");
     }
   }, [socketEvent]);
@@ -169,6 +168,15 @@ function ChattingList(props: Props) {
                     >
                       <div className="text">{chat.lastChat}</div>
                       <div className="time">{chat.lastChatTime}</div>
+                    </div>
+                    <div className="badge-wrapper">
+                      {
+                        chat.noReadMsg > 0 && 
+                        <span>
+                        {chat.noReadMsg}
+                      </span>
+                      }
+
                     </div>
                     <CloseButton
                       clickEventHandler={() => leaveChatting(chat.room_name)}

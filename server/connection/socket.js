@@ -14,13 +14,15 @@ class Socket {
 
       socket.on("joinRoom", (roomname) => {
         socket.join(roomname);
-        socket.emit("newMessage");
         socket.broadcast.to(roomname).emit("joinCheck", roomname);
       });
 
-      socket.on("newChatting", (roomname) => {
+      socket.on("newChatting", (roomname, playerList) => {
         socket.broadcast.to(roomname).emit("receiveMessage");
-        this.io.emit("newMessage");
+
+        for(let i=0; i<playerList.length; i++) {
+          socket.broadcast.to(playerList[i].socketId).emit('updateChatList');        
+        }
       });
 
       socket.on("couple", (roomname) => {

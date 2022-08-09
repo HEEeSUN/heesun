@@ -718,8 +718,11 @@ export default class AdminController {
   /* 채팅 목록 가져오기 */
   getInquiries = async (req, res) => {
     try {
+      const { id } = req.query;
       const chattings = await this.admin.getChatList();
       let chatList = [];
+      
+      await this.testInitSocket('master', id);
 
       if (chattings.length === 0) {
         return res.status(200).json({ chatList });
@@ -789,7 +792,7 @@ export default class AdminController {
   sendMessage = async (req, res) => {
     try {
       const roomname = req.params.id;
-      const { uniqueId, text, masterLeaveOrNot } = req.body;
+      const { uniqueId, text, masterLeaveOrNot, socketId } = req.body;
 
       if (!roomname) {
         return res.sendStatus(400);
@@ -815,7 +818,9 @@ export default class AdminController {
         chattingId
       );
 
-      res.status(200).json({ newChatting: chatting });
+      const playerList = await this.admin.getPlayersSocketId(roomname, socketId);
+
+      res.status(200).json({ newChatting: chatting, playerList });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -901,4 +906,16 @@ export default class AdminController {
       return res.sendStatus(400);
     }
   };
+
+  testInitSocket = async (username, socketId) => {
+    const user = await this.admin.getPlayer(username);
+
+    if (user) {
+      await this.admin.updateSocketId(socketId, username)
+    } else {
+      await this.admin.recordNewPlayer(username, socketId)
+    }
+
+  }
+
 }

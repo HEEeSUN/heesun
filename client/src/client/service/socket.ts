@@ -37,7 +37,12 @@ class Socket {
       callback("receiveMessage");
     });
 
+    this.socket.on("updateChatList", () => {
+      callback("updateChatList");
+    });
+
     this.socket.on("joinCheck", (roomname: string) => {
+      callback("couple");
       this.socket.emit("couple", roomname);
     });
 
@@ -57,6 +62,10 @@ class Socket {
       alert("서버와의 연결이 원활하지 않습니다\n잠시후 다시 시도해 주세요");
       callback("joinError");
     });
+  }
+
+  async leaveRoom(roomname: string) {
+    this.socket.emit("leaveRoom", roomname);
   }
 
   async joinRoom(roomname: string) {
@@ -82,15 +91,17 @@ class Socket {
     }
   }
 
-  async sendMessage(uniqueId: string, text: string, masterLeaveOrNot: boolean) {
+  async sendMessage(uniqueId: string, text: string, masterLeaveOrNot: boolean, socketId: string) {
     try {
-      const { newChatting, user } = await this.chattingService.sendMessage(
+      const { newChatting, user, playerList } = await this.chattingService.sendMessage(
         uniqueId,
         text,
         this.roomname,
-        masterLeaveOrNot
+        masterLeaveOrNot,
+        socketId
       );
-      this.socket.emit("newChatting", this.roomname);
+
+      this.socket.emit("newChatting", this.roomname, playerList);
 
       return { newChatting, user };
     } catch (error: any) {
@@ -153,9 +164,10 @@ export const joinRoom = async (
 export const sendMessage = async (
   uniqueId: string,
   text: string,
-  masterLeaveOrNot: boolean
+  masterLeaveOrNot: boolean,
+  socketId: string,
 ) => {
-  return socket.sendMessage(uniqueId, text, masterLeaveOrNot);
+  return socket.sendMessage(uniqueId, text, masterLeaveOrNot, socketId);
 };
 
 export const getMessage = async (pageNumber: number) => {
@@ -164,4 +176,8 @@ export const getMessage = async (pageNumber: number) => {
 
 export const getNewMessage = async () => {
   return socket.getNewMessage();
+};
+
+export const leaveRoom = async (roomname: string) => {
+  return socket.leaveRoom(roomname);
 };

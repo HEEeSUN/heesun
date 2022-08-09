@@ -11,10 +11,12 @@ export type ChattingService = {
     uniqueId: string,
     text: string,
     roomname: string,
-    masterLeaveOrNot: boolean
+    masterLeaveOrNot: boolean,
+    socketId: string
   ) => Promise<{
     user: string | undefined;
     newChatting: TempChattingCheck[];
+    playerList: PlayerList[];
   }>;
   getMessage: (
     roomname: string,
@@ -52,6 +54,7 @@ export type TempChatting = {
   username?: string;
   date?: string;
   createdAt: string;
+  uniqueId?: string;
 };
 
 export type TempChattingCheck = {
@@ -60,3 +63,7 @@ export type TempChattingCheck = {
   username: string;
   createdAt: string;
 };
+
+type PlayerList = {
+  socketId: string
+}
