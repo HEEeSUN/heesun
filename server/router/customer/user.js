@@ -10,35 +10,32 @@ function userRouter(customerAuth, userController) {
   router.post("/signup", userController.signup);
   router.post("/search", userController.searchUserInfo);
 
-  router.get("/order", customerAuth.isAuth, userController.getMyInfo);
-  router.post("/order", customerAuth.isAuth, userController.payment, userController.order);
-  router.post("/order/paycomplete", customerAuth.isAuth, userController.paycomplete);
-  router.post(
-    "/order/cancel",
-    customerAuth.isAuth,
-    userController.cancelPayment,
-    userController.addCart
-  );
+  router.all("/:id", customerAuth.isAuth)
 
-  router.get("/refund/:id", customerAuth.isAuth, userController.getOrder);
-  router.post("/refund", customerAuth.isAuth, userController.refund);
-  router.post("/refund/paycomplete", customerAuth.isAuth, userController.paycomplete);
-  router.post("/refund/cancel", customerAuth.isAuth, userController.cancelRefund);
-  router.post("/refund/:id", customerAuth.isAuth, userController.cancelOrder);
+  router.get("/order", userController.getMyInfo);
+  router.post("/order", userController.payment, userController.order);
+  router.post("/order/paycomplete", userController.paycomplete);
+  router.post("/order/cancel", userController.cancelPayment, userController.addCart);
 
-  router.get("/cart", customerAuth.isAuth, userController.cart);
-  router.post("/cart", customerAuth.isAuth, userController.addCart);
-  router.delete("/cart", customerAuth.isAuth, userController.removeProductInCART);
+  router.post("/refund", userController.refund);
+  router.get("/refund/:id", userController.getOrder);
+  router.post("/refund/paycomplete", userController.paycomplete);
+  router.post("/refund/cancel", userController.cancelRefund);
+  router.post("/refund/:id", userController.cancelOrder);
 
-  router.get("/info", customerAuth.isAuth, userController.info);
-  router.get("/info/myInfo", customerAuth.isAuth, userController.getMyInfo);
-  router.post("/info/myInfo", customerAuth.isAuth, userController.modifyUserInfo);
-  router.get("/info/delivery", customerAuth.isAuth, userController.deliveryStatus);
+  router.get("/cart", userController.cart);
+  router.post("/cart", userController.addCart);
+  router.delete("/cart", userController.removeProductInCART);
 
-  router.get("/review", customerAuth.isAuth, userController.getMyReview);
-  router.post("/review", customerAuth.isAuth, userController.writeReview);
+  router.get("/info", userController.info);
+  router.get("/info/myInfo", userController.getMyInfo);
+  router.post("/info/myInfo", userController.modifyUserInfo);
+  router.get("/info/delivery", userController.deliveryStatus);
 
-  router.get("/post", customerAuth.isAuth, userController.getMyPost);
+  router.get("/review", userController.getMyReview);
+  router.post("/review", userController.writeReview);
+
+  router.get("/post", userController.getMyPost);
 
   return router;
 }
