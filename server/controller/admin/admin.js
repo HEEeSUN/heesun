@@ -135,6 +135,7 @@ export default class AdminController {
 
   /* 로그아웃 */
   logout = async (req, res) => {
+    // return res.clearCookie('token', {path: '/', domain : '.heesun.shop'}).send();
     return res.status(200).clearCookie("token").send();
   };
 
@@ -264,7 +265,7 @@ export default class AdminController {
       let imgFileSrc = "";
 
       if (req.file) {
-        imgFileSrc = "/image/" + req.file.filename;
+        imgFileSrc = "/" + req.file.key;
       }
 
       await this.admin.addProduct(
@@ -566,25 +567,25 @@ export default class AdminController {
         }
       } else {
         orderList = await this.admin.getPendingRefundList(
-          amountOfSendData,
-          prevPage
+        amountOfSendData,
+        prevPage
+      );
+
+      if (orderList.length > 0) {
+        fullCount = orderList[0].full_count;
+      }
+
+      if (orderList.length < amountOfSendData) {
+        refundList = await this.admin.getPendingRefund(
+          orderList[orderList.length - 1].refundId,
+          orderList[0].refundId
         );
-
-        if (orderList.length > 0) {
-          fullCount = orderList[0].full_count;
-        }
-
-        if (orderList.length < amountOfSendData) {
-          refundList = await this.admin.getPendingRefund(
-            orderList[orderList.length - 1].refundId,
-            orderList[0].refundId
-          );
-        } else {
-          refundList = await this.admin.getPendingRefund(
-            orderList[4].refundId,
-            orderList[0].refundId
-          );
-        }
+      } else {
+        refundList = await this.admin.getPendingRefund(
+          orderList[4].refundId,
+          orderList[0].refundId
+        );
+      }
 
         let newArray = [];
 
@@ -598,8 +599,8 @@ export default class AdminController {
           }
         }
 
-        refundList = orderList;
-        orderList = newArray;
+      refundList = orderList;
+      orderList = newArray;
       }
 
       if (orderList.length < 1) {
@@ -715,6 +716,7 @@ export default class AdminController {
       httpOnly: true,
       // sameSite: 'none',
       // secure: true
+      domain : '.heesun.shop', 
     };
 
     res.cookie("token", token, options);
