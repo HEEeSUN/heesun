@@ -167,7 +167,7 @@ export default class UserController {
         const result = await this.user.findByNameAndEmail(name, email);
 
         if (!result) {
-          return res.status(400).json({ code: "ERROR00004" });
+          return res.status(402).json({ code: "ERROR00004" });
         }
 
         const mailOptions = {
@@ -183,7 +183,7 @@ export default class UserController {
         const info = await transporter.sendMail(mailOptions);
 
         if (!info) {
-          return res.sendStatus(400);
+          return res.sendStatus(403);
         }
       }
 
@@ -928,7 +928,7 @@ export default class UserController {
     let paymentId;
 
     try {
-      const paymentId = await this.user.insertInfoForExtra(
+      paymentId = await this.user.insertInfoForExtra(
         username,
         extraCharge
       );

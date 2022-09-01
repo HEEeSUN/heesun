@@ -5,7 +5,7 @@ const router = express.Router();
 function chattingRouter(chattingController){
   router.get("/", chattingController.getChattings);
   router.get("/:id", chattingController.getMessage);
-  router.post("/:id", chattingController.sendMesage);
+  router.post("/:id", chattingController.sendMessage);
   router.delete("/:id", chattingController.deleteChatting);
   
   return router;
