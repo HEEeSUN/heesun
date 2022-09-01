@@ -12,7 +12,15 @@ function Chatting({ chat, firstElement }: Props) {
       className={chat.username === "master" ? "my-chatting" : "other-chatting"}
     >
       <div className="chatting-text">{chat.text}</div>
-      <div className="chatting-time">{chat.createdAt}</div>
+      <div className="chatting-time">{chat.createdAt}
+      {
+        chat.username==="master" &&
+        <p className="chatting-time">
+        {chat.uniqueId ? "안읽음" : "읽음"}
+        </p>
+      }
+      </div>
+
     </div>
   );
 }

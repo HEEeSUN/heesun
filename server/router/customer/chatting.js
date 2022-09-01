@@ -3,11 +3,13 @@ import express from "express";
 const router = express.Router();
 
 function chattingRouter(customerAuth, chattingController) {
-  router.get("/", customerAuth.refresh, chattingController.getChattings);
+  router.all("/", customerAuth.refresh);
+  
+  router.get("/", chattingController.getChattings);
   router.post("/", chattingController.joinRoom);
-  router.get("/:id", customerAuth.refresh, chattingController.getMessage);
-  router.post("/:id", customerAuth.refresh, chattingController.sendMessage);
-  router.delete("/:id", chattingController.deleteChatting);
+  router.get("/:id", chattingController.getMessage);
+  router.post("/:id", chattingController.sendMesage);
+  router.delete("/:id", chattingController.setDisabledChatting);
 
   return router;
 }

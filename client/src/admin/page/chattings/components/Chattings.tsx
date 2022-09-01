@@ -2,12 +2,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Chatting from "./Chatting";
 import {
   AdminChattingService,
+  SocketEvent,
   TempChat,
   TempChattingCheck,
 } from "../../../model/chatting.model";
 
 type Props = {
   adminChattingService: AdminChattingService;
+
+  socketEventOccur: (ssocketEventData: SocketEvent) => Promise<void>;
   socketService: {
     joinRoom: (roomname: string) => Promise<any>;
     leaveRoom: (roomname: string) => Promise<any>;
@@ -15,10 +18,15 @@ type Props = {
       uniqueId: string,
       chat: string,
       roomname: string,
-      master: boolean
+      master: boolean,
+      chattingUser: string
     ) => Promise<any>;
-    getChatting: (roomname: string, pageNumber: number) => Promise<any>;
-    getNewChatting: (roomname: string) => Promise<any>;
+    getChatting: (
+      roomname: string,
+      pageNumber: number,
+      chattingUser: string
+    ) => Promise<any>;
+    getNewChatting: (roomname: string, chattingUser: string) => Promise<any>;
   };
   privateSocketEvent: string;
   setPrivateSocketEvent: React.Dispatch<React.SetStateAction<string>>;
@@ -28,6 +36,7 @@ type Props = {
 };
 
 function Chattings(props: Props) {
+  const chattingUser = "master";
   let [prevChatting, setPrevChatting] = useState<TempChat[]>([]);
   let [skip, setSkip] = useState<boolean>(true);
   let [loading, setLoading] = useState<boolean>(true);
@@ -36,6 +45,7 @@ function Chattings(props: Props) {
   let [myChat, setMyChat] = useState<string>("");
   let [chatting, setChatting] = useState<TempChat[]>([]);
   let [tempChatting, setTempChatting] = useState<TempChattingCheck[]>([]);
+  let [connection, setConnection] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesEndRef1 = useRef<HTMLDivElement>(null);
   const observer = useRef<IntersectionObserver>();
@@ -43,6 +53,7 @@ function Chattings(props: Props) {
   let chatTime: string = "";
   let {
     adminChattingService,
+    socketEventOccur,
     socketService,
     privateSocketEvent,
     setPrivateSocketEvent,
@@ -76,8 +87,16 @@ function Chattings(props: Props) {
 
   /* socket 이벤트 발생시 어떠한 이벤트인지 확인 후 해당 이벤트에 맞는 작업 실행 */
   const socketEventProcess = () => {
-    if (privateSocketEvent === "receiveMessage") {
-      getNewMessage();
+    switch (privateSocketEvent) {
+      case "receiveMessage":
+        getNewMessage();
+        break;
+      case "couple":
+        setConnection(true);
+        break;
+      case "leave":
+        setConnection(false);
+        break;
     }
     setPrivateSocketEvent("");
   };
@@ -106,7 +125,8 @@ function Chattings(props: Props) {
       tempChattingId,
       myChat,
       chatRoomName,
-      true
+      true,
+      chattingUser
     );
 
     if (newChatting) {
@@ -117,6 +137,7 @@ function Chattings(props: Props) {
       let time = newChatting.createdAt;
       time = time.substr(11, 5);
       tmpChatting.push({
+        uniqueId: connection ? "" : newChatting.uniqueId,
         text: newChatting.text,
         username: newChatting.username,
         date: date,
@@ -130,6 +151,8 @@ function Chattings(props: Props) {
       setChatting(temp);
       setTempChatting(tempArray2);
       scrollToBottom();
+
+      socketEventOccur("updateChatList");
     }
   };
 
@@ -140,7 +163,10 @@ function Chattings(props: Props) {
     };
 
     try {
-      const result: Result = await socketService.getNewChatting(chatRoomName);
+      const result: Result = await socketService.getNewChatting(
+        chatRoomName,
+        chattingUser
+      );
       const { newChatting } = result;
 
       if (newChatting) {
@@ -150,6 +176,7 @@ function Chattings(props: Props) {
         let time = newChatting.createdAt;
         time = time.substr(11, 5);
         tmpChatting.push({
+          uniqueId: newChatting.uniqueId,
           text: newChatting.text,
           username: newChatting.username,
           date: date,
@@ -178,7 +205,8 @@ function Chattings(props: Props) {
 
       const result: Result = await socketService.getChatting(
         chatRoomName,
-        pageNumber
+        pageNumber,
+        chattingUser
       );
       const { newChatting, hasmore } = result;
       let tmpChatting: TempChat[] = [];
@@ -189,6 +217,7 @@ function Chattings(props: Props) {
           let time = chat.createdAt;
           time = time.substr(11, 5);
           tmpChatting.push({
+            uniqueId: chat.uniqueId,
             text: chat.text,
             username: chat.username,
             date: date,
@@ -228,6 +257,30 @@ function Chattings(props: Props) {
   const backToList = async () => {
     setPrivatechat(false);
   };
+
+  const readAll = async () => {
+    const temp = [...chatting];
+    temp.map((chat) => {
+      chat.uniqueId = "";
+    });
+    setChatting(temp);
+
+    const find = prevChatting.find((chat) => chat.uniqueId !== "");
+
+    if (find) {
+      const temp = [...prevChatting];
+      temp.map((chat) => {
+        chat.uniqueId = "";
+      });
+      setPrevChatting(temp);
+    }
+  };
+
+  useEffect(() => {
+    if (connection) {
+      readAll();
+    }
+  }, [connection]);
 
   useEffect(() => {
     if (privateSocketEvent) {
@@ -282,10 +335,13 @@ function Chattings(props: Props) {
               );
             }
             if (chat.date && prevChatTIme < chat.date) {
-              <>
-                <p>{chat.date}</p>
-                <Chatting chat={chat} />
-              </>;
+              prevChatTIme = chat.date;
+              return (
+                <>
+                  <p>{chat.date}</p>
+                  <Chatting chat={chat} />
+                </>
+              );
             }
             return <Chatting chat={chat} />;
           })}

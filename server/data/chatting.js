@@ -67,14 +67,14 @@ export default class ChattingRepository {
 
   getChatting = async (roomname, prevPage, amountOfSendData) => {
     return this.#db
-      .execute(`SELECT text, createdAt, username 
+      .execute(`SELECT uniqueId, text, createdAt, username 
                 FROM ${this.#db.escapeId(roomname)}
                 ORDER BY chatting_id DESC
                 LIMIT ${amountOfSendData} OFFSET ${prevPage}`)
       .then((result) => result[0]);
   };
 
-  deleteChatting = async (roomname) => {
+  setDisabledChatting = async (roomname) => {
     return this.#db
       .execute(`UPDATE chat_list SET status=false WHERE room_name = ?`, [
         roomname,
@@ -82,12 +82,40 @@ export default class ChattingRepository {
       .then((result) => result[0]);
   };
 
-  getNewChatting = async (roomname) => {
+  deleteChatting = async (roomname) => {
+    let conn;
+
+    try {
+      conn = await this.#db.getConnection();
+      await conn.beginTransaction();
+
+      const query1 = conn.execute(
+        `DELETE FROM chat_list WHERE room_name=?`, [
+        roomname,
+      ]);
+
+      const query2 = conn.execute(
+        `DROP TABLE IF EXISTS ${this.#db.escapeId(roomname)}`
+      );
+
+      await Promise.all([query1, query2]);
+
+      await conn.commit();
+      return;
+    } catch (error) {
+      await conn.rollback();
+      throw new Error(error);
+    } finally {
+      conn.release();
+    }
+  };
+
+  getNewChatting = async (roomname, chattingUser) => {
     return this.#db
       .execute(`SELECT chatting_id, uniqueId, text, createdAt, username 
                 FROM ${this.#db.escapeId(roomname)}
-                WHERE uniqueId IS NOT NULL AND username='master'
-                ORDER BY chatting_id DESC`)
+                WHERE uniqueId IS NOT NULL AND username!=?
+                ORDER BY chatting_id DESC`,[chattingUser])
       .then((result) => result[0][0]);
   };
 
@@ -106,7 +134,7 @@ export default class ChattingRepository {
       ]);
   };
 
-  saveChatting = async (uniqueId, message, roomname, user, readAMsg, date) => {
+  saveChatting = async (uniqueId, message, roomname, chattingUser, readAMsg, date) => {
     let conn;
 
     try {
@@ -117,7 +145,7 @@ export default class ChattingRepository {
         `INSERT INTO ${this.#db.escapeId(roomname)} (uniqueId, text, username, readAMsg, createdAt) VALUES (?, ?, ?, ?, ?)`, [
           uniqueId, 
           message, 
-          user, 
+          chattingUser, 
           readAMsg, 
           date
         ]);
@@ -146,5 +174,64 @@ export default class ChattingRepository {
       .execute(`UPDATE chat_list SET status=false WHERE member=false AND username = ?`, [
         socketId
       ]);
+  };
+
+  getPlayer = async (username) => {
+    return this.#db
+      .execute(`SELECT * 
+                FROM socket_id_list 
+                WHERE username=?`,[username])
+      .then((result) => result[0][0]);
+  }
+
+  updateSocketId = async (socketId, username) => {
+    return this.#db
+      .execute(`UPDATE socket_id_list SET socketId=? WHERE username=?`,[socketId, username])
+  }
+
+  recordNewPlayer = async (username, socketId) => {
+    return this.#db
+      .execute(`INSERT INTO socket_id_list (username, socketId) VALUES (?, ?)`, [
+        username,
+        socketId,
+      ])
+      .then((result) => result[0].insertId);
+  }
+
+  recordRoomnameAndPlayer = async (roomname, username) => {
+    return this.#db
+      .execute(`INSERT INTO chatting_roomname_list (roomname, player) VALUES (?, ?)`, [
+        roomname,
+        username,
+      ])
+      .then((result) => result[0].insertId);
+  }
+
+  getPlayersSocketId = async (roomname, socketId) => {
+    return this.#db
+      .execute(`SELECT socketId 
+                FROM chatting_roomname_list JOIN socket_id_list 
+                ON chatting_roomname_list.player = socket_id_list.username 
+                WHERE roomname=? AND socketId != ?`,[roomname, socketId])
+      .then((result) => result[0]);
+  }
+
+  getNoReadMessage = async (roomname, chattingUser) => {
+    return this.#db
+      .execute(`SELECT COUNT(*) AS number 
+                FROM ${this.#db.escapeId(roomname)} 
+                WHERE uniqueId IS NOT null AND username!=?`,[chattingUser])
+      .then((result) => result[0][0]);
+  };
+
+  readAllMsg = async (roomname, chattingUser) => {
+    return this.#db
+      .execute(`UPDATE ${this.#db.escapeId(roomname)} SET uniqueId=null WHERE username!=?`,[chattingUser]);
+  };
+
+  getAllChattings = async () => {
+    return this.#db
+      .execute(`SELECT * FROM chat_list ORDER BY lastChatTime DESC`)
+      .then((result) => result[0]);
   };
 };

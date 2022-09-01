@@ -53,15 +53,13 @@
   margin: 10px auto;
   border-top: 1px solid maroon;
   border-bottom: 1px solid maroon;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(12,1fr);
   align-items: center;
 }
 
 .ClientHome .chatting-wrapper .chatting-list .list .content {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 90%;
+  grid-column: 1/9;
 }
 
 .ClientHome .chatting-wrapper .chatting-list .list:hover {
@@ -83,6 +81,23 @@
 
 .ClientHome .chatting-wrapper .chatting-list .list .content .time {
   font-size: 0.8em;
+}
+
+.ClientHome .chatting-wrapper .chatting-list .list .badge-wrapper {
+  grid-column: 9/11;
+  text-align: right;
+}
+
+.ClientHome .chatting-wrapper .chatting-list .list .badge-wrapper span{
+  border-radius: 50px;
+  padding: 5px;
+  background-color: red;
+  color: white;
+  font-weight: bold;
+}
+
+.ClientHome .chatting-wrapper .chatting-list .list .btn-wrapper {
+  grid-column: 11/13;
 }
 
 .ClientHome .chatting-wrapper .chatting-list .list .btn-wrapper span {
