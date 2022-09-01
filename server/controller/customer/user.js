@@ -60,7 +60,7 @@ export default class UserController {
 
   /* 로그아웃 */
   logout = async (req, res) => {
-    return res.status(202).clearCookie("token").send();
+    return res.clearCookie('token', {domain : '.heesun.shop'}).send();
   };
 
   /* 로그인 */
@@ -134,6 +134,7 @@ export default class UserController {
       httpOnly: true,
       // sameSite: "none",
       // secure: true,
+      domain : '.heesun.shop', 
     };
 
     res.cookie("token", token, options);
