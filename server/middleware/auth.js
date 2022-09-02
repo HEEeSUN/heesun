@@ -63,10 +63,10 @@ export class Auth {
 export class AdminAuth extends Auth {
   accessableMenu = async (req, res, next) => {
     const adminId = req.userId;
+    const accessPath = req.params.id;
+    // const accessPath = req.route.path.split("/")[1];
 
     const accessableMenu = await this.dataRepository.getMenuList(adminId);
-    const accessPath = req.route.path.split("/")[1];
-
     const menu = accessableMenu.find((menu) => menu.path === accessPath);
 
     if (!menu) {

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Resizer from "react-image-file-resizer";
 import "./products.css";
 import { AdminProductService, Product } from "../../model/product.model";
 import ProductInfoInput from "./components/ProductInfoInput";
@@ -256,6 +257,25 @@ export function Products({ adminProductService }: Props) {
     }
   }
 
+  const setReseizedImageFile = (dataURI: any) => {
+    setImageFile(dataURI);
+  };
+
+  const resizeImageFile = async (file: File) => {
+    Resizer.imageFileResizer(
+      file,
+      300,
+      300,
+      "JPEG",
+      100,
+      0,
+      (uri) => {
+        setReseizedImageFile(uri);
+      },
+      "file"
+    );
+  };
+
   /* input 항목에 따라 해당 state 변경 */
   function settings(event: React.ChangeEvent<HTMLInputElement>) {
     const type = event.target.type;
@@ -269,8 +289,8 @@ export function Products({ adminProductService }: Props) {
           alert("5MB 이하 이미지만 업로드 가능합니다");
           return;
         }
-        setImageFile(event.target.files[0]);
         preview(event.target.files[0]);
+        resizeImageFile(event.target.files[0]);
       }
     } else {
       targetName = event.target.name;

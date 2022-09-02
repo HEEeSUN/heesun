@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Resizer from "react-image-file-resizer";
 import {
   SelectedProduct,
   Option,
@@ -224,6 +225,25 @@ function ShowDetail(props: Props) {
     setOptionList(tempArray);
   };
 
+  const setReseizedImageFile = (dataURI: any) => {
+    setImageFile(dataURI);
+  };
+
+  const resizeImageFile = async (file: File) => {
+    Resizer.imageFileResizer(
+      file,
+      300,
+      300,
+      "JPEG",
+      100,
+      0,
+      (uri) => {
+        setReseizedImageFile(uri);
+      },
+      "file"
+    );
+  };
+
   function settings(event: React.ChangeEvent<HTMLInputElement>) {
     const type = event.target.type;
     const value = event.target.value;
@@ -235,10 +255,9 @@ function ShowDetail(props: Props) {
           alert("5MB 이하 이미지만 업로드 가능합니다");
           return;
         }
-
-        setImageFile(event.target.files[0]);
         setPreviewInput(event.target);
         preview(event.target.files[0]);
+        resizeImageFile(event.target.files[0]);
       }
     } else {
       targetName = event.target.name;

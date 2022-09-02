@@ -1,26 +1,36 @@
 export type AdminChattingService = {
-  getInquiry: () => Promise<{
+  getInquiry: (
+    socketId: string,
+    chattingUser: string
+  ) => Promise<{
     chatList: Chat[] | [];
   }>;
   deleteChat: (roomname: string) => Promise<void>;
 
   getChatting: (
     roomname: string,
-    pageNumber: number
+    pageNumber: number,
+    chattingUser: string
   ) => Promise<{
     newChatting: TempChat[] | [];
     hasmore: boolean;
   }>;
-  getNewChatting: (roomname: string) => Promise<{
+  getNewChatting: (
+    roomname: string,
+    chattingUser: string
+  ) => Promise<{
     newChatting: TempChattingCheck;
   }>;
   sendMessage: (
     uniqueId: string,
     chat: string,
     roomname: string,
-    master: boolean
+    master: boolean,
+    socketId: string,
+    chattingUser: string
   ) => Promise<{
     newChatting: TempChattingCheck;
+    playerList: PlayerList[];
   }>;
 };
 
@@ -37,6 +47,7 @@ export type Chat = {
 };
 
 export type TempChat = {
+  uniqueId?: string;
   text: string;
   username: string;
   date?: string;
@@ -50,4 +61,15 @@ export type TempChattingCheck = {
   createdAt: string;
 };
 
-export type SocketEvent = "newMessage" | "receiveMessage" | "messageSave" | "";
+export type SocketEvent =
+  | "newMessage"
+  | "receiveMessage"
+  | "messageSave"
+  | "updateChatList"
+  | "couple"
+  | "leave"
+  | "";
+
+type PlayerList = {
+  socketId: string;
+};
