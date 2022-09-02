@@ -68,9 +68,14 @@ export default class ChattingController {
 
       const roomname = await this.createChatting(username || socketId, member);
 
+      if (!roomname) {
+        return res.sendStatus(400);
+      }
+      
       res.status(200).json({ roomname });
     } catch (error) {
       console.log(error);
+      return res.sendStatus(400);
     }
   };
 
@@ -206,7 +211,7 @@ export default class ChattingController {
     }
   };
 
-  sendMesage = async (req, res) => {
+  sendMessage = async (req, res) => {
     try {
       const username = req.username;
       const roomname = req.params.id;

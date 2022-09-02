@@ -11,7 +11,7 @@
 }
 
 .ClientHome .chatting-wrapper .top-bar {
-  width: 300px;
+  width: 100%;
   background-color: maroon;
   color: white;
   border: 0.5px solid gainsboro;
@@ -40,7 +40,7 @@
 }
 
 .ClientHome .chatting-wrapper .chatting-list {
-  width: 300px;
+  width: 100%;
   background-color: rgb(244, 242, 236);
   height: 85%;
   overflow: auto;
@@ -160,6 +160,7 @@
   margin-left: 5px;
   font-size: 0.9em;
   text-align: left;
+  align-items: baseline;
 }
 
 .ClientHome .chatting-wrapper .chatting-list .chatting .mychat {
@@ -169,12 +170,13 @@
   display: flex;
   flex-direction: row-reverse;
   text-align: left;
+  align-items: baseline;
 }
 
 .ClientHome .chatting-wrapper .chatting-list .chatting .mychat .chatting-time {
   display: inline-block;
   padding: 0 5px;
-  font-size: 0.2em;
+  font-size: 0.6em;
 }
 
 .ClientHome .chatting-wrapper .chatting-list .chatting .mychat .chatting-text {
@@ -197,4 +199,27 @@
   display: inline-block;
   padding: 0 5px;
   font-size: 0.2em;
+}
+
+@media screen and (max-width: 479px) {
+  .ClientHome .chatting-wrapper {
+    width: 95vw;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: none;
+    margin: 0 auto;
+    animation-duration: .5s;
+    animation-name: chatting-show;
+  } 
+}
+
+@keyframes chatting-show {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: 70%;
+  }
 }

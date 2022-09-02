@@ -530,11 +530,7 @@ header .headerBottom .category span {
 }
 
 .productCard .productSummary {
-  padding: 5px;
-}
-
-.productCard .productSummary p{
-  border-top: 2px solid maroon;
+  padding: 5px 30px;
 }
 
 .productCard .productSummary .productName {

@@ -135,8 +135,7 @@ export default class AdminController {
 
   /* 로그아웃 */
   logout = async (req, res) => {
-    // return res.clearCookie('token', {path: '/', domain : '.heesun.shop'}).send();
-    return res.status(200).clearCookie("token").send();
+    return res.clearCookie('token', {domain : '.heesun.shop'}).send();
   };
 
   /* admin 계정 생성 */

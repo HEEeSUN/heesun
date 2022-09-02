@@ -60,7 +60,7 @@ export default class UserController {
 
   /* 로그아웃 */
   logout = async (req, res) => {
-    return res.status(202).clearCookie("token").send();
+    return res.clearCookie('token', {domain : '.heesun.shop'}).send();
   };
 
   /* 로그인 */
@@ -134,6 +134,7 @@ export default class UserController {
       httpOnly: true,
       // sameSite: "none",
       // secure: true,
+      domain : '.heesun.shop', 
     };
 
     res.cookie("token", token, options);
@@ -167,7 +168,7 @@ export default class UserController {
         const result = await this.user.findByNameAndEmail(name, email);
 
         if (!result) {
-          return res.status(400).json({ code: "ERROR00004" });
+          return res.status(402).json({ code: "ERROR00004" });
         }
 
         const mailOptions = {
@@ -183,7 +184,7 @@ export default class UserController {
         const info = await transporter.sendMail(mailOptions);
 
         if (!info) {
-          return res.sendStatus(400);
+          return res.sendStatus(403);
         }
       }
 
@@ -928,7 +929,7 @@ export default class UserController {
     let paymentId;
 
     try {
-      const paymentId = await this.user.insertInfoForExtra(
+      paymentId = await this.user.insertInfoForExtra(
         username,
         extraCharge
       );
