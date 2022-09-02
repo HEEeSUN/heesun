@@ -71,7 +71,7 @@ function ClientHome(props: Props) {
     }
 
     await memberService.logoff();
-    histroy.push("/");
+    histroy.push("/home");
   };
 
   const showChattingList = () => {
@@ -83,7 +83,8 @@ function ClientHome(props: Props) {
   };
 
   useEffect(() => {
-    memberService.auth(handleCartQuantity);
+    if (!loginState)
+      memberService.auth(handleCartQuantity);
     initSocket(chattingService, setInitialSocketId, socketCallback);
     window.addEventListener("unload", logout);
 

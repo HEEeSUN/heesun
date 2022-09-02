@@ -10,11 +10,10 @@ import Popup from "../../components/Popup";
 
 type Props = {
   adminOrderService: AdminOrderService;
-  request?: "" | "REFUND" | "NEWORDER";
   refundNum?: number;
 };
 
-function Order({ adminOrderService, request, refundNum }: Props) {
+function Order({ adminOrderService, refundNum }: Props) {
   let [orderList, setOrderList] = useState<Orders[]>([]);
   let [order, setOrder] = useState<Orders>();
   let [searchCategory, setSearchCategory] = useState<string>("");
@@ -22,6 +21,7 @@ function Order({ adminOrderService, request, refundNum }: Props) {
   let [searchWord, setSearchWord] = useState<string>("");
   let [staticSearchWord, setStaticSearchWord] = useState<string>("");
   let [showStatusModal, setShowStatusModal] = useState<boolean>(false);
+  let [changeStatus, setChangeStatus] = useState<boolean>(false);
   let [deliveryDetailId, setDeliveryDetailId] = useState<number>(0);
   let [pageNumber, setPageNumber] = useState<number>(1);
   let [prevDate, setPrevDate] = useState<string>("");
@@ -167,10 +167,13 @@ function Order({ adminOrderService, request, refundNum }: Props) {
   }, [deliveryDetailId]);
 
   useEffect(() => {
-    if (!showStatusModal) {
-      getOrderList();
+    if (!changeStatus) {
+      return
     }
-  }, [showStatusModal]);
+
+    getOrderList();
+    setChangeStatus(false);
+  }, [changeStatus]);
 
   useEffect(() => {
     if (pageNumber === 0) {
@@ -281,6 +284,7 @@ function Order({ adminOrderService, request, refundNum }: Props) {
         <StatusModal
           adminOrderService={adminOrderService}
           order={order}
+          setChangeStatus={setChangeStatus}
           stateArray={stateArray}
           setShowStatusModal={setShowStatusModal}
           deliveryDetailId={deliveryDetailId}
