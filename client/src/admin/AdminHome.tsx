@@ -32,16 +32,7 @@ function AdminHome({
   useEffect(() => {
     if (!loginState)
       adminService.auth();
-    window.addEventListener("unload", handleTabClosing);
-
-    return () => {
-      window.removeEventListener("unload", handleTabClosing);
-    };
   }, []);
-
-  const handleTabClosing = () => {
-    adminService.logoff();
-  };
 
   return loginState ? (
     <>

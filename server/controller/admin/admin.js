@@ -711,11 +711,11 @@ export default class AdminController {
   /* 쿠키에 토큰 설정 */
   setToken = (res, token) => {
     const options = {
-      maxAge: process.env.JWT_EXPIRES * 1000,
       httpOnly: true,
+      domain : '.heesun.shop', 
+      // maxAge: process.env.JWT_EXPIRES * 1000,
       // sameSite: 'none',
       // secure: true
-      domain : '.heesun.shop', 
     };
 
     res.cookie("token", token, options);
