@@ -64,6 +64,7 @@ function MyPage(props: Props) {
       setHasmore(hasmore);
       setLoading(false);
     } catch (error: any) {
+      alert(error.message);
       setError(true);
     }
   };

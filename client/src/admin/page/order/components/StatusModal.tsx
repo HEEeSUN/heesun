@@ -8,6 +8,7 @@ import {
 type Props = {
   adminOrderService: AdminOrderService;
   order: Orders;
+  setChangeStatus: React.Dispatch<React.SetStateAction<boolean>>;
   stateArray: string[];
   setShowStatusModal: React.Dispatch<React.SetStateAction<boolean>>;
   deliveryDetailId: number;
@@ -18,6 +19,7 @@ function StatusModal(props: Props) {
   const {
     adminOrderService,
     order,
+    setChangeStatus,
     stateArray,
     deliveryDetailId,
     setShowStatusModal,
@@ -33,7 +35,6 @@ function StatusModal(props: Props) {
       );
 
       setDeliveryStatus(status);
-      setShowStatusModal(true);
     } catch (error: any) {
       alert(error.message);
     }
@@ -48,6 +49,7 @@ function StatusModal(props: Props) {
 
       alert("배송정보가 변경되었습니다");
       getDeliveryStatus();
+      setChangeStatus(true)
     } catch (error: any) {
       alert(error.message);
     }

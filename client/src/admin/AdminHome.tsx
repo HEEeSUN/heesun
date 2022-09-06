@@ -30,7 +30,8 @@ function AdminHome({
   const { loginState } = sharedValue;
 
   useEffect(() => {
-    adminService.auth();
+    if (!loginState)
+      adminService.auth();
     window.addEventListener("unload", handleTabClosing);
 
     return () => {
