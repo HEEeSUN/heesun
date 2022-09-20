@@ -64,8 +64,8 @@ class Socket {
     });
   }
 
-  async leaveRoom(roomname: string) {
-    this.socket.emit("leaveRoom", roomname);
+  async leaveRoom() {
+    this.socket.emit("leaveRoom", this.roomname);
   }
 
   async joinRoom(roomname: string) {
@@ -197,6 +197,6 @@ export const getNewMessage = async (chattingUser: string) => {
   return socket.getNewMessage(chattingUser);
 };
 
-export const leaveRoom = async (roomname: string) => {
-  return socket.leaveRoom(roomname);
+export const leaveRoom = async () => {
+  return socket.leaveRoom();
 };
