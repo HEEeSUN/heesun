@@ -128,9 +128,6 @@ function MyInfo({ memberService, regex }: Props) {
       case "number":
         setNewPhone(value);
         break;
-      case "address":
-        setNewAddress(value);
-        break;
       case "extraAddress":
         setNewExtraAddress(value);
         break;
@@ -149,6 +146,10 @@ function MyInfo({ memberService, regex }: Props) {
   useEffect(() => {
     getUserInfo();
   }, []);
+
+  useEffect(() => {
+    setNewAddress(address);
+  }, [address]);
 
   useEffect(() => {
     matchedPassword();
