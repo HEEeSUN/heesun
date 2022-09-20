@@ -33,6 +33,7 @@ type Props = {
   setPrivatechat: React.Dispatch<React.SetStateAction<boolean>>;
   chatRoomName: string;
   chattingStatus: boolean;
+  getInquiry: () => Promise<void>;
 };
 
 function Chattings(props: Props) {
@@ -60,6 +61,7 @@ function Chattings(props: Props) {
     setPrivatechat,
     chatRoomName,
     chattingStatus,
+    getInquiry
   } = props;
 
   const firstElement = useCallback(
@@ -289,7 +291,7 @@ function Chattings(props: Props) {
   }, [privateSocketEvent]);
 
   useEffect(() => {
-    socketService.joinRoom(chatRoomName).then(getChatting);
+    socketService.joinRoom(chatRoomName).then(getChatting).then(getInquiry);
 
     return () => {
       socketService.leaveRoom(chatRoomName);
