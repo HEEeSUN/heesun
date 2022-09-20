@@ -95,7 +95,7 @@ function ChattingList(props: Props) {
   const backToList = () => {
     newRoom ? setNewRoom(false) : setJoinRoom(false);
 
-    leaveRoom(roomName);
+    leaveRoom();
     setRoomName("");
     getChattings();
   };

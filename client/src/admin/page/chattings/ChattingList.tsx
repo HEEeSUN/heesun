@@ -107,9 +107,7 @@ function ChattingList({ adminChattingService }: Props) {
   }, [socketId]);
 
   useEffect(() => {
-    getInquiry();
     if (!privateChat) {
-      // getInquiry();
       setClickedChat("");
     }
   }, [privateChat]);
@@ -157,6 +155,7 @@ function ChattingList({ adminChattingService }: Props) {
           setPrivatechat={setPrivatechat}
           chatRoomName={chatRoomName}
           chattingStatus={chattingStatus}
+          getInquiry={getInquiry}
         />
       ) : (
         <div className="chatting-wrapper">채팅방을 선택해주세요</div>

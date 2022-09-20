@@ -86,11 +86,6 @@ function ClientHome(props: Props) {
     if (!loginState)
       memberService.auth(handleCartQuantity);
     initSocket(chattingService, setInitialSocketId, socketCallback);
-    window.addEventListener("unload", logout);
-
-    return () => {
-      window.removeEventListener("unload", logout);
-    };
   }, []);
 
   return (
