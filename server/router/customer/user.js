@@ -11,6 +11,7 @@ function userRouter(customerAuth, userController) {
   router.post("/search", userController.searchUserInfo);
 
   router.all("/:id", customerAuth.isAuth)
+  router.all("/:id/:id", customerAuth.isAuth)
 
   router.get("/order", userController.getMyInfo);
   router.post("/order", userController.payment, userController.order);
@@ -28,8 +29,8 @@ function userRouter(customerAuth, userController) {
   router.delete("/cart", userController.removeProductInCART);
 
   router.get("/info", userController.info);
-  router.get("/info/myInfo", userController.getMyInfo);
   router.post("/info/myInfo", userController.modifyUserInfo);
+  router.get("/info/myInfo", userController.getMyInfo);
   router.get("/info/delivery", userController.deliveryStatus);
 
   router.get("/review", userController.getMyReview);
