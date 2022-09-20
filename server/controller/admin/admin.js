@@ -197,7 +197,7 @@ export default class AdminController {
       }
 
       if (req.file) {
-        imgFileSrc = "/image/" + req.file.filename;
+        imgFileSrc = "/" + req.file.key;
       }
 
       await this.admin.updateProduct(
