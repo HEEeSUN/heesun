@@ -2,9 +2,10 @@ type Props = {
   children: React.ReactNode;
   title: string;
   setPopup: React.Dispatch<React.SetStateAction<boolean>>;
+  handleClose?: () => {};
 };
 
-function Popup({ children, title, setPopup }: Props) {
+function Popup({ children, title, setPopup, handleClose}: Props) {
   const onClose = () => {
     setPopup(false);
   };
@@ -14,7 +15,7 @@ function Popup({ children, title, setPopup }: Props) {
       <div className="popup-body">
         <div className="popup-top-bar">
           <span>{title}</span>
-          <span onClick={onClose}>x</span>
+          <span onClick={handleClose ? handleClose : onClose}>x</span>
         </div>
         <div className="content">{children}</div>
       </div>

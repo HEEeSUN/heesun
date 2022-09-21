@@ -12,9 +12,14 @@ export default class AdminController {
   /* 새로고침 */
   refresh = async (req, res) => {
     try {
-      const { username } = req;
+      const { userId, username } = req;
+      let menuList = [];
 
-      return res.status(200).json({ username });
+      if (userId && username) {
+        menuList = await this.admin.getMenuList(userId);
+      }
+
+      return res.status(200).json({ username, menuList });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);

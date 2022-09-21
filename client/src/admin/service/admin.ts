@@ -1,19 +1,23 @@
 import { AxiosRequestConfig } from "axios";
 import HttpClient from "../../network/http";
+import { Menulist } from "../model/admin.model";
 
 export default class AdminService {
   http: HttpClient;
   login: (username: string) => void;
   logout: () => void;
+  setMenus: (menuList: Menulist[]) => void;
 
   constructor(
     http: HttpClient,
     login: (username: string) => void,
-    logout: () => void
+    logout: () => void,
+    setMenus: (menuList: Menulist[]) => void
   ) {
     this.http = http;
     this.login = login;
     this.logout = logout;
+    this.setMenus = setMenus;
   }
 
   async auth() {
@@ -24,9 +28,14 @@ export default class AdminService {
       };
 
       const result = await this.http.axiosAPI(axiosAPI);
-      const { username } = result;
+      const { username, menuList } = result;
 
-      username ? this.login(username) : this.logout();
+      if (username && menuList.length > 0) {
+        this.login(username)
+        this.setMenus(menuList);
+      } else {
+        this.logout();
+      }
     } catch (error: any) {
       alert(error.message);
     }
@@ -42,9 +51,12 @@ export default class AdminService {
       },
     };
 
-    const result = await this.http.axiosAPI(axiosAPI);
+    const { username, menuList } = await this.http.axiosAPI(axiosAPI);
 
-    this.login(result.username);
+    if (username && menuList.length > 0) {
+      this.login(username)
+      this.setMenus(menuList);
+    } 
   }
 
   async logoff() {
