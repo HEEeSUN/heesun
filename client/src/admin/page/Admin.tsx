@@ -37,7 +37,6 @@ function Admin({
 }: Props) {
   const sharedValue = useContext(AuthContext)
   const { loginState, sessionState, menuList } = sharedValue;
-  let [refundNum, setRefundNum] = useState<number>(0);
   let [showPopup, setShowPopup] = useState<boolean>(false);
   let history = useHistory();
 
@@ -86,13 +85,11 @@ function Admin({
                         <Route exact path="/admin/home">
                           <Dashboard
                               adminProductService={adminProductService}
-                              setRefundNum={setRefundNum}
                             />
                         </Route>
                         <Route exact path="/admin/orders">
                           <Order
                             adminOrderService={adminOrderService}
-                            refundNum={refundNum}
                           />
                         </Route>
                         <Route exact path="/admin/products">

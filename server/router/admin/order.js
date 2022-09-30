@@ -7,7 +7,7 @@ function orderRouter(adminController){
   router.get("/status", adminController.getOrderBySpecificStatus);
   router.get("/:id", adminController.deliveryStatus);
   router.patch("/:id", adminController.updateStatus);
-  router.post("/refund", adminController.refund);
+  router.post("/refund", adminController.refund, adminController.requestRefund);
 
   return router;
 }

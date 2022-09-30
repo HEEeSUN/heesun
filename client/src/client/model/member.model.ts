@@ -80,25 +80,14 @@ export type MemberService = {
   ) => Promise<{
     newMerchantUID: string | undefined;
     refundId: number;
-    refundSavePoint: {
-      rest_refund_amount: number;
-      products_price: number;
-      shippingfee: number;
-      return_shippingfee: number;
-    };
+    savePoint: SavePoint;
   }>;
+  requestRefundToImp: (imp_uid: string | undefined, 
+    refundAmount: number) => Promise<void>;
   refundComplete: (merchantUID: string, impUID: string) => Promise<void>;
   refundFail: (
     refundInformation: RefundInfo,
-    refundFailInfo:
-      | {
-          rest_refund_amount: number;
-          products_price: number;
-          shippingfee: number;
-          return_shippingfee: number;
-        }
-      | {}
-  ) => Promise<void>;
+    savePoint: SavePoint) => Promise<void>;
   getOrder: (
     orderId: string
   ) => Promise<{ order: Order; orderDetail: OrderDetails[] | [] }>;
@@ -138,11 +127,22 @@ export type RefundInfo = {
   merchantUID: string;
   impUID: string;
   extraCharge: number;
+  prePayment: number;
   refundProduct: OrderDetails[];
   refundAmount: number;
   newMerchantUID?: string;
   refundId?: number;
 };
+
+export type SavePoint = {
+  products_price: number;
+  shippingfee: number;
+  rest_refund_amount: number;
+  refund_amount: number;
+  return_shippingfee: number;
+  pending_refund: number;
+  paymentOption: string;
+}
 
 export type PayInfo = {
   amount: number;
@@ -238,6 +238,7 @@ export type Order = {
   address: string;
   extra_address: string;
   phone: string;
+  paymentOption: string;
 };
 
 export type OrderDetails = {

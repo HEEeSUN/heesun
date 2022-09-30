@@ -1,11 +1,11 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
-import { requestRefund } from "../payment.js";
 
 export default class UserController {
-  constructor(userRepository) {
+  constructor(userRepository, requestRefundToIMP) {
     this.user = userRepository;
+    this.requestRefundToIMP = requestRefundToIMP;
   }
 
   /* 회원가입 (idCheck 값이 true로 들어올 경우 중복체크만 해서 return함) */
@@ -634,7 +634,7 @@ export default class UserController {
 
     try {
       const username = req.username;
-      const { amount, shippingFee, productPrice, newArray } = req.body;
+      const { amount, shippingFee, productPrice, newArray, paymentOption } = req.body;
 
       const stock = await this.checkStock(newArray);
 
@@ -646,7 +646,8 @@ export default class UserController {
         username,
         amount,
         shippingFee,
-        productPrice
+        productPrice,
+        paymentOption
       );
 
       if (!paymentId) {
@@ -662,7 +663,7 @@ export default class UserController {
       const paymentInfoId = String(paymentId).padStart(8, "0");
       const merchantUID = paymentInfoDate.concat("-", paymentInfoId);
 
-      const result = await this.user.updateMarchantUID(paymentId, merchantUID);
+      const result = await this.user.updateMarchantUID("newOrder", paymentId, merchantUID);
 
       if (!result) {
         await this.user.deletePaymentByPaymentId(paymentId);
@@ -689,7 +690,6 @@ export default class UserController {
   cancelOrder = async (req, res) => {
     try {
       const orderId = req.params.id;
-      console.log(orderId);
       const paymentId = await this.user.findPaymentId(orderId);
 
       if (!paymentId) {
@@ -707,21 +707,27 @@ export default class UserController {
 
   /* 환불 요청, 즉시 환불 or 관리자 확인후 환불 가능하게 요청 건 db 저장 */
   refund = async (req, res) => {
+    let refundId;
+    let refundInformation;
+    let savePoint;
+
     try {
       const { refundInfo, immediatelyRefundInfo, pendingRefundInfo } = req.body;
-      const { merchantUID, impUID, extraCharge, refundProduct, refundAmount } =
+      const { merchantUID, impUID, extraCharge, prePayment, refundProduct, refundAmount } =
         refundInfo;
+      refundInformation = refundInfo;
       let newMerchantUID;
-      let refundId;
+      let product = []; // 배송이 되지 않은 것 (환불완료)
+      let pendingRefundProduct = []; // 배송이 진행된 것 || 현금결제건 (환불요청)
 
-      const refundSavePoint = await this.user.getAmount(merchantUID);
+      savePoint = await this.user.getSavePointBeforeRefund(merchantUID, refundId);
 
       const {
         rest_refund_amount,
         products_price,
         shippingfee,
         return_shippingfee,
-      } = refundSavePoint;
+      } = savePoint;
 
       const { refundAmountForProduct, refundAmountForShipping } =
         immediatelyRefundInfo;
@@ -741,67 +747,87 @@ export default class UserController {
         return res.status(400).json({ code: "환불 실패" });
       }
 
-      if (extraCharge) {
-        newMerchantUID = await this.payExtra(req.username, extraCharge);
-
-        if (!newMerchantUID) {
-          return res.status(400).json({ message: "refund failed" });
-        }
-      }
-
       const restOfProductPrice = products_price - refundAmountForProduct;
       const restOfShippingFee = shippingfee - refundAmountForShipping;
       const restOfreturnShippingFee = return_shippingfee + returnShippingFee;
       const restOfRefundAmount =
         rest_refund_amount - (refundAmountForProduct + refundAmountForShipping);
-      const product = refundProduct.filter(
-        (product) =>
-          product.status === "결제완료" || product.status === "입금대기중"
-      );
-      // const product2 = refundProduct.filter(product=>product.status!=='결제완료');
-      const product2 = refundProduct.filter(
-        (product) =>
-          product.status !== "결제완료" && product.status !== "입금대기중"
-      );
 
-      //즉시 환불액이 0이라면 전부 pending
-      refundId = await this.user.requestRefund(
+      if (savePoint.paymentOption !== "cash") {
+        product = refundProduct.filter(
+          (product) =>
+            product.status === "결제완료" || product.status === "입금대기중"
+        );
+        // const product2 = refundProduct.filter(product=>product.status!=='결제완료');
+        pendingRefundProduct = refundProduct.filter(
+          (product) =>
+            product.status !== "결제완료" && product.status !== "입금대기중"
+        );
+      } else {
+        pendingRefundProduct = refundProduct;
+      }
+
+      // refundId = await this.user.getPendingRefundById(merchantUID);
+
+      // if (refundId) {
+      //   //기존 펜딩에 추가
+      // } else {
+
+      // }
+
+      // `SELECT refundId
+      // FROM refund
+      // WHERE merchantUID=? AND refundProductPrice !=0`, [merchantUID]
+      
+
+      refundId = await this.user.refund(
         merchantUID,
         impUID,
-        product2,
+        pendingRefundProduct,
         pendingRefundAmountForProduct,
         returnShippingFee,
-        pendingRefundAmountForShipping
-      );
-
-      await this.user.refund(
+        pendingRefundAmountForShipping,
+        extraCharge + prePayment,
         restOfProductPrice,
         restOfShippingFee,
         restOfRefundAmount,
         restOfreturnShippingFee,
         refundAmountForProduct + refundAmountForShipping,
-        merchantUID,
         product
       );
 
-      if (refundAmount > 0) {
-        console.log("즉시 환불 진행");
-        // const result  = await requestRefund(impUID, refundAmount);
-        // console.log(result);
+      refundInformation = {
+        ...refundInformation,
+        refundId
       }
-      res.status(200).json({ newMerchantUID, refundId, refundSavePoint });
+
+      if (extraCharge > 0) {
+        const paymentDate = new Date(
+          Date.now() - new Date().getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .substr(0, 10);
+  
+        const paymentInfoDate = paymentDate.split("-").join("");
+        const paymentInfoId = String(refundId).padStart(8, "0");
+        newMerchantUID = paymentInfoDate.concat("-", paymentInfoId);
+
+        this.user.updateMarchantUID("refund", refundId, newMerchantUID);
+      }
+
+      return res.status(200).json({ newMerchantUID, refundId, savePoint });
     } catch (error) {
       console.log(error);
+      if (refundId) {
+        this.returnToStateBeforeExecuteRefund(refundInformation, savePoint)
+      }
       return res.sendStatus(400);
     }
   };
 
-  /* 환불 취소 */
-  cancelRefund = async (req, res) => {
+  returnToStateBeforeExecuteRefund = async (refundInfo, savePoint) => {
     try {
-      const { refundInfo, refundFailInfo } = req.body;
-      const { merchantUID, newMerchantUID, refundId, refundProduct } =
-        refundInfo;
+      const { merchantUID, refundId, refundProduct } = refundInfo;
       const {
         rest_refund_amount,
         products_price,
@@ -809,10 +835,9 @@ export default class UserController {
         return_shippingfee,
         refund_amount,
         pending_refund,
-      } = refundFailInfo;
-
+      } = savePoint;
+  
       await this.user.cancelRefund(
-        newMerchantUID,
         refundId,
         refundProduct,
         pending_refund,
@@ -823,13 +848,39 @@ export default class UserController {
         refund_amount,
         merchantUID
       );
+      
+      return;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  /* IMP에 실제 환불 요청 */
+  requestRefund = async (req, res) => {
+    try {
+      const { imp_uid, refundAmount } = req.body;
+
+      await this.requestRefundToIMP(imp_uid, refundAmount);
 
       res.sendStatus(200);
     } catch (error) {
       console.log(error);
+      return res.sendStatus(400)
+    }
+  }
+
+  /* 환불 실패시 */
+  requestToCancelRefund = async (req, res) => {
+    try {
+      const { refundInfo, savePoint } = req.body;
+
+      await this.returnToStateBeforeExecuteRefund(refundInfo, savePoint);
+
+      return res.sendStatus(200);
+    } catch (error) {
+      console.log(error)
       return res.sendStatus(400);
     }
-  };
+  }  
 
   /* 주문 정보 저장 */
   order = async (req, res) => {
@@ -921,47 +972,6 @@ export default class UserController {
       }
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  /* 고객이 환불 요청시 추가 결제금액 발생할 경우 */
-  payExtra = async (username, extraCharge) => {
-    let paymentId;
-
-    try {
-      paymentId = await this.user.insertInfoForExtra(
-        username,
-        extraCharge
-      );
-
-      if (!paymentId) {
-        return false;
-      }
-
-      const paymentDate = new Date(
-        Date.now() - new Date().getTimezoneOffset() * 60000
-      )
-        .toISOString()
-        .substr(0, 10);
-
-      const paymentInfoDate = paymentDate.split("-").join("");
-      const paymentInfoId = String(paymentId).padStart(8, "0");
-      const merchantUID = paymentInfoDate.concat("-", paymentInfoId);
-
-      const result = await this.user.updateMarchantUID(paymentId, merchantUID);
-
-      if (!result) {
-        await this.user.cancelPayment(paymentId);
-        return false;
-      }
-
-      return merchantUID;
-    } catch (error) {
-      if (paymentId) {
-        await this.user.cancelPayment(paymentId);
-      }
-      console.log(error);
-      return false;
     }
   };
 }

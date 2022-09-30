@@ -12,9 +12,10 @@ import Popup from "../../../components/Popup";
 
 type Props = {
   adminOrderService: AdminOrderService;
+  updateRefundNum: (refundNum: number) => Promise<void>
 };
 
-function Refund({ adminOrderService }: Props) {
+function Refund({ adminOrderService, updateRefundNum }: Props) {
   let [pageNumber, setPageNumber] = useState<number>(1);
   let [pageLength, setPageLength] = useState<number>(0);
   let [showStatusModal, setShowStatusModal] = useState<boolean>(false);
@@ -25,6 +26,10 @@ function Refund({ adminOrderService }: Props) {
   let [refundAmount, setRefundAmount] = useState<RefundAmount>();
   let [refundId, setRefundId] = useState<number>(0);
 
+  const updatePendingRefund = async () => {
+    setPageNumber(0)
+  }
+
   const refundDetailCmp = (
     <RefundDetail
       setShowStatusModal={setShowStatusModal}
@@ -32,6 +37,7 @@ function Refund({ adminOrderService }: Props) {
       refundAmount={refundAmount}
       setRefundId={setRefundId}
       adminOrderService={adminOrderService}
+      updatePendingRefund={updatePendingRefund}
     />
   );
 
@@ -41,21 +47,15 @@ function Refund({ adminOrderService }: Props) {
       const { refundList, orderList, orderPageLength } =
         await adminOrderService.getPendingRefund(pageNumber);
 
-      console.log(orderList);
       setRefundAmountList(refundList);
       setPageLength(orderPageLength);
       setChange(true);
       setOrderList(orderList);
+      updateRefundNum(orderList.length);
     } catch (error: any) {
       alert(error.message);
     }
   };
-
-  useEffect(() => {
-    if (!showStatusModal) {
-      getPendingRefund();
-    }
-  }, [showStatusModal]);
 
   useEffect(() => {
     if (refundId) {

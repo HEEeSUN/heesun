@@ -428,10 +428,18 @@ export default class AdminRepository {
 
   getPendingRefund = async (min, max) => {
     return this.#db
-      .execute(`SELECT product_name, price, quantity, merchantUID, orderer,phone, address, extra_address, detail_id, amount, refund_amount,rest_refund_amount, shippingfee, return_shippingfee, imp_uid, refundStatus, refundId  
-                FROM (order_detail NATURAL JOIN orders) LEFT JOIN payment USING (payment_id)
-                WHERE refundId BETWEEN ${min} AND ${max}
-                ORDER BY createdAt DESC`)
+      .execute(`SELECT product_name, paymentOption, price, deliverystatus, quantity, merchantUID, orderer,phone, address, extra_address, detail_id, amount, refund_amount,rest_refund_amount, shippingfee, return_shippingfee, imp_uid, refundStatus, refundId 
+      FROM orders natural join (
+                  SELECT * 
+                  FROM order_detail LEFT JOIN (
+                      SELECT status AS deliverystatus, detail_id
+                      FROM deliverystatus 
+                      WHERE deliverystatus_id IN ( 
+                        SELECT MAX(deliverystatus_id) 
+                        FROM deliverystatus 
+                        GROUP BY detail_id))A
+                              USING(detail_id)
+                  WHERE refundId BETWEEN ${min} AND ${max})B LEFT JOIN payment USING (payment_id)`)
       .then((result) => result[0]);
   };
 
@@ -593,13 +601,130 @@ export default class AdminRepository {
       .then((result) => result[0][0]);
   };
 
+  getSavePointBeforeRefund = async (merchantUID, refundId) => {
+    let conn;
+
+    try {
+      conn = await this.#db.getConnection();
+      await conn.beginTransaction();
+
+      //paymentInfo
+      const query1 = conn.execute(
+        `SELECT products_price, shippingfee, rest_refund_amount, refund_amount, return_shippingfee, pending_refund 
+        FROM payment 
+        WHERE merchantUID=?`, [
+          merchantUID
+        ])
+
+      //orderDetailList
+      const query2 = conn.execute(
+        `SELECT detail_id, status, refundStatus
+        FROM order_detail
+        WHERE refundId=?`, [
+          refundId
+        ])
+
+      //refundInfo 
+      const query3 = conn.execute(
+        `SELECT reflection, refundProductPrice, refundShippingFee
+        FROM refund
+        WHERE refundId=?`, [
+          refundId
+        ])
+
+      const [result1, result2, result3] = await Promise.all([query1, query2, query3]);
+
+      const beforePaymentInfo = result1[0][0];
+      const beforeOrderDetailList = result2[0];
+      const beforeRefundInfo = result3[0][0];
+
+      await conn.commit();
+      
+      return {beforePaymentInfo, beforeOrderDetailList, beforeRefundInfo}
+    } catch (error) {
+      console.log(error);
+      await conn.rollback();
+      throw new Error(error);
+    } finally {
+      conn.release();
+    }
+  };
+
+  refundFail = async (
+    merchantUID,
+    paymentInfo,
+    orderDetailList,
+    refundInfo
+  ) => {
+    let conn;
+
+    try {
+      conn = await this.#db.getConnection();
+      await conn.beginTransaction();
+      
+      const query1 = conn.execute(
+        `UPDATE payment SET products_price=?, shippingfee=?, rest_refund_amount=?, refund_amount=?, return_shippingfee=?, pending_refund=? WHERE merchantUID=?`,
+        [
+          paymentInfo.products_price,
+          paymentInfo.shippingfee,
+          paymentInfo.rest_refund_amount,
+          paymentInfo.refund_amount,
+          paymentInfo.return_shippingfee,
+          paymentInfo.pending_refund,
+          merchantUID
+        ]
+      );
+
+      const query2 = async () => {
+        for (let i = 0; i < orderDetailList.length; i++) {
+          await conn.execute(
+            `DELETE FROM deliverystatus WHERE detail_id=? and status =?`, [
+              orderDetailList[i].detail_id,
+              "반품및취소완료"
+            ]);
+        }
+      };
+
+      const query3 = async () => {
+        for (let i = 0; i < orderDetailList.length; i++) {
+          await conn.execute(
+            `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
+              orderDetailList[i].status,
+              orderDetailList[i].refundStatus,
+              orderDetailList[i].detail_id
+            ]);
+        }
+      };
+
+      const query4 = conn.execute(
+        `UPDATE refund SET reflection=?, refundProductPrice=?, refundShippingFee=? WHERE refundId=?`, [
+          refundInfo.reflection,
+          refundInfo.refundProductPrice,
+          refundInfo.refundShippingFee,
+          refundInfo.refundID
+        ]);
+
+        await Promise.all([query1, query2(), query3(), query4]);
+      
+      await conn.commit();
+      return;
+    } catch (error) {
+      console.log(error);
+      await conn.rollback();
+      throw new Error(error);
+    } finally {
+      conn.release();
+    }
+  }; 
+
   refund = async (
     allRefund,
     detailId,
     realRefundProducts,
     realRefundShippingFee,
     merchantUID,
-    refundId
+    refundId,
+    reflection
   ) => {
     let conn;
 
@@ -626,43 +751,52 @@ export default class AdminRepository {
           ]);
         }
       };
+      // if (allRefund) {
+      //   query3 = conn.execute(
+      //     `UPDATE order_detail SET status=?, refundStatus=? WHERE refundId=?`, [
+      //       "반품및취소완료", 
+      //       "complete", 
+      //       refundId
+      //     ]);
 
-      let query3;
+      // } else {
+      //   query3 = async () => {
+      //     for (let i = 0; i < detailId.length; i++) {
+      //       await conn.execute(
+      //         `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
+      //           "반품및취소완료", 
+      //           "complete", 
+      //           detailId[i]
+      //         ]);
+      //     }
+      //   };
+      // }
+
+      const query3 = async () => {
+        for (let i = 0; i < detailId.length; i++) {
+          await conn.execute(
+            `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
+              "반품및취소완료", 
+              "complete", 
+              detailId[i]
+            ]);
+        }
+      }
+
       let query4;
-
-      if (allRefund) {
-        query3 = conn.execute(
-          `UPDATE order_detail SET status=?, refundStatus=? WHERE refundId=?`, [
-            "반품및취소완료", 
-            "complete", 
+      if (reflection) {
+        query4 = conn.execute(
+          `UPDATE refund SET reflection=${reflection}, refundProductPrice=refundProductPrice-${realRefundProducts}, refundShippingFee=refundShippingFee-${realRefundShippingFee} WHERE refundID=?`, [
             refundId
           ]);
-
-        query4 = conn.execute(
-          `DELETE FROM refund WHERE refundID=?`, [
-            refundId,
-          ]);
-
-        await Promise.all([query1, query2(), query3, query4]);
       } else {
-        query3 = async () => {
-          for (let i = 0; i < detailId.length; i++) {
-            await conn.execute(
-              `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
-                "반품및취소완료", 
-                "complete", 
-                detailId[i]
-              ]);
-          }
-        };
-
         query4 = conn.execute(
           `UPDATE refund SET refundProductPrice=refundProductPrice-${realRefundProducts}, refundShippingFee=refundShippingFee-${realRefundShippingFee} WHERE refundID=?`, [
             refundId
           ]);
-
-        await Promise.all([query1, query2(), query3(), query4]);
       }
+
+      await Promise.all([query1, query2(), query3(), query4]);
 
       await conn.commit();
       return;

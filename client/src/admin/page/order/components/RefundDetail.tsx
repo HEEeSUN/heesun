@@ -11,6 +11,7 @@ type Props = {
   refundAmount: RefundAmount | undefined;
   setRefundId: React.Dispatch<React.SetStateAction<number>>;
   adminOrderService: AdminOrderService;
+  updatePendingRefund: () => Promise<void>;
 };
 
 function RefundDetail(props: Props) {
@@ -19,6 +20,9 @@ function RefundDetail(props: Props) {
   let [realRefundProducts, setRealRefundProducts] = useState<number>(0);
   let [realRefundShippingFee, setRealRefundShippingFee] = useState<number>(0);
   let [realReturnShippingFee, setRealReturnShippingFee] = useState<number>(0);
+  let [realRefundAmount, setRealRefundAmount] = useState<number>(0);
+  let [차감액, set차감액] = useState<number>(0);
+  let [reflection, setRefelction] = useState<boolean>(false);
 
   const {
     setShowStatusModal,
@@ -26,9 +30,11 @@ function RefundDetail(props: Props) {
     setRefundId,
     refundAmount,
     adminOrderService,
+    updatePendingRefund
   } = props;
 
-  const onClose = () => {
+  const onClose = async () => {
+    await updatePendingRefund();
     setShowStatusModal(false);
     setRefundId(0);
   };
@@ -40,17 +46,8 @@ function RefundDetail(props: Props) {
       newArray = [...newArray, refund.detail_id];
     });
 
-    const savePoint = {
-      payment: {
-        restRefundAmount: refundList[0].rest_refund_amount,
-        refundAmount: refundList[0].refund_amount,
-        returnShippingFee: refundList[0].return_shippingfee,
-        shippingFee: refundList[0].shippingfee,
-      },
-      pending: refundAmount,
-    };
-
     const refundInfo = {
+      paymentOption : refundList[0].paymentOption,
       refundId: refundAmount?.refundId,
       merchantUID: refundList[0].merchantUID,
       impUID: refundList[0].imp_uid,
@@ -59,12 +56,26 @@ function RefundDetail(props: Props) {
       realRefundProducts,
       realRefundShippingFee,
       realReturnShippingFee,
+      reflection,
+      realRefundAmount
     };
 
-    await adminOrderService.refund(savePoint, refundInfo);
+    try {
+      if (refundList[0].paymentOption === "cash") {
+        const confirm = window.confirm('현금 결제건입니다.\환불을 먼저 하신 다음 확인을 눌러주세요.')
+        
+        if (!confirm) {
+          return;
+        }
+      }
 
-    alert("선택하신 상품에 대하여 환불이 완료되었습니다");
-    onClose();
+      await adminOrderService.refund(refundInfo);
+
+      alert("선택하신 상품에 대하여 환불이 완료되었습니다");
+      onClose();
+    } catch (error: any) {
+      alert(error.message)
+    }
   };
 
   const checked = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,25 +103,51 @@ function RefundDetail(props: Props) {
     let amount = 0;
 
     refundProducts.map((refund) => {
-      amount += refund.price;
+      amount += refund.price * refund.quantity;
     });
 
+    const find =  refundProducts.find(product => product.deliverystatus !== "결제완료");
+    
+    let tempRealReturnShippingFee = 0;
     if (refundProducts.length === 0) {
       setRealReturnShippingFee(0);
     } else {
       if (refundAmount?.returnShippingFee) {
-        setRealReturnShippingFee(refundAmount.returnShippingFee);
+        if (find) {
+          setRealReturnShippingFee(refundAmount.returnShippingFee);
+          tempRealReturnShippingFee = refundAmount.returnShippingFee;
+        } else {
+          setRealReturnShippingFee(0);
+          tempRealReturnShippingFee = 0;
+        }
       }
     }
 
+    let tempRealRefundShippingFee = 0;
     if (amount === refundAmount?.refundProductPrice) {
       setRefundAll(true);
       setRealRefundShippingFee(refundAmount.refundShippingFee);
+      tempRealRefundShippingFee = refundAmount.refundShippingFee;
     } else {
       setRefundAll(false);
       setRealRefundShippingFee(0);
+      tempRealRefundShippingFee = 0;
     }
     setRealRefundProducts(amount);
+
+    let real차감액 = 0;
+    if(refundProducts && !refundAmount?.reflection && refundAmount?.extraPay) {
+      set차감액(refundAmount.extraPay);
+      real차감액 = refundAmount.extraPay;
+      setRefelction(true);
+    } 
+    // else {
+    //   set차감액(0);
+    //   real차감액 = 0;
+    //   setRefelction(false);
+    // }
+    
+    setRealRefundAmount(amount+tempRealRefundShippingFee-tempRealReturnShippingFee+real차감액)
   }, [refundProducts]);
 
   useEffect(() => {
@@ -145,35 +182,35 @@ function RefundDetail(props: Props) {
         <table>
           <tr>
             <th rowSpan={2}>결제정보</th>
+            <th>결제수단</th>
             <th>총결제금액</th>
             <th>이전환불액</th>
             <th>환불가능액</th>
-            <th>추가결제액</th>
+            <th>환불요청액</th>
           </tr>
           <tr>
+            <td>{refundList[0].paymentOption}</td>
             <td>{refundList[0].amount}</td>
             <td>{refundList[0].refund_amount}</td>
             <td>{refundList[0].rest_refund_amount}</td>
-            <td>{refundAmount?.returnShippingFee}</td>
+            <td>{refundAmount
+                ? refundAmount.refundProductPrice +
+                  refundAmount.refundShippingFee
+                : 0}</td>
           </tr>
           <tr>
             <th rowSpan={2}>환불요청정보</th>
-            <th>환불요청액</th>
             <th>상품가액</th>
-            <th>(+)환불배송비</th>
-            {/* <th>(-)반품배송비</th> */}
+            <th>환불배송비</th>
+            <th>반품배송비</th>
+            <th>선결제액</th>
             <th>총환불액</th>
           </tr>
           <tr>
-            <td>
-              {refundAmount
-                ? refundAmount.refundProductPrice +
-                  refundAmount.refundShippingFee
-                : 0}
-            </td>
             <td>{refundAmount?.refundProductPrice}</td>
             <td>{refundAmount?.refundShippingFee}</td>
-            {/* <td>{refundAmount?.returnShippingFee}</td> */}
+            <td>{refundAmount?.returnShippingFee}</td>
+            <td>{refundAmount?.extraPay}</td>
             <td>
               {refundAmount
                 ? refundAmount.refundProductPrice +
@@ -190,6 +227,7 @@ function RefundDetail(props: Props) {
             <th>품명</th>
             <th>상품가액</th>
             <th>수량</th>
+            <th>주문상태</th>
           </tr>
           {refundList.map((refund) => {
             return (
@@ -205,6 +243,7 @@ function RefundDetail(props: Props) {
                 <td>{refund.product_name}</td>
                 <td>{refund.price}</td>
                 <td>{refund.quantity}</td>
+                <td>{refund.deliverystatus}</td>
               </tr>
             );
           })}
@@ -221,15 +260,17 @@ function RefundDetail(props: Props) {
           <tr>
             <th rowSpan={2}>환불정보</th>
             <th>상품가액</th>
-            <th>(+)환불배송비</th>
-            {/* <th>(-)반품배송비</th> */}
+            <th>환불배송비</th>
+            <th>반품배송비</th>
+            <th>선결제차감액</th>
             <th>총환불액</th>
           </tr>
           <tr>
             <td>{realRefundProducts}</td>
             <td>{realRefundShippingFee}</td>
-            {/* <td>{realReturnShippingFee}</td> */}
-            <td>{realRefundProducts + realRefundShippingFee}</td>
+            <td>{realReturnShippingFee}</td>
+            <td>{차감액}</td>
+            <td>{realRefundAmount}</td>
           </tr>
         </table>
       </div>

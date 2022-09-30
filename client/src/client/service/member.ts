@@ -1,5 +1,6 @@
 import { AxiosRequestConfig } from "axios";
 import HttpClient from "../../network/http";
+import { RefundInfo, SavePoint } from "../model/member.model";
 
 export default class MemberService {
   http: HttpClient;
@@ -336,6 +337,7 @@ export default class MemberService {
       merchantUID: string;
       impUID: string;
       extraCharge: number;
+      prePayment: number;
       refundProduct: any;
       refundAmount: number;
     },
@@ -362,14 +364,27 @@ export default class MemberService {
     return this.http.axiosAPI(axiosAPI);
   }
 
+  async requestRefundToImp(imp_uid: string | undefined, refundAmount: number): Promise<any> {
+    const axiosAPI: AxiosRequestConfig = {
+      method: "post",
+      url: `/member/refund/imp`,
+      data: {
+        imp_uid,
+        refundAmount
+      },
+    };
+
+    return this.http.axiosAPI(axiosAPI);
+  }
+
   /* PG사를 이용한 결제 성공시 주문 상품 관련 정보 DB 저장*/
   async refundComplete(imp_uid: string, merchant_uid: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
       url: `/member/refund/paycomplete`,
       data: {
-        imp_uid: imp_uid,
-        merchant_uid: merchant_uid,
+        imp_uid,
+        merchant_uid,
       },
     };
 
@@ -377,23 +392,15 @@ export default class MemberService {
   }
 
   async refundFail(
-    refundInfo: {
-      merchantUID: string;
-      impUID: string;
-      extraCharge: number;
-      refundProduct: any;
-      refundAmount: number;
-      newMerchantUID?: string;
-      refundId?: number;
-    },
-    refundFailInfo: any
+    refundInfo: RefundInfo,
+    savePoint: SavePoint
   ): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
       url: `/member/refund/cancel`,
       data: {
         refundInfo,
-        refundFailInfo,
+        savePoint,
       },
     };
 

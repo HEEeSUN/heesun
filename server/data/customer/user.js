@@ -355,12 +355,6 @@ export default class UserRepository {
       .then((result) => result[0]);
   };
 
-  getAmount = async (merchantUID) => {
-    return this.#db
-      .execute(`SELECT * FROM payment WHERE merchantUID=?`, [merchantUID])
-      .then((result) => result[0][0]);
-  };
-
   getOrderDetail = async (id) => {
     return this.#db
       .execute("SELECT * FROM order_detail WHERE order_id=?", [id])
@@ -376,13 +370,34 @@ export default class UserRepository {
       .then((result) => result[0][0]);
   };
 
-  requestRefund = async (
+  getSavePointBeforeRefund = async (merchantUID) => {
+    return this.#db
+    .execute(`SELECT  
+                products_price,
+                shippingfee,
+                rest_refund_amount,
+                refund_amount,
+                return_shippingfee,
+                pending_refund,
+              paymentOption
+              FROM payment WHERE merchantUID=?`, [merchantUID])
+    .then((result) => result[0][0]);
+  }
+
+  refund = async (
     merchantUID,
     impUID,
-    refundProduct,
+    pendingRefundProduct,
     pendingRefundAmountForProduct,
     returnShippingFee,
-    pendingRefundAmountForShipping
+    pendingRefundAmountForShipping,
+    extraCharge,
+    restOfProductPrice,
+    restOfShippingFee,
+    restOfRefundAmount,
+    restOfreturnShippingFee,
+    refundAmount,
+    refundProduct
   ) => {
     let conn;
 
@@ -391,28 +406,45 @@ export default class UserRepository {
       await conn.beginTransaction();
 
       const query1 = conn.execute(
-        `insert into refund (merchantUID, impUID, refundShippingFee, refundProductPrice, returnShippingFee) values(?,?,?,?,?)`, [
+        `insert into refund (merchantUID, impUID, refundShippingFee, refundProductPrice, returnShippingFee, extraPay, reflection) values(?, ?, ?,?,?,?,?)`, [
           merchantUID,
           impUID,
           pendingRefundAmountForShipping,
           pendingRefundAmountForProduct,
           returnShippingFee,
+          extraCharge,
+          false
         ]);
 
       const query2 = conn.execute(
-        `UPDATE payment SET pending_refund=pending_refund+${pendingRefundAmountForProduct} WHERE merchantUID=?`, [
-          merchantUID
+        `UPDATE payment SET pending_refund=pending_refund+${pendingRefundAmountForProduct}, products_price=?, shippingfee=?, rest_refund_amount=?, return_shippingfee=?, refund_amount=refund_amount+${refundAmount} WHERE merchantUID=?`, [
+          restOfProductPrice,
+          restOfShippingFee,
+          restOfRefundAmount,
+          restOfreturnShippingFee,
+          merchantUID,
         ]);
 
-      const results = await Promise.all([query1, query2]);
+      const query3 = async () => {
+        for (let i = 0; i < refundProduct.length; i++) {
+          conn.execute(
+            `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
+              "반품및취소완료", 
+              "complete", 
+              refundProduct[i].detail_id
+            ]);
+        }
+      }
 
-      for (let i = 0; i < refundProduct.length; i++) {
+      const results = await Promise.all([query1, query2, query3()]);
+
+      for (let i = 0; i < pendingRefundProduct.length; i++) {
         conn.execute(
           `UPDATE order_detail SET status=?, refundStatus=?, refundId=? WHERE detail_id=?`, [
             "반품및취소요청",
             "waiting",
             results[0][0].insertId,
-            refundProduct[i].detail_id,
+            pendingRefundProduct[i].detail_id,
           ]);
       }
 
@@ -428,7 +460,6 @@ export default class UserRepository {
   };
 
   cancelRefund = async (
-    newMerchantUID,
     refundId,
     refundProduct,
     pendingRefundAmountForProduct,
@@ -445,14 +476,6 @@ export default class UserRepository {
       conn = await this.#db.getConnection();
       await conn.beginTransaction();
 
-      let query;
-
-      if (newMerchantUID) {
-        query = conn.execute(`DELETE FROM payment WHERE merchantUID=?`, [
-          newMerchantUID,
-        ]);
-      }
-
       const query1 = conn.execute(
         `UPDATE payment SET products_price=?, shippingfee=?, rest_refund_amount=?, return_shippingfee=?, refund_amount=?, pending_refund=? WHERE merchantUID=?`, [
           restOfProductPrice,
@@ -467,8 +490,8 @@ export default class UserRepository {
       const query2 = async () => {
         for (let i = 0; i < refundProduct.length; i++) {
           conn.execute(
-            `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
-              refundProduct[i].status, "", refundProduct[i].detail_id
+            `UPDATE order_detail SET status=?, refundStatus=?, refundId=? WHERE detail_id=?`, [
+              refundProduct[i].status, refundProduct[i].refundStatus, refundProduct[i].refundId, refundProduct[i].detail_id
             ]);
         }
       };
@@ -477,59 +500,7 @@ export default class UserRepository {
         refundId,
       ]);
 
-      if (query) {
-        await Promise.all([query, query1, query2(), query3]);
-      }
-
       await Promise.all([query1, query2(), query3]);
-
-      await conn.commit();
-      return;
-    } catch (error) {
-      console.log(error);
-      await conn.rollback();
-      throw new Error(error);
-    } finally {
-      conn.release();
-    }
-  };
-
-  refund = async (
-    restOfProductPrice,
-    restOfShippingFee,
-    restOfRefundAmount,
-    returnShippingFee,
-    refundAmount,
-    merchantUID,
-    refundProduct
-  ) => {
-    let conn;
-
-    try {
-      conn = await this.#db.getConnection();
-      await conn.beginTransaction();
-
-      const query1 = conn.execute(
-        `UPDATE payment SET products_price=?, shippingfee=?, rest_refund_amount=?, return_shippingfee=?, refund_amount=refund_amount+${refundAmount} WHERE merchantUID=?`, [
-          restOfProductPrice,
-          restOfShippingFee,
-          restOfRefundAmount,
-          returnShippingFee,
-          merchantUID,
-        ]);
-
-      const query2 = async () => {
-        for (let i = 0; i < refundProduct.length; i++) {
-          conn.execute(
-            `UPDATE order_detail SET status=?, refundStatus=? WHERE detail_id=?`, [
-              "반품및취소완료", 
-              "complete", 
-              refundProduct[i].detail_id
-            ]);
-        }
-      };
-
-      await Promise.all([query1, query2()]);
 
       await conn.commit();
       return;
@@ -658,32 +629,30 @@ export default class UserRepository {
       .then((result) => result[0][0]);
   };
 
-  insertInfoForExtra = async (username, extraCharge) => {
-    return this.#db
-      .execute(`INSERT INTO payment (username, amount) VALUES (?, ?)`, [
-        username,
-        extraCharge,
-      ])
-      .then((result) => result[0].insertId);
-  };
-
   insertInfoForPayment = async (
     username,
     amount,
     shippingFee,
-    productPrice
+    productPrice,
+    paymentOption
   ) => {
     return this.#db
-      .execute(`INSERT INTO payment (username, amount, shippingfee, products_price, rest_refund_amount) VALUES (?, ?, ?, ?, ?)`, [
-          username, amount, shippingFee, productPrice, amount
+      .execute(`INSERT INTO payment (username, amount, shippingfee, products_price, rest_refund_amount, paymentOption) VALUES (?, ?, ?, ?, ?, ?)`, [
+          username, amount, shippingFee, productPrice, amount, paymentOption
         ])
       .then((result) => result[0].insertId);
   };
 
-  updateMarchantUID = async (id, merchantUID) => {
-    return this.#db
+  updateMarchantUID = async (what, id, merchantUID) => {
+    if (what === "refund") {
+      return this.#db
+      .execute(`UPDATE refund SET newMerchantUID = '${merchantUID}' WHERE refundId=?`,[id])
+      .then((result) => result[0]);
+    } else {
+      return this.#db
       .execute(`UPDATE payment SET merchantUID = '${merchantUID}' WHERE payment_id=?`,[id])
       .then((result) => result[0]);
+    }
   };
 
   getByProduct_code = async (product_code) => {
