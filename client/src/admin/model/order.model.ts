@@ -9,13 +9,15 @@ export type AdminOrderService = {
   ) => Promise<{
     orderList: Orders[] | [];
     orderPageLength: number;
+    refundNum: number;
   }>;
   getPendingRefund: (pageNumber: number) => Promise<{
     refundList: RefundAmount[] | [];
     orderList: OrderList[] | [];
     orderPageLength: number;
   }>;
-  refund: (savePoint: SavePoint, refundInfo: RefundInfo) => Promise<void>;
+  refund: (refundInfo: RefundInfo) => Promise<void>;
+  refundFail: (savePoint: SavePoint) => Promise<void>;
   getDeliveryStatus: (deliveryDetailId: number) => Promise<{
     status: DeliveryStatus[] | [];
   }>;
@@ -51,11 +53,15 @@ export type RefundAmount = {
   refundShippingFee: number;
   refundProductPrice: number;
   returnShippingFee: number;
+  extraPay: number;
+  reflection: boolean;
 };
 
 export type Order = {
   product_name: string;
+  paymentOption: string;
   price: number;
+  deliverystatus: string;
   quantity: number;
   merchantUID: string;
   orderer: string;

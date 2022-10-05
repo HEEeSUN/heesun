@@ -19,9 +19,10 @@ function userRouter(customerAuth, userController) {
   router.post("/order/cancel", userController.cancelPayment, userController.addCart);
 
   router.post("/refund", userController.refund);
+  router.post("/refund/imp", userController.requestRefund);
   router.get("/refund/:id", userController.getOrder);
   router.post("/refund/paycomplete", userController.paycomplete);
-  router.post("/refund/cancel", userController.cancelRefund);
+  router.post("/refund/cancel", userController.requestToCancelRefund);
   router.post("/refund/:id", userController.cancelOrder);
 
   router.get("/cart", userController.cart);

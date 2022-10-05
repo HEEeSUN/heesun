@@ -5,11 +5,13 @@ export default class HttpClient {
   memberAuthError: () => void;
   adminAuthError: () => void;
   apiClient: AxiosInstance;
+  expiredSession: () => void;
 
   constructor(
     baseURL: string | undefined,
     memberAuthError: () => void,
-    adminAuthError: () => void
+    adminAuthError: () => void,
+    expiredSession: () => void
   ) {
     this.memberAuthError = memberAuthError;
     this.adminAuthError = adminAuthError;
@@ -17,6 +19,7 @@ export default class HttpClient {
       baseURL: baseURL,
       withCredentials: true,
     });
+    this.expiredSession = expiredSession;
   }
 
   async axiosAPI(apiOption: AxiosRequestConfig): Promise<any> {
@@ -37,7 +40,8 @@ export default class HttpClient {
       if (error.status === 401) {
         if (error.data.code === "ERROR00001") {
           if (error.config.url?.startsWith("/admin")) {
-            this.adminAuthError();
+            // this.adminAuthError();
+            this.expiredSession();
           } else if (
             error.config.url?.startsWith("/member")
             // error.config.url?.startsWith("/community")

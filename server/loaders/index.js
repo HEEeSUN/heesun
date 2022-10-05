@@ -3,6 +3,7 @@ import databaseLoader from './database.js'
 import initSocket from "../connection/socket.js";
 import { Auth, AdminAuth } from "../middleware/auth.js";
 import verifyClientUrl from "../middleware/verifyClientUrl.js";
+import {requestRefundToIMP} from '../controller/payment.js';
 import ChattingController from "../controller/chatting.js";
 import AdminController from "../controller/admin/admin.js";
 import CommunityController from "../controller/customer/community.js";
@@ -24,8 +25,8 @@ export default async ({ server, expressApp }) => {
   const userRepository = new UserRepository(db)
   const customerAuth = new Auth(userRepository);
   const adminAuth = new AdminAuth(adminRepository);
-  const adminController = new AdminController(adminRepository);
-  const userController = new UserController(userRepository);
+  const adminController = new AdminController(adminRepository, requestRefundToIMP);
+  const userController = new UserController(userRepository, requestRefundToIMP);
   const communityController = new CommunityController(communityRepository);
   const productController = new ProductController(productRepository);
   const chattingController = new ChattingController(chattingRepository);

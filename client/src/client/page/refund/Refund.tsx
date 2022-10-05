@@ -11,10 +11,12 @@ import {
   RefundInfo,
   PendingRefundInfo,
   refundReasons,
+  SavePoint
 } from "../../model/member.model";
 import { UseParams } from "../../model/model";
 import Input from "../../components/Input";
 import Payment from "../order/components/Payment";
+import PaymentOption from "../order/components/PaymentOption";
 
 type Props = {
   memberService: MemberService;
@@ -31,7 +33,6 @@ function Refund(props: Props) {
   let [order, setOrder] = useState<Order>(); // 주문 내역
   let [orderDetail, setOrderDetail] = useState<OrderDetails[]>([]); // 주문 상세 내역
   let [refundProduct, setRefundProduct] = useState<OrderDetails[]>([]); // 환불을 요청할 주문 상세 내역
-
   let [refundAmountForProduct, setRefundAmountForProduct] = useState<number>(0); //환불할 상품가격
   let [refundAmountForShipping, setRefundAmountForShipping] =
     useState<number>(0); // 환불 배송비 (돌려줄 것)
@@ -42,15 +43,15 @@ function Refund(props: Props) {
     useState<number>(0); // 판매자 확인후 환불할 배송비 (돌려줄 것)
   let [pendingRefundAmount, setPendingRefundAmount] = useState<number>(0); // 판매자 확인후 환불할 전체 환불비
   let [returnShippingFee, setReturnShippingFee] = useState<number>(0); // 반품배송비(받을 것)
+  let [refundInformation, setRefundInformation] = useState<RefundInfo>();
+  let [refundSavePoint, setRefundSavePoint] = useState<SavePoint>();
+  let [reasonNumber, setReasonNumber] = useState<number>(0);
+  let [prePayment, setPrePayment] = useState<number>(0);
+  const { memberService } = props;
   let history = useHistory();
   let refundInfo: RefundInfo;
   let immediatelyRefundInfo: ImmediatelyRefundInfo;
   let pendingRefundInfo: PendingRefundInfo;
-  let [refundInformation, setRefundInformation] = useState<RefundInfo>();
-  let [refundFailInfo, setRefundFailInfo] = useState({});
-  let [reasonNumber, setReasonNumber] = useState<number>(0);
-  const { memberService } = props;
-  let extraCharge: number;
 
   const requestRefund = async () => {
     let emptyRefundReason = refundProduct.find(
@@ -76,23 +77,22 @@ function Refund(props: Props) {
         }
       }
 
-      if (pendingRefundAmount < 0) {
+      if (extraPay > 0) {
         const result = window.confirm(
-          `${-pendingRefundAmount} 원의 추가 결제 금액이 발생합니다.\n계속하시겠습니까?`
+          `${extraPay} 원의 추가 결제 금액이 발생합니다.\n계속하시겠습니까?`
         );
 
         if (!result) {
           return;
-        } else {
-          extraCharge = -pendingRefundAmount;
-        }
+        } 
       }
 
       if (order) {
         refundInfo = {
           merchantUID: order.merchantUID,
           impUID: order.imp_uid,
-          extraCharge: extraCharge,
+          extraCharge: extraPay,
+          prePayment,
           refundProduct,
           refundAmount,
         };
@@ -110,29 +110,37 @@ function Refund(props: Props) {
       }
 
       try {
-        const { newMerchantUID, refundId, refundSavePoint } =
+        const { newMerchantUID, refundId, savePoint } =
           await memberService.requestRefund(
             refundInfo,
             immediatelyRefundInfo,
             pendingRefundInfo
           );
 
-        if (newMerchantUID) {
           refundInfo = {
             ...refundInfo,
-            newMerchantUID,
             refundId,
           };
 
-          setRefundFailInfo(refundSavePoint);
+          setRefundSavePoint(savePoint);
           setRefundInformation(refundInfo);
 
+        if (newMerchantUID) {
           setPayInfo({
-            amount: extraCharge,
+            amount: extraPay,
             productName: `환불`,
           });
           setMerchantUID(newMerchantUID);
           setPayment(true);
+        } else  if (refundAmount > 0) {
+          try {
+            await memberService.requestRefundToImp(order?.imp_uid, refundAmount);
+
+            alert("반품 및 취소가 완료되었습니다");
+            history.push("/home/member/info");
+          } catch (error) {
+            IMPRefundFail(refundInfo, savePoint);
+          }
         } else {
           alert("반품 및 취소가 요청되었습니다");
           history.push("/home/member/info");
@@ -143,13 +151,19 @@ function Refund(props: Props) {
     }
   };
 
+  const IMPRefundFail = async (refundInfo: RefundInfo, savePoint: SavePoint) => {
+    alert("환불에 실패하였습니다");
+
+    memberService.refundFail(refundInfo, savePoint);
+  }
+
   const refundComplete = async (merchantUID: string, impUID: string) => {
     try {
       await memberService.refundComplete(merchantUID, impUID);
 
       setPayment(false);
       alert("반품 및 취소가 요청되었습니다");
-      history.push("info");
+      history.push("/home/member/info");
     } catch (error: any) {
       alert(error.message);
       return;
@@ -160,9 +174,9 @@ function Refund(props: Props) {
     try {
       alert(`환불에 실패하였습니다\n${errorMsg}`);
 
-      if (refundInformation) {
-        memberService.refundFail(refundInformation, refundFailInfo);
-      }
+      if (refundInformation && refundSavePoint)
+        memberService.refundFail(refundInformation, refundSavePoint);
+      // history.push("/home/member/info");
     } catch (error: any) {
       console.log(error);
       return;
@@ -236,13 +250,19 @@ function Refund(props: Props) {
     let tempPendingShipping = 0;
     let tempReturnShippingFee = 0;
 
-    refundProduct.map((product) => {
-      if (product.status === "결제완료" || product.status === "입금대기중") {
-        tempImmediatelyRefundAmount += product.price * product.quantity;
-      } else {
+    if (order?.paymentOption === "cash") { // 현금 결제인경우 판매자 확인후 환불 진행
+      refundProduct.map((product) => {
         tempPendingRefundAmount += product.price * product.quantity;
-      }
-    });
+      });
+    } else {
+      refundProduct.map((product) => {
+        if (product.status === "결제완료" || product.status === "입금대기중") {
+          tempImmediatelyRefundAmount += product.price * product.quantity;
+        } else {
+          tempPendingRefundAmount += product.price * product.quantity;
+        }
+      });
+    }
 
     setRefundAmountForProduct(tempImmediatelyRefundAmount);
     setPendingRefundAmountForProduct(tempPendingRefundAmount);
@@ -262,9 +282,15 @@ function Refund(props: Props) {
           setPendingRefundAmountForShipping(order.shippingfee);
           setRefundAmountForShipping(0);
         } else {
-          tempImmediatelyShipping = order.shippingfee;
-          setPendingRefundAmountForShipping(0);
-          setRefundAmountForShipping(order.shippingfee);
+          if (order.paymentOption === "cash") {
+            tempPendingShipping = order.shippingfee;
+            setPendingRefundAmountForShipping(order.shippingfee);
+            setRefundAmountForShipping(0);
+          } else {
+            tempImmediatelyShipping = order.shippingfee;
+            setPendingRefundAmountForShipping(0);
+            setRefundAmountForShipping(order.shippingfee);
+          }
         }
       } else {
         setPendingRefundAmountForShipping(0);
@@ -272,7 +298,6 @@ function Refund(props: Props) {
       }
     }
 
-    console.log(order?.return_shippingfee);
     if (order?.return_shippingfee) {
       tempReturnShippingFee = 0;
       setReturnShippingFee(0);
@@ -301,11 +326,25 @@ function Refund(props: Props) {
           tempImmediatelyShipping -
           tempReturnShippingFee;
         setRefundAmount(tmp);
+        setPrePayment(tempReturnShippingFee);
         tempReturnShippingFee = 0;
       } else {
         tempReturnShippingFee -=
           tempImmediatelyRefundAmount + tempImmediatelyShipping;
+        setPrePayment(tempImmediatelyRefundAmount + tempImmediatelyShipping);
         setRefundAmount(0);
+      }
+
+      if (tempReturnShippingFee >= tempPendingRefundAmount + tempPendingShipping) {
+        tempReturnShippingFee -= tempPendingRefundAmount + tempPendingShipping;
+        setPendingRefundAmount(0);
+      } else {
+        const tmp =
+        tempPendingRefundAmount +
+        tempPendingShipping -
+        tempReturnShippingFee;
+        setPendingRefundAmount(tmp);
+        tempReturnShippingFee = 0;
       }
 
       if (tempReturnShippingFee < 0) {
@@ -315,10 +354,9 @@ function Refund(props: Props) {
       setExtraPay(tempReturnShippingFee);
     } else {
       setRefundAmount(tempImmediatelyRefundAmount + tempImmediatelyShipping);
-      // setPendingRefundAmount(tempPendingRefundAmount + tempPendingShipping);
+      setPendingRefundAmount(tempPendingRefundAmount + tempPendingShipping);
       setExtraPay(0);
     }
-    setPendingRefundAmount(tempPendingRefundAmount + tempPendingShipping);
   };
 
   useEffect(() => {
@@ -469,18 +507,23 @@ function Refund(props: Props) {
         </div>
         <hr />
         <div className="refund-amount-label">
-          <p>환불요청금액</p>
+          <p>환불상품금액</p>
           <p>{refundAmountForProduct + pendingRefundAmountForProduct}</p>
         </div>
         <div className="refund-amount-label">
           <p>환불배송비</p>
           <p>{refundAmountForShipping + pendingRefundAmountForShipping}</p>
         </div>
+        <div className="refund-amount-label">
+          <p>총환불요청액</p>
+          <p>{refundAmountForProduct + pendingRefundAmountForProduct + refundAmountForShipping + pendingRefundAmountForShipping}</p>
+        </div>
         <hr />
         <div className="refund-amount-label">
           <p>반품배송비</p>
           <p>{returnShippingFee}</p>
         </div>
+        <hr />
         {/* <div className="refund-amount-label">
           <p>추가배송비</p>
           <p>{extraPay}</p>
@@ -489,9 +532,6 @@ function Refund(props: Props) {
         <div className="refund-amount-label">
           <p>
             즉시환불금액
-            {refundAmountForProduct && returnShippingFee
-              ? "(반품배송비와 상계처리)"
-              : null}
           </p>
           <p>{refundAmount}</p>
         </div>
@@ -499,11 +539,37 @@ function Refund(props: Props) {
           <p>판매자확인후 환불가능금액</p>
           <p>{pendingRefundAmount}</p>
         </div>
+        {
+         extraPay > 0 && 
         <div className="refund-amount-label">
           <p>추가결제액</p>
           <p>{extraPay}</p>
         </div>
+        }
       </div>
+      {
+        returnShippingFee > 0 &&
+        <div> 반품배송비는 환불 받으실 금액에서 차감됩니다</div>
+      }
+      {
+        extraPay > 0 && 
+        <div className="payment-option">
+          <p>결제수단선택</p>
+          <fieldset>
+            <PaymentOption
+              title="이니시스결제"
+              value="html5_inicis"
+              defaultChecked={true}
+              handleClickEvent={(e) => setPaymentOption(e.target.value)}
+            />
+            <PaymentOption
+              title="카카오페이"
+              value="kakaopay"
+              handleClickEvent={(e) => setPaymentOption(e.target.value)}
+            />
+          </fieldset>
+        </div>
+      }
       <button className="refund-btn" onClick={requestRefund}>
         완료
       </button>

@@ -11,16 +11,16 @@ import SalesChart from "./components/SalesChart";
 
 type Props = {
   adminProductService: AdminProductService;
-  setRefundNum: React.Dispatch<React.SetStateAction<number>>;
 };
 
-function Dashboard({ adminProductService, setRefundNum }: Props) {
+function Dashboard({ adminProductService }: Props) {
   let [alerts, setAlerts] = useState<DashboardAlerts>([]);
   let [labels, setLabels] = useState<string[]>([]);
   let [sales, setSales] = useState<number[]>([]);
   let [refund, setRefund] = useState<number[]>([]);
   let [updateTime, setUpdateTime] = useState<string>("");
   let [salesOf6month, setSalesOf6month] = useState<SalesOfPerMonth[]>([]);
+  let [refundNum, setRefundNum] = useState<number>(0);
   let history = useHistory();
 
   const getInitialData = async () => {

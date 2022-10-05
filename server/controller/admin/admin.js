@@ -2,19 +2,24 @@ import fs from "fs";
 import path from "path";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { requestRefund } from "../payment.js";
 
 export default class AdminController {
-  constructor(adminRepository) {
+  constructor(adminRepository, requestRefundToIMP) {
     this.admin = adminRepository;
+    this.requestRefundToIMP = requestRefundToIMP;
   }
 
   /* 새로고침 */
   refresh = async (req, res) => {
     try {
-      const { username } = req;
+      const { userId, username } = req;
+      let menuList = [];
 
-      return res.status(200).json({ username });
+      if (userId && username) {
+        menuList = await this.admin.getMenuList(userId);
+      }
+
+      return res.status(200).json({ username, menuList });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -559,8 +564,6 @@ export default class AdminController {
           "반품및취소요청"
         );
 
-        console.log(orderList);
-
         if (orderList.length > 0) {
           fullCount = orderList[0].full_count;
         }
@@ -574,16 +577,18 @@ export default class AdminController {
         fullCount = orderList[0].full_count;
       }
 
-      if (orderList.length < amountOfSendData) {
-        refundList = await this.admin.getPendingRefund(
-          orderList[orderList.length - 1].refundId,
-          orderList[0].refundId
-        );
-      } else {
-        refundList = await this.admin.getPendingRefund(
-          orderList[4].refundId,
-          orderList[0].refundId
-        );
+      if (orderList.length !== 0) {
+        if (orderList.length < amountOfSendData) {
+          refundList = await this.admin.getPendingRefund(
+            orderList[orderList.length - 1].refundId,
+            orderList[0].refundId
+          );
+        } else {
+          refundList = await this.admin.getPendingRefund(
+            orderList[4].refundId,
+            orderList[0].refundId
+          );
+        }
       }
 
         let newArray = [];
@@ -611,10 +616,6 @@ export default class AdminController {
       } else {
         orderPageLength = fullCount / amountOfSendData;
       }
-
-      console.log(refundList);
-      console.log(orderList);
-      console.log(orderPageLength);
 
       res.status(200).json({ orderList, orderPageLength, refundList });
     } catch (error) {
@@ -694,7 +695,19 @@ export default class AdminController {
         orderPageLength = orderList[0].full_count / amountOfSendData;
       }
 
-      res.status(200).json({ orderList, orderPageLength });
+      // 결제완료, 환불요청 주문건
+      const orderAndRefund = await this.admin.getNewOrderAndNewRefund();
+
+      const newRefund = orderAndRefund.find(
+        (order) => order.status === "반품및취소요청"
+      );
+
+      let refundNum;
+      if (newRefund) {
+        refundNum = newRefund.number;
+      }
+
+      res.status(200).json({ orderList, orderPageLength, refundNum });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -721,14 +734,54 @@ export default class AdminController {
     res.cookie("token", token, options);
   };
 
-  /* 환불 요청건에 대해 실제 환불 진행 */
-  refund = async (req, res) => {
-    try {
-      const { savePoint, refundInfo } = req.body;
+  // /* 환불 요청건에 대해 실제 환불 진행 */
+  // refund = async (req, res) => {
+  //   try {
+  //     const { savePoint, refundInfo } = req.body;
 
-      console.log(refundInfo);
+  //     console.log(refundInfo);
+
+  //     const {
+  //       merchantUID,
+  //       impUID,
+  //       refundId,
+  //       all,
+  //       detailId,
+  //       realRefundProducts,
+  //       realRefundShippingFee,
+  //       realReturnShippingFee,
+  //     } = refundInfo;
+
+  //     await this.admin.refund(
+  //       all,
+  //       detailId,
+  //       realRefundProducts,
+  //       realRefundShippingFee,
+  //       merchantUID,
+  //       refundId
+  //     );
+
+  //     if (realRefundProducts + realRefundShippingFee < 0) {
+  //       //환불금 0
+  //       return res.sendStatus(200);
+  //     }
+
+  //     // const result = await requestRefund(impUID, (realRefundProducts+realRefundShippingFee));
+
+  //     res.sendStatus(200);
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res.sendStatus(400);
+  //   }
+  // };
+
+    /* 환불 요청건에 대해 실제 환불 진행 */
+  refund = async (req, res, next) => {
+    try {
+      const { refundInfo } = req.body;
 
       const {
+        paymentOption,
         merchantUID,
         impUID,
         refundId,
@@ -737,7 +790,20 @@ export default class AdminController {
         realRefundProducts,
         realRefundShippingFee,
         realReturnShippingFee,
+        reflection,
+        realRefundAmount
       } = refundInfo;
+
+      const {
+        beforePaymentInfo,
+        beforeOrderDetailList, 
+        beforeRefundInfo
+      } = await this.admin.getSavePointBeforeRefund(merchantUID, refundId);
+      const savePoint = {
+        beforePaymentInfo, 
+        beforeOrderDetailList, 
+        beforeRefundInfo
+      }
 
       await this.admin.refund(
         all,
@@ -745,20 +811,81 @@ export default class AdminController {
         realRefundProducts,
         realRefundShippingFee,
         merchantUID,
-        refundId
+        refundId,
+        reflection,
       );
 
-      if (realRefundProducts + realRefundShippingFee < 0) {
-        //환불금 0
+      if (realRefundAmount === 0 || paymentOption === "cash") {
         return res.sendStatus(200);
       }
 
-      // const result = await requestRefund(impUID, (realRefundProducts+realRefundShippingFee));
+      req.body.merchantUID = merchantUID;
+      req.body.impUID = impUID;
+      req.body.refundAmount = realRefundAmount;
+      req.body.savePoint = savePoint;
 
-      res.sendStatus(200);
+      next();
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
     }
   };
+  
+  requestRefund = async (req,res) => {
+    const {merchantUID, impUID, refundAmount, savePoint} = req.body;
+
+    try {
+      await this.requestRefundToIMP(impUID, refundAmount);
+
+      return res.sendStatus(200);
+    } catch (error) {
+      console.log(error);
+      this.refundFail(merchantUID, savePoint);
+      return res.sendStatus(400);
+    }
+  }
+
+  refundFail = async (merchantUID, savePoint) => {
+    /*
+    type BeforePaymentInfo = {
+      products_price: number,
+      shippingfee: number,
+      rest_refund_amount: number,
+      refund_amount: number,
+      pending_refund: number,
+      return_shippingfee: number
+    }
+    type BeforeOrderDetailList = {
+      detail_id: number, 
+      status: string, 
+      refundStatus: string 
+    }
+    type BeforeRefundInfo = {
+      reflection: boolean,
+      refundProductPrice: number, 
+      refundShippingFee: number
+    }
+    type SavePoint = {
+      beforePaymentInfo: BeforePaymentInfo,
+      beforeOrderDetailList: BeforeOrderDetailList[],
+      beforeRefundInfo: BeforeRefundInfo
+    }
+    */
+
+    try {
+      const {
+        beforePaymentInfo,
+        beforeOrderDetailList, 
+        beforeRefundInfo
+      } = savePoint
+  
+      await this.admin.refundFail(merchantUID, beforePaymentInfo, beforeOrderDetailList, beforeRefundInfo)
+      
+      return
+    } catch (error) {
+      console.log(error)
+    }
+    }
+
+
 }

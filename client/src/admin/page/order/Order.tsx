@@ -10,10 +10,9 @@ import Popup from "../../components/Popup";
 
 type Props = {
   adminOrderService: AdminOrderService;
-  refundNum?: number;
 };
 
-function Order({ adminOrderService, refundNum }: Props) {
+function Order({ adminOrderService }: Props) {
   let [orderList, setOrderList] = useState<Orders[]>([]);
   let [order, setOrder] = useState<Orders>();
   let [searchCategory, setSearchCategory] = useState<string>("");
@@ -31,9 +30,9 @@ function Order({ adminOrderService, refundNum }: Props) {
   let [change, setChange] = useState<boolean>(false);
   let [extraCategory, setExtraCategory] = useState<boolean>(false);
   let [showRefund, setShowRefund] = useState<boolean>(false);
+  let [refundNum, setRefundNum] = useState<number>(0);
 
-  const refundCmp = <Refund adminOrderService={adminOrderService} />;
-
+  
   const categoryArr1 = [
     { value: "", name: "전체보기", id: "default" },
     { value: "orderer", name: "주문자명" },
@@ -51,7 +50,13 @@ function Order({ adminOrderService, refundNum }: Props) {
     "반품및취소요청",
     "반품및취소완료",
   ];
-
+  
+  const updateRefundNum =  async (refundNum: number) => {
+    setRefundNum(refundNum);
+  }
+  
+  const refundCmp = <Refund adminOrderService={adminOrderService} updateRefundNum={updateRefundNum}/>;
+  
   const categoryHandleing1 = async (value: string, id?: string) => {
     setSearchCategory(value);
 
@@ -133,7 +138,7 @@ function Order({ adminOrderService, refundNum }: Props) {
 
     try {
       const { startDate, endDate } = await searchDate();
-      const { orderList, orderPageLength } =
+      const { orderList, orderPageLength, refundNum } =
         await adminOrderService.getOrderListByWord(
           pageNumber,
           startDate,
@@ -146,6 +151,7 @@ function Order({ adminOrderService, refundNum }: Props) {
       setPageLength(orderPageLength);
       setChange(true);
       setOrderList(orderList);
+      setRefundNum(refundNum);
     } catch (error: any) {
       alert(error.message);
     }
@@ -167,12 +173,10 @@ function Order({ adminOrderService, refundNum }: Props) {
   }, [deliveryDetailId]);
 
   useEffect(() => {
-    if (!changeStatus) {
-      return
+    if (changeStatus) {
+      getOrderList();
+      setChangeStatus(false);
     }
-
-    getOrderList();
-    setChangeStatus(false);
   }, [changeStatus]);
 
   useEffect(() => {

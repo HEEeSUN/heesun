@@ -99,10 +99,7 @@ function Order(props: Props) {
         extra_address: extraAddress,
       });
 
-      alert("orderid" + orderId);
       setMerchantUID(merchantUID);
-
-      alert(merchantUID);
       setOrderId(orderId);
 
       if (paymentOption === "cash") {

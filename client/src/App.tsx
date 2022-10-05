@@ -16,10 +16,11 @@ import AdminChattingService from "./admin/service/chatting";
 import AdminHome from "./admin/AdminHome";
 import ClientHome from "./client/ClientHome";
 import Main from "./client/page/Main";
+import Admin from "./admin/page/Admin";
 
 function App() {
   const sharedValue = useContext(AuthContext);
-  const { login, logout } = sharedValue;
+  const { login, logout, setMenus, expiredSession } = sharedValue;
   let history = useHistory();
 
   const memberAuthError = () => {
@@ -33,12 +34,12 @@ function App() {
   };
 
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const httpClient = new HttpClient(baseURL, memberAuthError, adminAuthError);
+  const httpClient = new HttpClient(baseURL, memberAuthError, adminAuthError, expiredSession);
   const memberService = new MemberService(httpClient, login, logout);
   const productService = new ProductService(httpClient);
   const communityService = new CommunityService(httpClient);
   const chattingService = new ChattingService(httpClient);
-  const adminService = new AdminService(httpClient, login, logout);
+  const adminService = new AdminService(httpClient, login, logout, setMenus);
   const adminProductService = new AdminProductService(httpClient);
   const adminOrderService = new AdminOrderService(httpClient);
   const adminDiscountService = new AdminDiscountService(httpClient);
@@ -59,13 +60,17 @@ function App() {
             regex={regex}
           />
         </Route>
-        <Route path="/admin">
-          <AdminHome
+        <Route exact path="/admin">
+          <AdminHome />
+        </Route>
+        <Route path="/admin/:id">
+          <Admin
             adminService={adminService}
             adminProductService={adminProductService}
             adminOrderService={adminOrderService}
             adminDiscountService={adminDiscountService}
             adminChattingService={adminChattingService}
+            regex={regex}
           />
         </Route>
         <Route path="*">NOT FOUND</Route>

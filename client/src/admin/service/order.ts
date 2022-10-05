@@ -55,13 +55,24 @@ export default class AdminOrderService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async refund(savePoint: SavePoint, refundInfo: RefundInfo) {
+  async refund(refundInfo: RefundInfo) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
       url: `/admin/orders/refund`,
       data: {
-        savePoint,
         refundInfo,
+      },
+    };
+
+    return this.http.axiosAPI(axiosAPI);
+  }
+
+  async refundFail(savePoint: SavePoint) {
+    const axiosAPI: AxiosRequestConfig = {
+      method: "post",
+      url: `/admin/orders/refundFail`,
+      data: {
+        savePoint,
       },
     };
 

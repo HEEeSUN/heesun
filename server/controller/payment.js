@@ -1,7 +1,7 @@
 import axios from "axios";
 
 /* 결제대행 IAMPORT에 환불 요청 */
-export const requestRefund = async (imp_uid, refundAmount) => {
+export const requestRefundToIMP = async (imp_uid, amount) => {
   try {
     const getToken = await axios({
       url: process.env.IMP_GET_TOKEN_URL,
@@ -9,7 +9,7 @@ export const requestRefund = async (imp_uid, refundAmount) => {
       headers: { "Content-Type": "application/json" },
       data: {
         imp_key: process.env.IMP_KEY,
-        imp_secret: process.env.SECRET,
+        imp_secret: process.env.IMP_SECRET,
       },
     });
 
@@ -23,7 +23,7 @@ export const requestRefund = async (imp_uid, refundAmount) => {
       },
       data: {
         imp_uid, // imp_uid를 환불 `unique key`로 입력
-        amount: refundAmount, // 가맹점 클라이언트로부터 받은 환불금액
+        amount // 가맹점 클라이언트로부터 받은 환불금액
       },
     });
 
