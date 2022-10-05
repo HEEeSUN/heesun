@@ -5,16 +5,17 @@ export default class ProductRepository {
     this.#db = db;
   }
 
-  getByProduct_code = async (product_code) => {
+  getByProduct_code = async (product_code, today) => {
     return this.#db
       .execute(`SELECT product_code, option_number, name, price, main_img_src, description, option1, option2, stock, sale_price, start, end
                 FROM (product NATURAL JOIN product_option) LEFT JOIN (
                   SELECT * 
                   FROM sale_product LEFT JOIN time_sale_table
                   USING(time_id)
+                  where time_id is null or start <= ? and end >= ?
                 )A
                 USING(product_code, option_number)
-                WHERE disabled is not true and product_code=?`,[product_code])
+                WHERE disabled is not true and product_code=?`,[today, today, product_code])
       .then((result) => result[0]);
   };
 
