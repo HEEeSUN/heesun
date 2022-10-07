@@ -294,6 +294,10 @@ function Chattings(props: Props) {
     if (joinRoom) {
       socketService.joinRoom(username, socketId, roomName).then(getMessage);
     }
+
+    return () => {
+      socketService.leaveRoom();
+    }
   }, []);
   // 최초실행시 socket 클래스에 있는 initSocket을 이용해 socket 인스턴스 생성
 
