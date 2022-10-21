@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./contact.css";
 import { ContactService } from "../../model/contact.model";
 import { Regex } from "../../model/model";
+import KakaoMap from "./components/Kakaomap";
 import Button from "../../components/Button";
 
 type Props = {
@@ -131,6 +132,7 @@ function Contact({ contactService, regex }: Props) {
           ></textarea>
           <Button title="보내기" type="submit" extraClass="no-margin" />
         </form>
+        <KakaoMap />
       </div>
     </div>
   );

@@ -9,27 +9,29 @@ declare global {
 function KakaoMap() {
   const { kakao } = window;
   const ref = useRef(null);
-
+  
   const map = async () => {
     const container = ref.current;
     const mapOption = {
       center: new kakao.maps.LatLng(37.653096, 126.895559),
-      level: 3,
+      level: 3
     };
     const map = new kakao.maps.Map(container, mapOption);
 
-    const markerPosition = new kakao.maps.LatLng(37.653096, 126.895559);
+    const markerPosition  = new kakao.maps.LatLng(37.653096, 126.895559); 
     const marker = new kakao.maps.Marker({
-      position: markerPosition,
+        position: markerPosition
     });
     marker.setMap(map);
-  };
+  }
 
-  useEffect(() => {
+  useEffect(()=>{
     map();
-  }, []);
-
-  return <div className="kakao-map-container" id="map" ref={ref} />;
+  },[])
+  
+  return(
+    <div className="kakao-map-container" id="map" ref={ref} />
+  )
 }
 
 export default KakaoMap;
