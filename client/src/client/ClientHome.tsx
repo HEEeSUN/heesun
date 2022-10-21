@@ -9,6 +9,7 @@ import { ChattingService } from "./model/chatting.model";
 import { CommunityService } from "./model/community.model";
 import { MemberService } from "./model/member.model";
 import { ProductService } from "./model/product.model";
+import { ContactService } from "./model/contact.model";
 import Signup from "./page/signup/Signup";
 import Login from "./page/login/Login";
 import SearchUser from "./page/search/SearchUser";
@@ -19,6 +20,7 @@ import Product from "./page/product/Product";
 import Community from "./page/community/Community";
 import Post from "./page/post/Post";
 import ChattingList from "./page/chatting/ChattingList";
+import Contact from "./page/contact/Contact";
 import Member from "./page/Member";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -31,6 +33,7 @@ type Props = {
   memberService: MemberService;
   communityService: CommunityService;
   chattingService: ChattingService;
+  contactService: ContactService;
   regex: Regex;
 };
 
@@ -47,6 +50,7 @@ function ClientHome(props: Props) {
     memberService,
     communityService,
     chattingService,
+    contactService,
     regex,
   } = props;
   const histroy = useHistory();
@@ -162,6 +166,9 @@ function ClientHome(props: Props) {
           </Route>
           <Route exact path="/home/community/:id">
             <Post communityService={communityService} username={username} />
+          </Route>
+          <Route exact path="/home/contact">
+            <Contact contactService={contactService} regex={regex} />
           </Route>
           <Route path="*">
             <NotFound />

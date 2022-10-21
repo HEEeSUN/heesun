@@ -7,6 +7,7 @@ import chattingRouter from "../router/customer/chatting.js";
 import communityRouter from "../router/customer/community.js";
 import productRouter from "../router/customer/product.js";
 import userRouter from "../router/customer/user.js";
+import contactRouter from "../router/customer/contact.js";
 
 export default async ({ app, middleware, controllers }) => {
   const __dirname = path.resolve(); 
@@ -16,7 +17,8 @@ export default async ({ app, middleware, controllers }) => {
     userController,
     communityController,
     productController,
-    chattingController
+    chattingController,
+    contactController
   } = controllers;
 
   app.use(express.json());
@@ -32,10 +34,11 @@ export default async ({ app, middleware, controllers }) => {
   app.use("/image", express.static(path.join(__dirname, "../public/image")));
 
   app.use("/home", verifyClientUrl, productRouter(productController));
-  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, chattingController));
+  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, chattingController, contactController));
   app.use("/member", verifyClientUrl, userRouter(customerAuth, userController));
   app.use("/community", verifyClientUrl, communityRouter(customerAuth, communityController));
   app.use("/chatting", verifyClientUrl, chattingRouter(customerAuth, chattingController));
+  app.use("/contact", verifyClientUrl, contactRouter(contactController));
 
   app.use((req, res, next) => {
     return res.sendStatus(404);

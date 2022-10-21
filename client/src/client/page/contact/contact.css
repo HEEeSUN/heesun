@@ -1,0 +1,45 @@
+.contact {}
+
+.contact .content {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 50px;
+}
+
+.contact .content .contact-form {
+  width: 300px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.contact .content .contact-form p {
+  font-weight: bold;
+}
+
+.contact .content .contact-form .info {
+  color: maroon;
+  font-weight: bold;
+  display: flex;
+  font-size: 0.9em;
+  align-items: center;
+  outline: none;
+  background-color: rgb(244, 242, 236);
+  border: none;
+  border-bottom: 1px solid maroon;
+}
+
+.contact .content .contact-form fieldset label {
+  margin: 0 5px 0 0;
+}
+
+.contact .content .contact-form textarea {
+  resize: none;
+  min-height: 200px;
+  outline: transparent;
+}
+
+.contact .content .contact-form .no-margin {
+  margin: 0;
+}

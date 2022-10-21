@@ -5,11 +5,13 @@ import { Auth, AdminAuth } from "../middleware/auth.js";
 import verifyClientUrl from "../middleware/verifyClientUrl.js";
 import {requestRefundToIMP} from '../controller/payment.js';
 import ChattingController from "../controller/chatting.js";
+import ContactController from "../controller/contact.js";
 import AdminController from "../controller/admin/admin.js";
 import CommunityController from "../controller/customer/community.js";
 import ProductController from "../controller/customer/product.js";
 import UserController from "../controller/customer/user.js";
 import ChattingRepository from "../data/chatting.js";
+import ContactRepository from "../data/contact.js";
 import AdminRepository from "../data/admin/admin.js";
 import CommunityRepository from "../data/customer/community.js";
 import ProductRepository from "../data/customer/product.js";
@@ -23,6 +25,7 @@ export default async ({ server, expressApp }) => {
   const communityRepository = new CommunityRepository(db)
   const productRepository = new ProductRepository(db)
   const userRepository = new UserRepository(db)
+  const contactRepository = new ContactRepository(db);
   const customerAuth = new Auth(userRepository);
   const adminAuth = new AdminAuth(adminRepository);
   const adminController = new AdminController(adminRepository, requestRefundToIMP);
@@ -30,7 +33,8 @@ export default async ({ server, expressApp }) => {
   const communityController = new CommunityController(communityRepository);
   const productController = new ProductController(productRepository);
   const chattingController = new ChattingController(chattingRepository);
-  
+  const contactController = new ContactController(contactRepository);
+
   const middleware = {
     customerAuth,
     adminAuth,
@@ -41,7 +45,8 @@ export default async ({ server, expressApp }) => {
     userController,
     communityController,
     productController,
-    chattingController
+    chattingController,
+    contactController
   }
 
   initSocket(server, process.env.CLIENT_URL, chattingController.deleteExpiredChatting);
