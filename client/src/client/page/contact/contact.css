@@ -1,4 +1,6 @@
-.contact {}
+.contact {
+
+}
 
 .contact .content {
   display: flex;
@@ -7,18 +9,19 @@
 }
 
 .contact .content .contact-form {
-  width: 300px;
+  width: 400px;
   height: 400px;
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
+  margin: 0 auto;
 }
 
-.contact .content .contact-form p {
+.contact .content .contact-form p{
   font-weight: bold;
 }
 
-.contact .content .contact-form .info {
+.contact .content .contact-form .info{
   color: maroon;
   font-weight: bold;
   display: flex;
@@ -30,16 +33,39 @@
   border-bottom: 1px solid maroon;
 }
 
-.contact .content .contact-form fieldset label {
+.contact .content .contact-form fieldset label{
   margin: 0 5px 0 0;
 }
 
-.contact .content .contact-form textarea {
+.contact .content .contact-form textarea{
   resize: none;
   min-height: 200px;
-  outline: transparent;
 }
 
-.contact .content .contact-form .no-margin {
+.contact .content .contact-form .no-margin{
   margin: 0;
+}
+
+.contact .kakao-map-container {
+  width: 400px;
+  height: 400px;
+  border: 2px solid maroon;
+  border-radius: 10px;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 767px) {
+  .contact .content {
+    flex-direction: column;
+  }
+
+  .contact .content .contact-form {
+    width: 300px;
+    margin-bottom: 50px;
+  }
+
+  .contact .kakao-map-container {
+    width: 300px;
+    height: 300px;
+  }
 }
