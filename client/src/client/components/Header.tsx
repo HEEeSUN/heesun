@@ -42,6 +42,11 @@ function Header(props: Props) {
               </Link>
             </li>
             <li>
+              <Link to="/home/contact" className="text">
+                <span>Contact</span>
+              </Link>
+            </li>
+            <li>
               <Search searchWord={searchWord} setSearchWord={setSearchWord} />
             </li>
           </ul>
@@ -79,6 +84,11 @@ function Header(props: Props) {
           <li>
             <Link to="/home/community" className="text">
               <span>Community</span>
+            </Link>
+          </li>
+          <li>
+            <Link to="/home/contact" className="text">
+              <span>Contact</span>
             </Link>
           </li>
         </ul>

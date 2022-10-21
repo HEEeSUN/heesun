@@ -14,7 +14,11 @@ export default class ProductController {
       }
 
       if (!reviewPage) {
-        const product = await this.product.getByProduct_code(product_code);
+        const today = new Date(
+          Date.now() - new Date().getTimezoneOffset() * 60000
+        ).toISOString();
+
+        const product = await this.product.getByProduct_code(product_code, today);
 
         if (product.length < 1) {
           return res.sendStatus(404);

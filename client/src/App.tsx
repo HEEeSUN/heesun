@@ -8,11 +8,13 @@ import ProductService from "./client/service/product";
 import MemberService from "./client/service/member";
 import CommunityService from "./client/service/community";
 import ChattingService from "./client/service/chatting";
+import ContactService from "./client/service/contact";
 import AdminService from "./admin/service/admin";
 import AdminOrderService from "./admin/service/order";
 import AdminProductService from "./admin/service/product";
 import AdminDiscountService from "./admin/service/discount";
 import AdminChattingService from "./admin/service/chatting";
+import AdminInquiryService from "./admin/service/inquiry";
 import AdminHome from "./admin/AdminHome";
 import ClientHome from "./client/ClientHome";
 import Main from "./client/page/Main";
@@ -34,16 +36,23 @@ function App() {
   };
 
   const baseURL = process.env.REACT_APP_BASE_URL;
-  const httpClient = new HttpClient(baseURL, memberAuthError, adminAuthError, expiredSession);
+  const httpClient = new HttpClient(
+    baseURL,
+    memberAuthError,
+    adminAuthError,
+    expiredSession
+  );
   const memberService = new MemberService(httpClient, login, logout);
   const productService = new ProductService(httpClient);
   const communityService = new CommunityService(httpClient);
   const chattingService = new ChattingService(httpClient);
+  const contactService = new ContactService(httpClient);
   const adminService = new AdminService(httpClient, login, logout, setMenus);
   const adminProductService = new AdminProductService(httpClient);
   const adminOrderService = new AdminOrderService(httpClient);
   const adminDiscountService = new AdminDiscountService(httpClient);
   const adminChattingService = new AdminChattingService(httpClient);
+  const adminInquiryService = new AdminInquiryService(httpClient);
 
   return (
     <div className="App">
@@ -57,6 +66,7 @@ function App() {
             memberService={memberService}
             communityService={communityService}
             chattingService={chattingService}
+            contactService={contactService}
             regex={regex}
           />
         </Route>
@@ -70,6 +80,7 @@ function App() {
             adminOrderService={adminOrderService}
             adminDiscountService={adminDiscountService}
             adminChattingService={adminChattingService}
+            adminInquiryService={adminInquiryService}
             regex={regex}
           />
         </Route>

@@ -247,7 +247,8 @@ function Chattings(props: Props) {
     if (result) {
       try {
         await adminChattingService.deleteChat(chatRoomName);
-
+        await getInquiry();
+        
         setPrivatechat(false);
       } catch (error: any) {
         alert(error.message);
