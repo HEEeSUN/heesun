@@ -7,6 +7,7 @@ function discountRouter(adminController){
   router.post("/", adminController.addSaleProduct);
   router.patch("/", adminController.updateSaleProduct);
   router.delete("/:id", adminController.deleteSaleProduct);
+  router.get("/products", adminController.getAllProductsWithOption);
 
   return router;
 }

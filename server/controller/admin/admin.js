@@ -26,18 +26,6 @@ export default class AdminController {
     }
   };
 
-  /* 관리자 별로 부여된 메뉴 */
-  getMenuList = async (req, res) => {
-    try {
-      const accessableMenu = await this.admin.getMenuList(req.userId);
-
-      res.status(200).json({ menuList: accessableMenu });
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
   /* dashboard에 표시될 데이터 */
   getDashboardData = async (req, res) => {
     try {
@@ -232,33 +220,13 @@ export default class AdminController {
         return res.status(405).json({ code: "ERROR60002" });
       }
 
-      const { main_img_src } = result;
-
       await this.admin.deleteProduct(code);
-
-      if (main_img_src) {
-        this.removeProductImageFile(main_img_src);
-      }
 
       res.sendStatus(200);
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
     }
-  };
-
-  /* 상품삭제시 이미지 파일 삭제 */
-  removeProductImageFile = async (main_img_src) => {
-    const __dirname = path.resolve();
-
-    const deleteProductImgSrc = path.join(
-      __dirname,
-      "..",
-      `/public/${main_img_src}`
-    );
-    fs.rm(deleteProductImgSrc, (err) => {
-      if (err) console.log(err);
-    });
   };
 
   /* 상품 추가 */
@@ -306,10 +274,10 @@ export default class AdminController {
     }
   };
 
-  /* 상품 수정 메뉴 선택시 상품 목록 가져오기 */
-  getProducts = async (req, res) => {
+  /* 세일 상품 등록시 상품 목록 가져오기 */
+  getAllProductsWithOption  = async (req, res) => {
     try {
-      const { option, category, search, page } = req.query;
+      const { category, search, page } = req.query;
 
       if (isNaN(Number(page))) return res.sendStatus(404);
 
@@ -319,58 +287,88 @@ export default class AdminController {
       let prevPage = (page - 1) * amountOfSendData;
       let productList;
 
-      if (option) {
-        if (!category) {
-          if (!search) {
-            //카테고리X, 검색어X => 전체보기
-            productList = await this.admin.getAllProductWithOption(
-              amountOfSendData,
-              prevPage
-            );
-          } else {
-            //카테고리X, 검색어O => 이름과 코드에서 검색어와 일치하는 것 보기
-            productList = await this.admin.getProductWithOptionByTxt(
-              search,
-              amountOfSendData,
-              prevPage
-            ); //이름에서 검색
-          }
+      if (!category) {
+        if (!search) {
+          //카테고리X, 검색어X => 전체보기
+          productList = await this.admin.getAllProductWithOption(
+            amountOfSendData,
+            prevPage
+          );
         } else {
-          //카테고리o, 검색어O => 카테고리에서 검색어와 일치하는 것 보기
-          productList = await this.admin.getProductWithOptionByCatAndTxt(
-            category,
+          //카테고리X, 검색어O => 이름과 코드에서 검색어와 일치하는 것 보기
+          productList = await this.admin.getProductWithOptionByTxt(
             search,
             amountOfSendData,
             prevPage
-          ); //id=카테고리 여서 카테고리 안에서 검색
+          ); //이름에서 검색
         }
       } else {
-        if (!category) {
-          if (!search) {
-            //카테고리X, 검색어X => 전체보기
-            productList = await this.admin.getAllProduct(
-              amountOfSendData,
-              prevPage
-            );
-          } else {
-            //카테고리X, 검색어O => 이름과 코드에서 검색어와 일치하는 것 보기
-            productList = await this.admin.getProductByTxt(
-              search,
-              amountOfSendData,
-              prevPage
-            ); //이름에서 검색
-          }
+        //카테고리o, 검색어O => 카테고리에서 검색어와 일치하는 것 보기
+        productList = await this.admin.getProductWithOptionByCatAndTxt(
+          category,
+          search,
+          amountOfSendData,
+          prevPage
+        ); //id=카테고리 여서 카테고리 안에서 검색
+      }
+
+      if (!productList[0]) {
+        return res.status(200).json({ productList: [], productPageLength });
+      }
+
+      if (productList[0].full_count % amountOfSendData > 0) {
+        productPageLength = Math.ceil(
+          productList[0].full_count / amountOfSendData
+        );
+      } else {
+        productPageLength = productList[0].full_count / amountOfSendData;
+      }
+
+      res.status(200).json({ productList, productPageLength });
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+  }
+
+  /* 상품 수정 메뉴 선택시 상품 목록 가져오기 */
+  getProducts = async (req, res) => {
+    try {
+      const { category, search, page } = req.query;
+
+      if (isNaN(Number(page))) return res.sendStatus(404);
+
+      const amountOfSendData = 10;
+      let productPageLength = 1;
+      // let currPage = page * amountOfSendData;
+      let prevPage = (page - 1) * amountOfSendData;
+      let productList;
+
+      if (!category) {
+        if (!search) {
+          //카테고리X, 검색어X => 전체보기
+          productList = await this.admin.getAllProduct(
+            amountOfSendData,
+            prevPage
+          );
         } else {
-          //카테고리o, 검색어O => 카테고리에서 검색어와 일치하는 것 보기
-          productList = await this.admin.getProductByCatAndTxt(
-            category,
+          //카테고리X, 검색어O => 이름과 코드에서 검색어와 일치하는 것 보기
+          productList = await this.admin.getProductByTxt(
             search,
             amountOfSendData,
             prevPage
-          ); //id=카테고리 여서 카테고리 안에서 검색
+          ); //이름에서 검색
         }
+      } else {
+        //카테고리o, 검색어O => 카테고리에서 검색어와 일치하는 것 보기
+        productList = await this.admin.getProductByCatAndTxt(
+          category,
+          search,
+          amountOfSendData,
+          prevPage
+        ); //id=카테고리 여서 카테고리 안에서 검색
       }
-
+      
       if (!productList[0]) {
         return res.status(200).json({ productList: [], productPageLength });
       }
@@ -534,9 +532,9 @@ export default class AdminController {
   };
 
   /* 특정 주문 상태의 주문건 가져오기 */
-  getOrderBySpecificStatus = async (req, res) => {
+  getPendingRefundList = async (req, res) => {
     try {
-      let { page, status } = req.query;
+      let { page } = req.query;
 
       if (isNaN(Number(page))) return res.sendStatus(404);
 
@@ -547,28 +545,7 @@ export default class AdminController {
       let fullCount;
 
       let orderList;
-      if (status === "new") {
-        orderList = await this.admin.getOrderBySpecificStatus(
-          amountOfSendData,
-          prevPage,
-          "결제완료"
-        );
-
-        if (orderList.length > 0) {
-          fullCount = orderList[0].full_count;
-        }
-      } else if (status === "refund") {
-        orderList = await this.admin.getOrderBySpecificStatus(
-          amountOfSendData,
-          prevPage,
-          "반품및취소요청"
-        );
-
-        if (orderList.length > 0) {
-          fullCount = orderList[0].full_count;
-        }
-      } else {
-        orderList = await this.admin.getPendingRefundList(
+      orderList = await this.admin.getPendingRefundList(
         amountOfSendData,
         prevPage
       );
@@ -605,7 +582,6 @@ export default class AdminController {
 
       refundList = orderList;
       orderList = newArray;
-      }
 
       if (orderList.length < 1) {
         return res.status(200).json({ orderList, orderPageLength, refundList });
@@ -631,8 +607,9 @@ export default class AdminController {
 
       if (isNaN(Number(page))) return res.sendStatus(404);
 
-      const amountOfSendData = 5;
-      let orderPageLength;
+      const amountOfSendData = 10;
+      let orderPageLength = 1;
+      let refundNum = 0;
       let prevPage = (page - 1) * amountOfSendData;
       let orderList;
 
@@ -686,7 +663,7 @@ export default class AdminController {
       }
 
       if (!orderList[0]) {
-        return res.status(200).json({ orderList, orderPageLength });
+        return res.status(200).json({ orderList, orderPageLength, refundNum });
       }
 
       if (orderList[0].full_count % amountOfSendData > 0) {
@@ -702,7 +679,6 @@ export default class AdminController {
         (order) => order.status === "반품및취소요청"
       );
 
-      let refundNum;
       if (newRefund) {
         refundNum = newRefund.number;
       }

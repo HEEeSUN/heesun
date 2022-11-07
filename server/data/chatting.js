@@ -121,7 +121,7 @@ export default class ChattingRepository {
 
   getNewChattingById = async (roomname, id) => {
     return this.#db
-      .execute(`SELECT chatting_id, uniqueId, text, createdAt, username 
+      .execute(`SELECT uniqueId, text, createdAt, username 
                 FROM ${this.#db.escapeId(roomname)}
                 WHERE chatting_id=?`, [id])
       .then((result) => result[0][0]);

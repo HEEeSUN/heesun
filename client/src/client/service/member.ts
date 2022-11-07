@@ -17,6 +17,19 @@ export default class MemberService {
     this.logout = logout;
   }
 
+  async apiDOCS() {
+    try {
+      const axiosAPI: AxiosRequestConfig = {
+        method: "get",
+        url: "/api-docs",
+      };
+
+     return await this.http.axiosAPI(axiosAPI);
+    } catch (error: any) {
+      alert(error.message);
+    }
+  }
+
   async auth(handleCartQuantity: (quantity: number) => void) {
     try {
       const axiosAPI: AxiosRequestConfig = {
@@ -74,10 +87,10 @@ export default class MemberService {
     await this.http.axiosAPI(axiosAPI);
   }
 
-  async findId(userInfo: { name: string; email: string }) {
+  async findId(userInfo: { username: string; email: string }) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: "/member/search?id=true",
+      url: "/member/search?thing=id",
       data: {
         userInfo,
       },
@@ -86,10 +99,10 @@ export default class MemberService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async findPassword(userInfo: { id: string; email: string }) {
+  async findPassword(userInfo: { username: string; email: string }) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: "/member/search?pw=true",
+      url: "/member/search?thing=pw",
       data: {
         userInfo,
       },
@@ -99,17 +112,10 @@ export default class MemberService {
   }
 
   /* 회원가입시 아이디 중복 체크 */
-  async checkDuplicate(signupInfo: {
-    idCheck: boolean;
-    username: string;
-  }): Promise<any> {
+  async checkDuplicate(username: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: "/member/signup",
-      data: {
-        idCheck: signupInfo.idCheck,
-        username: signupInfo.username,
-      },
+      method: "get",
+      url: `/member/signup?username=${username}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -117,7 +123,6 @@ export default class MemberService {
 
   /* 회원가입 */
   async signup(signupInfo: {
-    idCheck: boolean;
     username: string;
     password?: string;
     name: string;
@@ -174,7 +179,7 @@ export default class MemberService {
   async getMyPost(pageNumber: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/member/post?post=true&page=${pageNumber}`,
+      url: `/member/post?thing=post&page=${pageNumber}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -183,7 +188,7 @@ export default class MemberService {
   async getPostsWithMyComment(pageNumber: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/member/post?comment=true&page=${pageNumber}`,
+      url: `/member/post?thing=comment&page=${pageNumber}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -202,7 +207,7 @@ export default class MemberService {
   async getDeliveryStatus(detail_id: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/member/info/delivery?id=${detail_id}`,
+      url: `/member/info/${detail_id}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

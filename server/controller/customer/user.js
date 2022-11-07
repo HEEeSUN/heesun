@@ -8,50 +8,54 @@ export default class UserController {
     this.requestRefundToIMP = requestRefundToIMP;
   }
 
+  /* id 중복 체크 */
+  idDuplicateCheck = async (req, res) => {
+    try {
+      const { username } = req.query;
+
+      const result = await this.user.findByUsername(username);
+
+      if (result) {
+        return res.status(409).json({ code: "ERROR00003" });
+      } else {
+        return res.sendStatus(200);
+      }
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+  }
+
   /* 회원가입 (idCheck 값이 true로 들어올 경우 중복체크만 해서 return함) */
   signup = async (req, res) => {
     try {
-      const { idCheck } = req.body;
+      const { signupInfo } = req.body;
+      const {
+        username,
+        password,
+        name,
+        email,
+        phone,
+        address = "",
+        extraAddress = "",
+      } = signupInfo;
 
-      if (idCheck) {
-        const { username } = req.body;
+      const hashed = await bcrypt.hash(
+        password,
+        parseInt(process.env.BCRYPT_SALT_ROUNDS)
+      );
 
-        const result = await this.user.findByUsername(username);
+      await this.user.createUser(
+        username,
+        hashed,
+        name,
+        email,
+        phone,
+        address,
+        extraAddress
+      );
 
-        if (result) {
-          return res.status(409).json({ code: "ERROR00003" });
-        } else {
-          return res.sendStatus(200);
-        }
-      } else {
-        const { signupInfo } = req.body;
-        const {
-          username,
-          password,
-          name,
-          email,
-          phone,
-          address = "",
-          extraAddress = "",
-        } = signupInfo;
-
-        const hashed = await bcrypt.hash(
-          password,
-          parseInt(process.env.BCRYPT_SALT_ROUNDS)
-        );
-
-        await this.user.createUser(
-          username,
-          hashed,
-          name,
-          email,
-          phone,
-          address,
-          extraAddress
-        );
-
-        res.sendStatus(201);
-      }
+      res.sendStatus(201);
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -151,8 +155,9 @@ export default class UserController {
   /* 사용자 id, pw 찾아서 메일로 전송 */
   searchUserInfo = async (req, res) => {
     try {
+      const { thing } = req.query;
       const { userInfo } = req.body;
-      const { id, pw } = req.query;
+      const { username, email } = userInfo;
 
       let transporter = nodemailer.createTransport({
         service: process.env.MAILER_SERVICE,
@@ -162,10 +167,8 @@ export default class UserController {
         },
       });
 
-      if (id) {
-        const { name, email } = userInfo;
-
-        const result = await this.user.findByNameAndEmail(name, email);
+      if (thing === 'id') {
+        const result = await this.user.findByNameAndEmail(username, email);
 
         if (!result) {
           return res.status(402).json({ code: "ERROR00004" });
@@ -188,10 +191,8 @@ export default class UserController {
         }
       }
 
-      if (pw) {
-        const { id, email } = userInfo;
-
-        const result = await this.user.findByUsernameAndEmail(id, email);
+      if (thing === 'pw') {
+        const result = await this.user.findByUsernameAndEmail(username, email);
 
         if (!result) {
           return res.status(400).json({ code: "ERROR00004" });
@@ -206,7 +207,7 @@ export default class UserController {
         const mailOptions = {
           from: process.env.MAILER_USERNAME,
           to: email,
-          subject: `[heesun] ${id}님 임시 비밀번호 발송해드립니다.`,
+          subject: `[heesun] ${username}님 임시 비밀번호 발송해드립니다.`,
           html: `<h4>임시비밀번호 발송</h4>
                   <div>
                     <p>아래 임시비밀번호로 로그인하여 새로운 비밀번호로 변경하여 주세요.</p>
@@ -219,7 +220,7 @@ export default class UserController {
           return res.sendStatus(400);
         }
 
-        this.user.updatePassword(id, hashed);
+        this.user.updatePassword(username, hashed);
       }
       res.sendStatus(204);
     } catch (error) {
@@ -337,7 +338,7 @@ export default class UserController {
   /* 주문 정보 (배송현황) 상세보기 */
   deliveryStatus = async (req, res) => {
     try {
-      const { id } = req.query;
+      const id = req.params.id;
       const status = await this.user.getDeliveryStatus(id);
 
       if (status.length < 1) {
@@ -468,7 +469,7 @@ export default class UserController {
   /* 내가 작성한 or 내가 댓글을 작성한 게시글 목록 가져오기 */
   getMyPost = async (req, res) => {
     try {
-      let { post, comment, page } = req.query;
+      let { thing, page } = req.query;
 
       if (isNaN(Number(page))) return res.sendStatus(404);
 
@@ -476,16 +477,16 @@ export default class UserController {
       const amountOfSendData = 15; // 한번에 보낼 게시글의 개수
       let currPage = page * amountOfSendData;
       let prevPage = (page - 1) * amountOfSendData;
-      let newPosts;
+      let newPosts = [];
       let hasmore = 0;
 
-      if (post) {
+      if (thing === "post") {
         newPosts = await this.user.getMyPost(
           username,
           amountOfSendData,
           prevPage
         );
-      } else if (comment) {
+      } else if (thing === "comment") {
         newPosts = await this.user.getMyComment(
           username,
           amountOfSendData,

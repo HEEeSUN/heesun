@@ -1,6 +1,7 @@
 import { PostSummary } from "./community.model";
 
 export type MemberService = {
+  apiDOCS: () => void;
   login: (username: string) => void;
   logout: () => void;
   auth: (handleCartQuantity: (quantity: number) => void) => Promise<void>;
@@ -10,12 +11,9 @@ export type MemberService = {
   }) => Promise<void>;
   kakaoLogin: (kakao_account: string) => Promise<void>;
   logoff: () => Promise<void>;
-  findId: (userInfo: { name: string; email: string }) => Promise<void>;
-  findPassword: (userInfo: { id: string; email: string }) => Promise<void>;
-  checkDuplicate: (signupInfo: {
-    idCheck: boolean;
-    username: string;
-  }) => Promise<void>;
+  findId: (userInfo: { username: string; email: string }) => Promise<void>;
+  findPassword: (userInfo: { username: string; email: string }) => Promise<void>;
+  checkDuplicate: (username: string) => Promise<void>;
   signup: (signupInfo: SignupInfo) => Promise<void>;
   getProductInfoFromCart: () => Promise<{
     adjustmentProduct: AdjustmentProduct[] | [];
@@ -94,7 +92,6 @@ export type MemberService = {
 };
 
 export type SignupInfo = {
-  idCheck: boolean;
   username: string;
   password: string;
   name: string;

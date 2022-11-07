@@ -87,7 +87,7 @@ export default class ChattingService {
   async getNewMessage(roomname: string, chattingUser: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/chatting/${roomname}?user=${chattingUser}`,
+      url: `/chatting/${roomname}/new?user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

@@ -28,7 +28,7 @@ export default class AdminOrderService {
   async getPendingRefund(pageNumber: number) {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/admin/orders/status?page=${pageNumber}&status=pending`,
+      url: `/admin/orders/refund?page=${pageNumber}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

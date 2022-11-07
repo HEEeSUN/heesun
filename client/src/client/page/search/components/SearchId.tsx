@@ -20,7 +20,7 @@ function SearchId({ memberService }: Props) {
 
     try {
       const userInfo = {
-        name,
+        username: name,
         email,
       };
 

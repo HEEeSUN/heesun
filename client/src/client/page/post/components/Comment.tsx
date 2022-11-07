@@ -59,7 +59,7 @@ function Comment(props: Props) {
 
   const deleteComment = async (commentId: number) => {
     try {
-      await communityService.deleteComment(commentId);
+      await communityService.deleteComment(postId, commentId);
 
       alert("댓글이 삭제되었습니다");
       getComments();

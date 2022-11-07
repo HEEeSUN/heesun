@@ -64,6 +64,10 @@ export default class ChattingController {
       let member;
       let { username, socketId } = req.body;
 
+      if (!socketId) {
+        return res.sendStatus(400)
+      }
+
       username ? (member = 1) : (member = 0);
 
       const roomname = await this.createChatting(username || socketId, member);
@@ -107,8 +111,29 @@ export default class ChattingController {
     }
   };
 
+  getNewMessage = async (req, res) => {
+    try {
+      const username = req.username;
+      const roomname = req.params.id;
+      let { user } = req.query;
+      const chattingUser = user;
+
+      const chatting = await this.chatting.getNewChatting(
+        roomname,
+        chattingUser
+      );
+
+      await this.chatting.updateNewChatting(roomname, chatting.chatting_id);
+
+      return res.status(200).json({ username, newChatting: chatting });
+
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+  }
   /* 채팅 내용 가져오기 */
-  getMessage = async (req, res) => {
+  getMessages = async (req, res) => {
     try {
       const username = req.username;
       const roomname = req.params.id;
@@ -116,38 +141,28 @@ export default class ChattingController {
       let { page, user } = req.query;
       const chattingUser = user;
 
-      if (!page) {
-        const chatting = await this.chatting.getNewChatting(
-          roomname,
-          chattingUser
-        );
+      if (isNaN(Number(page))) return res.sendStatus(404);
 
-        await this.chatting.updateNewChatting(roomname, chatting.chatting_id);
+      let prevPage = (page - 1) * amountOfSendData;
+      let hasmore = true;
 
-        return res.status(200).json({ username, newChatting: chatting });
-      } else {
-        if (isNaN(Number(page))) return res.sendStatus(404);
+      const chatting = await this.chatting.getChatting(
+        roomname,
+        prevPage,
+        amountOfSendData
+      );
 
-        let prevPage = (page - 1) * amountOfSendData;
-        let hasmore = true;
-
-        const chatting = await this.chatting.getChatting(
-          roomname,
-          prevPage,
-          amountOfSendData
-        );
-
-        if (chatting.length < 1) {
-          hasmore = false;
-        }
-        const reverse = chatting.reverse();
-
-        await this.chatting.readAllMsg(roomname, chattingUser);
-
-        return res
-          .status(200)
-          .json({ username, newChatting: reverse, hasmore });
+      if (chatting.length < 1) {
+        hasmore = false;
       }
+      const reverse = chatting.reverse();
+
+      await this.chatting.readAllMsg(roomname, chattingUser);
+
+      return res
+        .status(200)
+        .json({ username, newChatting: reverse, hasmore });
+
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);

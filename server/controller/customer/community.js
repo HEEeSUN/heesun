@@ -85,7 +85,7 @@ export default class CommunityController {
   deleteComment = async (req, res) => {
     try {
       const { username } = req;
-      const commentId = req.params.id;
+      const commentId = req.query.commentId;
 
       await this.community.deleteComment(commentId, username);
 
@@ -114,7 +114,8 @@ export default class CommunityController {
   /* 게시글에 달려있는 댓글 불러오기 */
   getComments = async (req, res) => {
     try {
-      let { postId, pageNum } = req.query;
+      const postId = req.params.id;
+      let { pageNum } = req.query;
 
       if (isNaN(Number(pageNum))) return res.sendStatus(404);
 
@@ -172,7 +173,7 @@ export default class CommunityController {
 
       if (isNaN(Number(pageNum))) return res.sendStatus(404);
 
-      const amountOfSendData = 5; // 한번에 보낼 게시글의 개수
+      const amountOfSendData = 10; // 한번에 보낼 게시글의 개수
       let prevPage = (pageNum - 1) * amountOfSendData;
       let posts;
       let postPageLength = 1;

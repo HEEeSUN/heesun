@@ -20,7 +20,7 @@ function SearchPw({ memberService }: Props) {
       setLoading(true);
 
       const userInfo = {
-        id,
+        username: id,
         email,
       };
       await memberService.findPassword(userInfo);

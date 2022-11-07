@@ -7,6 +7,7 @@ function userRouter(customerAuth, userController) {
   router.get("/logout", userController.logout);
   router.post("/login", userController.login);
   router.post("/login/:id", userController.kakaoLogin);
+  router.get("/signup", userController.idDuplicateCheck);
   router.post("/signup", userController.signup);
   router.post("/search", userController.searchUserInfo);
 
@@ -20,9 +21,9 @@ function userRouter(customerAuth, userController) {
 
   router.post("/refund", userController.refund);
   router.post("/refund/imp", userController.requestRefund);
-  router.get("/refund/:id", userController.getOrder);
   router.post("/refund/paycomplete", userController.paycomplete);
   router.post("/refund/cancel", userController.requestToCancelRefund);
+  router.get("/refund/:id", userController.getOrder);
   router.post("/refund/:id", userController.cancelOrder);
 
   router.get("/cart", userController.cart);
@@ -30,9 +31,9 @@ function userRouter(customerAuth, userController) {
   router.delete("/cart", userController.removeProductInCART);
 
   router.get("/info", userController.info);
-  router.post("/info/myInfo", userController.modifyUserInfo);
   router.get("/info/myInfo", userController.getMyInfo);
-  router.get("/info/delivery", userController.deliveryStatus);
+  router.post("/info/myInfo", userController.modifyUserInfo);
+  router.get("/info/:id", userController.deliveryStatus);
 
   router.get("/review", userController.getMyReview);
   router.post("/review", userController.writeReview);

@@ -16,7 +16,7 @@ export default class AdminDiscountService {
   ) {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/admin/products?option=true&category=${category}&search=${searchText}&page=${pageNumber}`,
+      url: `/admin/discount/products?category=${category}&search=${searchText}&page=${pageNumber}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

@@ -7,7 +7,6 @@ import chattingRouter from "./chatting.js";
 const router = express.Router();
 
 function adminRouter(adminAuth, adminController, chattingController, contactController) {
-  router.get("/", adminAuth.isAuth, adminController.getMenuList);
   router.post("/", adminController.login);
   router.get("/logout", adminController.logout);
   router.get("/auth", adminAuth.refresh, adminController.refresh);
@@ -25,5 +24,8 @@ function adminRouter(adminAuth, adminController, chattingController, contactCont
   
   return router;
 }
+
+
+
 
 export default adminRouter;

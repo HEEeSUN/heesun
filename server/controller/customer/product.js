@@ -3,57 +3,66 @@ export default class ProductController {
     this.product = prodcutRepository;
   }
 
+  getReviews = async (req, res) => {
+    try {
+      const product_code = req.params.id;
+      let { reviewPage } = req.query;
+
+      if (!product_code || isNaN(Number(reviewPage))) {
+        return res.sendStatus(404);
+      }
+
+      const amountOfSendData = 5; //한번에 보낼 리뷰의 개수
+      let prevPage = (reviewPage - 1) * amountOfSendData;
+      let reviewPageLength = 1;
+
+      const amountOfReviews = await this.product.getAmountOfReviews(
+        product_code
+      );
+
+      if (amountOfReviews === 0) {
+        return res.status(200).json({ reviews: [], reviewPageLength });
+      }
+
+      const reviews = await this.product.getReviews(
+        product_code,
+        amountOfSendData,
+        prevPage
+      );
+
+      if (amountOfReviews % amountOfSendData > 0) {
+        reviewPageLength = Math.ceil(amountOfReviews / amountOfSendData);
+      } else {
+        reviewPageLength = amountOfReviews / amountOfSendData;
+      }
+
+      res.status(200).json({ reviews, reviewPageLength });
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+  }
+  
   /* 상품 상세 보기 */
   getProduct = async (req, res) => {
     try {
       const product_code = req.params.id;
-      let { reviewPage } = req.query;
 
       if (!product_code) {
         return res.sendStatus(404);
       }
 
-      if (!reviewPage) {
-        const today = new Date(
-          Date.now() - new Date().getTimezoneOffset() * 60000
-        ).toISOString();
+      const today = new Date(
+        Date.now() - new Date().getTimezoneOffset() * 60000
+      ).toISOString();
 
-        const product = await this.product.getByProduct_code(product_code, today);
+      const product = await this.product.getByProduct_code(product_code, today);
 
-        if (product.length < 1) {
-          return res.sendStatus(404);
-        }
-
-        res.status(200).json({ product });
-      } else {
-        if (isNaN(Number(reviewPage))) return res.sendStatus(404);
-
-        const amountOfSendData = 5; //한번에 보낼 리뷰의 개수
-        let prevPage = (reviewPage - 1) * amountOfSendData;
-        let reviewPageLength = 1;
-
-        const amountOfReviews = await this.product.getAmountOfReviews(
-          product_code
-        );
-
-        if (amountOfReviews === 0) {
-          return res.status(200).json({ reviews: [], reviewPageLength });
-        }
-
-        const reviews = await this.product.getReviews(
-          product_code,
-          amountOfSendData,
-          prevPage
-        );
-
-        if (amountOfReviews % amountOfSendData > 0) {
-          reviewPageLength = Math.ceil(amountOfReviews / amountOfSendData);
-        } else {
-          reviewPageLength = amountOfReviews / amountOfSendData;
-        }
-
-        res.status(200).json({ reviews, reviewPageLength });
+      if (product.length < 1) {
+        return res.sendStatus(404);
       }
+
+      res.status(200).json({ product });
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -67,7 +76,7 @@ export default class ProductController {
 
       if (isNaN(Number(page))) return res.sendStatus(404);
 
-      const amountOfSendData = 9; //한번에 보여줄 상품 개수
+      const amountOfSendData = 12; //한번에 보여줄 상품 개수
       let currPage = page * amountOfSendData;
       let prevPage = (page - 1) * amountOfSendData;
       let hasmore = 0;

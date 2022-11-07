@@ -170,6 +170,9 @@ function ClientHome(props: Props) {
           <Route exact path="/home/contact">
             <Contact contactService={contactService} regex={regex} />
           </Route>
+          <Route exact path="/home/api-docs">
+            <ApiDocs memberService={memberService}/>
+          </Route>
           <Route path="*">
             <NotFound />
           </Route>
@@ -181,3 +184,15 @@ function ClientHome(props: Props) {
 }
 
 export default ClientHome;
+
+type p = {
+  memberService: MemberService;
+}
+function ApiDocs({memberService}: p){
+  useEffect(()=>{
+    memberService.apiDOCS();
+
+  },[])
+
+  return null
+}

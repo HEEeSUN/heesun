@@ -5,13 +5,6 @@ export default class ContactController {
     this.contact = contactRepository;
   }
 
-  preventNullException = async () => {
-    // 검사할 객체 받아옴
-    // 키값 뽑아냄
-    // 키의 갯수만큼 반복을 돌며 null이 있는지 확인
-    throw new Error();
-  };
-
   getInquiries = async (req, res) => {
     try {
       const { page } = req.query;
@@ -47,7 +40,15 @@ export default class ContactController {
     try {
       const { id } = req.params;
 
+      if (!id) {
+        return res.sendStatus(400);
+      }
+
       const inquiryDetail = await this.contact.getInquiry(id);
+
+      if (!inquiryDetail) {
+        return res.sendStatus(404)
+      }
 
       return res.status(200).json({ inquiryDetail });
     } catch (error) {
@@ -84,6 +85,17 @@ export default class ContactController {
   answer = async (req, res) => {
     try {
       const { id } = req.params;
+      
+      if (!id) {
+        return res.sendStatus(400);
+      }
+
+      const inquiryDetail = await this.contact.getInquiry(id);
+
+      if (!inquiryDetail) {
+        return res.sendStatus(404)
+      }
+
       const { email, text, contactOption } = req.body;
 
       const date = new Date();

@@ -39,13 +39,8 @@ function Signup(props: Props) {
       return;
     }
 
-    const signupInfo = {
-      idCheck: true,
-      username: signId,
-    };
-
     try {
-      await memberService.checkDuplicate(signupInfo);
+      await memberService.checkDuplicate(signId);
 
       setExclusiveId(true);
       alert("사용가능한 아이디입니다");
@@ -63,7 +58,6 @@ function Signup(props: Props) {
     }
 
     const signupInfo = {
-      idCheck: false,
       username: signId,
       password: signPw1st,
       name: signName,
