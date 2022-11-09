@@ -5,6 +5,16 @@ export default class ChattingRepository {
     this.#db = db;
   }
 
+  checkRoomname = async (roomname) => {
+    return this.#db
+      .execute(`SELECT EXISTS (
+                  SELECT * 
+                  FROM chat_list 
+                  WHERE room_name=?
+                ) as existence`, [roomname])
+      .then((result) => result[0].existence)
+  }
+
   insertInChattingList = async (username, member) => {
     return this.#db
       .execute(`INSERT INTO chat_list (username, member) VALUES (?, ?)`, [

@@ -3,6 +3,18 @@ export default class ChattingController {
     this.chatting = chattingRepository;
   }
 
+  checkRoomname = async (req, res, next) => {
+    const roomname = req.params.id;
+
+    const existence = await this.chatting.checkRoomname(roomname);
+
+    if (!existence) {
+      return res.sendStatus(404)
+    }
+
+    next();
+  }
+
   /* 채팅 목록 가져오기 */
   getChattings = async (req, res) => {
     try {

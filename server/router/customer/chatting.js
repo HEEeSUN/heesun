@@ -4,8 +4,8 @@ const router = express.Router();
 
 function chattingRouter(customerAuth, chattingController) {
   router.all("/", customerAuth.refresh);
-  router.all("/:id", customerAuth.refresh);
-  router.all("/:id/:id", customerAuth.refresh);
+  router.all("/:id", customerAuth.refresh, chattingController.checkRoomname);
+  router.all("/:id/:id", customerAuth.refresh, chattingController.checkRoomname);
 
   router.get("/", chattingController.getChattings);
   router.post("/", chattingController.joinRoom);

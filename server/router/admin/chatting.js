@@ -3,6 +3,9 @@ import express from "express";
 const router = express.Router();
 
 function chattingRouter(chattingController){
+  router.all("/:id", chattingController.checkRoomname);
+  router.all("/:id/:id", chattingController.checkRoomname);
+  
   router.get("/", chattingController.getChattings);
   router.get("/:id", chattingController.getMessages);
   router.post("/:id", chattingController.sendMessage);
