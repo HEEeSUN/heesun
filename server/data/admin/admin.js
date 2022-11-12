@@ -134,7 +134,7 @@ export default class AdminRepository {
     cost,
     imgFileSrc,
     description,
-    products
+    options
   ) => {
     let conn;
 
@@ -154,14 +154,14 @@ export default class AdminRepository {
         ]);
 
       const query2 = async () => {
-        for (let i = 0; i < products.length; i++) {
+        for (let i = 0; i < options.length; i++) {
           conn.execute(
             `INSERT INTO product_option (product_code, option_number, option1, option2, stock) VALUES (?, ?, ?, ?, ?)`, [
               product_code,
               i,
-              products[i].option1,
-              products[i].option2,
-              products[i].stock,
+              options[i].option1,
+              options[i].option2,
+              options[i].stock,
             ]);
         }
       };

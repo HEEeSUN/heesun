@@ -1,12 +1,7 @@
 export type Product = {
-  product_code: string;
-  name: string;
   option1: string;
   option2: string;
-  price: number;
-  cost: number;
   stock: number;
-  description: string;
 };
 
 export type SalesOfPerMonth = {

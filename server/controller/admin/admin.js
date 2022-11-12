@@ -233,7 +233,8 @@ export default class AdminController {
   addProduct = async (req, res) => {
     try {
       const products = JSON.parse(req.body.products);
-      const { product_code, name, price, cost, description } = products[0];
+      const { productCode, name, cost, price, description, options } = products;
+
       let imgFileSrc = "";
 
       if (req.file) {
@@ -241,13 +242,13 @@ export default class AdminController {
       }
 
       await this.admin.addProduct(
-        product_code,
+        productCode,
         name,
         price,
         cost,
         imgFileSrc,
         description,
-        products
+        options
       );
 
       res.sendStatus(201);
