@@ -178,16 +178,20 @@ export default class AdminController {
   updateProduct = async (req, res) => {
     try {
       const code = req.params.id;
-      const { name, price, cost, description, imageSrc } = req.body;
-
-      const optionList = JSON.parse(req.body.optionList);
-      let imgFileSrc = imageSrc;
 
       const product = await this.admin.findByProductCode(code);
 
       if (!product) {
-        return res.status(409).json({ code: "ERROR60002" });
+        return res.status(404).json({ code: "ERROR60002" });
       }
+
+      const { products } = req.body;
+
+      const produtList = JSON.parse(products);
+
+      const { name, price, cost, description, imageSrc, optionList } = produtList;
+
+      let imgFileSrc = imageSrc;
 
       if (req.file) {
         imgFileSrc = "/" + req.file.key;
