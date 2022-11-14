@@ -74,18 +74,21 @@ export type MemberService = {
   requestRefund: (
     refundInfo: RefundInfo,
     immediatelyRefundInfo: ImmediatelyRefundInfo,
-    pendingRefundInfo: PendingRefundInfo
+    pendingRefundInfo: PendingRefundInfo,
+    orderId: string
   ) => Promise<{
     newMerchantUID: string | undefined;
     refundId: number;
     savePoint: SavePoint;
   }>;
   requestRefundToImp: (imp_uid: string | undefined, 
-    refundAmount: number) => Promise<void>;
-  refundComplete: (merchantUID: string, impUID: string) => Promise<void>;
+    refundAmount: number,
+    orderId: string) => Promise<void>;
+  refundComplete: (merchantUID: string, impUID: string, orderId: string) => Promise<void>;
   refundFail: (
     refundInformation: RefundInfo,
-    savePoint: SavePoint) => Promise<void>;
+    savePoint: SavePoint,
+    orderId: string) => Promise<void>;
   getOrder: (
     orderId: string
   ) => Promise<{ order: Order; orderDetail: OrderDetails[] | [] }>;

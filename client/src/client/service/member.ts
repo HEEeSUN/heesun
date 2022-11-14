@@ -330,7 +330,7 @@ export default class MemberService {
 
   async cancelOrder(orderId: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
-      method: "post",
+      method: "delete",
       url: `/member/refund/${orderId}`,
     };
 
@@ -354,11 +354,12 @@ export default class MemberService {
       pendingRefundAmountForProduct: number;
       returnShippingFee: number;
       pendingRefundAmountForShipping: number;
-    }
+    },
+    orderId: string
   ): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: `/member/refund`,
+      url: `/member/refund/${orderId}`,
       data: {
         refundInfo,
         immediatelyRefundInfo,
@@ -369,10 +370,10 @@ export default class MemberService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async requestRefundToImp(imp_uid: string | undefined, refundAmount: number): Promise<any> {
+  async requestRefundToImp(imp_uid: string | undefined, refundAmount: number, orderId: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: `/member/refund/imp`,
+      url: `/member/refund/${orderId}/imp`,
       data: {
         imp_uid,
         refundAmount
@@ -383,10 +384,10 @@ export default class MemberService {
   }
 
   /* PG사를 이용한 결제 성공시 주문 상품 관련 정보 DB 저장*/
-  async refundComplete(imp_uid: string, merchant_uid: string): Promise<any> {
+  async refundComplete(imp_uid: string, merchant_uid: string, orderId: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: `/member/refund/paycomplete`,
+      url: `/member/refund/${orderId}/paycomplete`,
       data: {
         imp_uid,
         merchant_uid,
@@ -398,11 +399,12 @@ export default class MemberService {
 
   async refundFail(
     refundInfo: RefundInfo,
-    savePoint: SavePoint
+    savePoint: SavePoint,
+    orderId: string
   ): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: `/member/refund/cancel`,
+      url: `/member/refund/${orderId}/cancel`,
       data: {
         refundInfo,
         savePoint,

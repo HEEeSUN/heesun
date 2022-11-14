@@ -19,12 +19,12 @@ function userRouter(customerAuth, userController) {
   router.post("/order/paycomplete", userController.paycomplete);
   router.post("/order/cancel", userController.cancelPayment, userController.addCart);
 
-  router.post("/refund", userController.refund);
-  router.post("/refund/imp", userController.requestRefund);
-  router.post("/refund/paycomplete", userController.paycomplete);
-  router.post("/refund/cancel", userController.requestToCancelRefund);
   router.get("/refund/:id", userController.getOrder);
-  router.post("/refund/:id", userController.cancelOrder);
+  router.post("/refund/:id", userController.refund);
+  router.delete("/refund/:id", userController.cancelOrder);
+  router.post("/refund/:id/imp", userController.requestRefund);
+  router.post("/refund/:id/paycomplete", userController.paycomplete);
+  router.post("/refund/:id/cancel", userController.requestToCancelRefund);
 
   router.get("/cart", userController.cart);
   router.post("/cart", userController.addCart);

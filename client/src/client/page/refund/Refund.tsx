@@ -114,7 +114,8 @@ function Refund(props: Props) {
           await memberService.requestRefund(
             refundInfo,
             immediatelyRefundInfo,
-            pendingRefundInfo
+            pendingRefundInfo,
+            orderId
           );
 
           refundInfo = {
@@ -134,7 +135,7 @@ function Refund(props: Props) {
           setPayment(true);
         } else  if (refundAmount > 0) {
           try {
-            await memberService.requestRefundToImp(order?.imp_uid, refundAmount);
+            await memberService.requestRefundToImp(order?.imp_uid, refundAmount, orderId);
 
             alert("반품 및 취소가 완료되었습니다");
             history.push("/home/member/info");
@@ -154,12 +155,12 @@ function Refund(props: Props) {
   const IMPRefundFail = async (refundInfo: RefundInfo, savePoint: SavePoint) => {
     alert("환불에 실패하였습니다");
 
-    memberService.refundFail(refundInfo, savePoint);
+    memberService.refundFail(refundInfo, savePoint, orderId);
   }
 
   const refundComplete = async (merchantUID: string, impUID: string) => {
     try {
-      await memberService.refundComplete(merchantUID, impUID);
+      await memberService.refundComplete(merchantUID, impUID, orderId);
 
       setPayment(false);
       alert("반품 및 취소가 요청되었습니다");
@@ -175,7 +176,7 @@ function Refund(props: Props) {
       alert(`환불에 실패하였습니다\n${errorMsg}`);
 
       if (refundInformation && refundSavePoint)
-        memberService.refundFail(refundInformation, refundSavePoint);
+        memberService.refundFail(refundInformation, refundSavePoint, orderId);
       // history.push("/home/member/info");
     } catch (error: any) {
       console.log(error);
