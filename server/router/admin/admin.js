@@ -13,6 +13,9 @@ function adminRouter(adminAuth, adminController, chattingController, contactCont
   router.get("/home", adminAuth.isAuth, adminController.getDashboardData);
   
   router.all("/:id", adminAuth.isAuth, adminAuth.accessableMenu)
+  router.all("/:id/:id", adminAuth.isAuth, adminAuth.accessableMenu)
+  router.all("/:id/:id/:id", adminAuth.isAuth, adminAuth.accessableMenu)
+  
   router.post("/account", adminController.create);
   router.use("/products", productRouter(adminController));;
   router.use("/discount", discountRouter(adminController));
