@@ -1,5 +1,5 @@
 import expressLoader from './express.js'
-import databaseLoader from './database.js'
+import Database from './database.js';
 import initSocket from "../connection/socket.js";
 import { Auth, AdminAuth } from "../middleware/auth.js";
 import verifyClientUrl from "../middleware/verifyClientUrl.js";
@@ -18,7 +18,7 @@ import ProductRepository from "../data/customer/product.js";
 import UserRepository from "../data/customer/user.js";
 
 export default async ({ server, expressApp }) => {
-  const db = await databaseLoader();
+  const db = new Database();
 
   const adminRepository = new AdminRepository(db)
   const chattingRepository = new ChattingRepository(db)
