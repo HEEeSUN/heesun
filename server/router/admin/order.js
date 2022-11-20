@@ -2,12 +2,12 @@ import express from "express";
 
 const router = express.Router();
 
-function orderRouter(adminController){
-  router.get("/", adminController.getOrders);
-  router.get("/refund", adminController.getPendingRefundList);
-  router.post("/refund", adminController.refund, adminController.requestRefund);
-  router.get("/:id", adminController.deliveryStatus);
-  router.patch("/:id", adminController.updateStatus);
+function orderRouter(adminOrderController){
+  router.get("/", adminOrderController.getOrders);
+  router.get("/refund", adminOrderController.getPendingRefundList);
+  router.post("/refund", adminOrderController.refund, adminOrderController.requestRefund);
+  router.get("/:id", adminOrderController.deliveryStatus);
+  router.patch("/:id", adminOrderController.updateStatus);
 
   return router;
 }

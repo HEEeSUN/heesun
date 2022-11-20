@@ -2,26 +2,30 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import yaml from 'yamljs'
+import swaggerUI from 'swagger-ui-express'
 import adminRouter from "../router/admin/admin.js";
 import chattingRouter from "../router/customer/chatting.js";
 import communityRouter from "../router/customer/community.js";
 import productRouter from "../router/customer/product.js";
 import userRouter from "../router/customer/user.js";
 import contactRouter from "../router/customer/contact.js";
-import yaml from 'yamljs'
-import swaggerUI from 'swagger-ui-express'
 
 export default async ({ app, middleware, controllers }) => {
   const __dirname = path.resolve(); 
   const { customerAuth, adminAuth, verifyClientUrl } = middleware;
   const {
-    adminController,
+    adminControllers,
     userController,
     communityController,
     productController,
     chattingController,
     contactController
   } = controllers;
+
+  const {
+    adminController
+  } = adminControllers
 
   const openAPIDocument = yaml.load(path.join(__dirname, "/api/openapi.yaml"))
   
@@ -42,7 +46,7 @@ export default async ({ app, middleware, controllers }) => {
   app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(openAPIDocument))
 
   app.use("/home", verifyClientUrl, productRouter(productController));
-  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, chattingController, contactController));
+  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController));
   app.use("/member", verifyClientUrl, userRouter(customerAuth, userController));
   app.use("/community", verifyClientUrl, communityRouter(customerAuth, communityController));
   app.use("/chatting", verifyClientUrl, chattingRouter(customerAuth, chattingController));
