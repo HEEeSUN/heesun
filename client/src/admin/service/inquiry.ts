@@ -28,16 +28,12 @@ export default class AdminInquiryService {
 
   async answer(
     inquiryId: number | undefined,
-    email: string,
-    text: string,
-    contactOption: string
+    text: string
   ) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
       url: `/admin/contact/${inquiryId}`,
       data: {
-        contactOption,
-        email,
         text,
       },
     };

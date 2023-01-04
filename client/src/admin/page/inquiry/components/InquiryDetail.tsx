@@ -57,7 +57,7 @@ function InquiryDetail(props: Props) {
     }
 
     try {
-      await adminInquiryService.answer(inquiryId, "", "", contactOptin);
+      await adminInquiryService.answer(inquiryId, contactOptin);
 
       alert("답변완료 처리되었습니다");
       complteAnswer();

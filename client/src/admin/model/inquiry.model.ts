@@ -5,9 +5,7 @@ export type adminInquiryService = {
   getInquiry: (id: number) => Promise<{ inquiryDetail: Inquiry }>;
   answer: (
     inquiryId: number | undefined,
-    email: string,
-    text: string,
-    contactOption: string
+    text: string
   ) => Promise<void>;
 };
 

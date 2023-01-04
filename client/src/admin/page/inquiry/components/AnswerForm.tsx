@@ -21,7 +21,7 @@ function AnswerForm({
   const answer = async () => {
     try {
       setLoading(true);
-      await adminInquiryService.answer(inquiryId, email, text, "");
+      await adminInquiryService.answer(inquiryId, text);
 
       alert("답변이 메일로 전송되었습니다");
       setLoading(false);
