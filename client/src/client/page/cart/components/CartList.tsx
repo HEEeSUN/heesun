@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useHistory } from "react-router";
 import { CartProducts } from "../../../model/member.model";
 import CloseButton from "../../../components/CloseButton";
+import ImageCmp from "../../../components/ImageCmp";
 
 type Props = {
   removeCartProduct: (cart_id: number) => void;
@@ -64,7 +65,11 @@ function CartList(props: Props) {
           ></input>
         </div>
         <div className="product-img">
-          <img className="product-img" src={main_img_src} alt="product image" />
+          <ImageCmp 
+            imgSrc={main_img_src}
+            alt="product image"
+            className="product-img"
+          />
         </div>
       </div>
       <div className="list-in-cart-right">
