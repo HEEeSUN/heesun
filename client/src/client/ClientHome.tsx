@@ -10,6 +10,7 @@ import { CommunityService } from "./model/community.model";
 import { MemberService } from "./model/member.model";
 import { ProductService } from "./model/product.model";
 import { ContactService } from "./model/contact.model";
+import Main from "./page/Main";
 import Signup from "./page/signup/Signup";
 import Login from "./page/login/Login";
 import SearchUser from "./page/search/SearchUser";
@@ -139,13 +140,25 @@ function ClientHome(props: Props) {
             <InquiryButton showChattingList={showChattingList} />
           </Route>
           <Route exact path="/home/member/signup">
-            <Signup memberService={memberService} regex={regex} />
+            {loginState ? (
+              <Main />
+            ) : (
+              <Signup memberService={memberService} regex={regex} />
+            )}
           </Route>
           <Route exact path="/home/member/search">
-            <SearchUser memberService={memberService} />
+            {loginState ? (
+              <Main />
+            ) : (
+              <SearchUser memberService={memberService} />
+            )}
           </Route>
           <Route exact path="/home/member/login">
-            <Login memberService={memberService} regex={regex} />
+            {loginState ? (
+              <Main />
+            ) : (
+              <Login memberService={memberService} regex={regex} />
+            )}
           </Route>
           <Route path="/home/member">
             {!loginState ? (
