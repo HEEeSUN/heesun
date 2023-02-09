@@ -32,24 +32,10 @@ function MyPage(props: Props) {
 
   /* 주문 목록 가져오기 */
   const getOrderList = async () => {
-    const offset = new Date().getTimezoneOffset() * 60000;
-    const curr = new Date(Date.now() - offset);
-    const today = curr.toISOString().substr(0, 10);
-    const time = curr.toISOString().substr(11, 8);
-
-    let date1 = prevDate + " 00:00:00";
-    let date2: string = "";
-
-    if (date < today) {
-      date2 = date + " 23:59:59";
-    } else {
-      date2 = date + " " + time;
-    }
-
     setLoading(true);
 
     try {
-      const result = await memberService.getOrderList(pageNumber, date1, date2);
+      const result = await memberService.getOrderList(pageNumber, prevDate, date);
       const { username, orderList, orderDetailList, hasmore } = result;
 
       let temp1: OrderList[];
