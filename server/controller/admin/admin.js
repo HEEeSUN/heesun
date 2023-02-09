@@ -112,8 +112,6 @@ export default class AdminController {
         revenueOfCurrentMonth = currentMonth.revenue;
       }
 
-      // const salesQuantity = await this.db.getSalesQuantity("202204");
-
       res.status(200).json({
         message,
         order,
@@ -142,8 +140,10 @@ export default class AdminController {
         parseInt(process.env.BCRYPT_SALT_ROUNDS)
       );
 
-      const admin_id = await this.db.createAdmin(admin, hashed);
-      await this.db.grantAuthority(admin_id, menuList);
+      const menus = new Set(menuList);
+      const menuIdList = Array.from(menus)
+      const sortedMenu = menuIdList.sort();
+      await this.db.createAdmin(admin, hashed, sortedMenu);
 
       res.sendStatus(201);
     } catch (error) {

@@ -60,21 +60,18 @@ export default class AdminRepository {
       .then((result) => result[0]);
   };
 
-  createAdmin = async (admin, password) => {
-    return this.#db
-      .execute(`INSERT INTO admin (username, password) VALUES (?, ?)`, [
-        admin,
-        password,
-      ])
-      .then((result) => result[0].insertId);
-  };
-
-  grantAuthority = async (admin_id, menuList) => {
+  createAdmin = async (admin, password, menuList) => {
     let conn;
 
     try {
       conn = await this.#db.getConnection();
       await conn.beginTransaction();
+
+      const admin_id = await conn.execute(`
+        INSERT INTO admin (username, password) VALUES (?, ?)`, [
+          admin,
+          password,
+        ]).then(result=>result[0].insertId)
 
       for (let i = 0; i < menuList.length; i++) {
         await conn.execute(
