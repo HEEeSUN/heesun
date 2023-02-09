@@ -3,6 +3,7 @@ export default class ProductController {
     this.product = prodcutRepository;
   }
 
+  /* 상품에 남겨진 후기 가져오기 */
   getReviews = async (req, res) => {
     try {
       const product_code = req.params.id;
@@ -89,10 +90,10 @@ export default class ProductController {
 
       switch (sortCode) {
         case "highPrice":
-          orderBy = "price DESC";
+          orderBy = "sortPrice DESC";
           break;
         case "lowPrice":
-          orderBy = "price";
+          orderBy = "sortPrice";
           break;
         case "latestUpdate":
           orderBy = "createdAt DESC";
