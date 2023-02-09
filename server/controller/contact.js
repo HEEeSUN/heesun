@@ -5,6 +5,7 @@ export default class ContactController {
     this.contact = contactRepository;
   }
 
+  /* 문의 가져오기 */
   getInquiries = async (req, res) => {
     try {
       const { page } = req.query;
@@ -36,6 +37,7 @@ export default class ContactController {
     }
   };
 
+  /* 특정 문의 가져오기 */
   getInquiry = async (req, res) => {
     try {
       const { id } = req.params;
@@ -82,6 +84,7 @@ export default class ContactController {
     }
   };
 
+  /* 문의에 대한 답변 작성 */
   answer = async (req, res) => {
     try {
       const { id } = req.params;
