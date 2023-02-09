@@ -1,8 +1,10 @@
 import express from "express";
+import orderRouter from "./order.js";
+import refundRouter from "./refund.js"
 
 const router = express.Router();
 
-function userRouter(customerAuth, userController) {
+function userRouter(customerAuth, userController, orderController, refundController) {
   router.get("/auth", customerAuth.refresh, userController.refreshAuth);
   router.get("/logout", userController.logout);
   router.post("/login", userController.login);
@@ -13,18 +15,9 @@ function userRouter(customerAuth, userController) {
 
   router.all("/:id", customerAuth.isAuth)
   router.all("/:id/:id", customerAuth.isAuth)
-
-  router.get("/order", userController.getMyInfo);
-  router.post("/order", userController.payment, userController.order);
-  router.post("/order/paycomplete", userController.paycomplete);
-  router.post("/order/cancel", userController.cancelPayment, userController.addCart);
-
-  router.get("/refund/:id", userController.getOrder);
-  router.post("/refund/:id", userController.refund);
-  router.delete("/refund/:id", userController.cancelOrder);
-  router.post("/refund/:id/imp", userController.requestRefund);
-  router.post("/refund/:id/paycomplete", userController.paycomplete);
-  router.post("/refund/:id/cancel", userController.requestToCancelRefund);
+  
+  router.use("/order", orderRouter(orderController));;
+  router.use("/refund", refundRouter(refundController, customerAuth));;
 
   router.get("/cart", userController.cart);
   router.post("/cart", userController.addCart);

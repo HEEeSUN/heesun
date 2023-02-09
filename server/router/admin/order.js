@@ -1,13 +1,13 @@
 import express from "express";
+import refundRouter from "./refund.js";
 
 const router = express.Router();
 
-function orderRouter(adminOrderController){
+function orderRouter(adminOrderController, refundController){
+  router.use("/refund", refundRouter(refundController));
   router.get("/", adminOrderController.getOrders);
-  router.get("/refund", adminOrderController.getPendingRefundList);
-  router.post("/refund", adminOrderController.refund, adminOrderController.requestRefund);
-  router.get("/:id", adminOrderController.deliveryStatus);
-  router.patch("/:id", adminOrderController.updateStatus);
+  router.get("/:id", adminOrderController.checkOrderId, adminOrderController.deliveryStatus);
+  router.patch("/:id", adminOrderController.checkOrderId, adminOrderController.updateStatus);
 
   return router;
 }

@@ -20,7 +20,9 @@ export default async ({ app, middleware, controllers }) => {
     communityController,
     productController,
     chattingController,
-    contactController
+    contactController,
+    orderController,
+    refundController
   } = controllers;
 
   const {
@@ -46,8 +48,8 @@ export default async ({ app, middleware, controllers }) => {
   app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(openAPIDocument))
 
   app.use("/home", verifyClientUrl, productRouter(productController));
-  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController));
-  app.use("/member", verifyClientUrl, userRouter(customerAuth, userController));
+  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController, refundController));
+  app.use("/member", verifyClientUrl, userRouter(customerAuth, userController, orderController, refundController));
   app.use("/community", verifyClientUrl, communityRouter(customerAuth, communityController));
   app.use("/chatting", verifyClientUrl, chattingRouter(customerAuth, chattingController));
   app.use("/contact", verifyClientUrl, contactRouter(contactController));

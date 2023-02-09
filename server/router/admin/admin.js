@@ -7,7 +7,7 @@ import contactRouter from "./contact.js";
 
 const router = express.Router();
 
-function adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController) {
+function adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController, refundController) {
   router.post("/", adminController.login);
   router.get("/logout", adminController.logout);
   router.get("/auth", adminAuth.refresh, adminController.refresh);
@@ -20,7 +20,7 @@ function adminRouter(adminAuth, adminController, adminControllers, chattingContr
   router.post("/account", adminController.create);
   router.use("/products", productRouter(adminControllers.adminProductController));;
   router.use("/discount", discountRouter(adminControllers.adminDiscountController));
-  router.use("/orders", orderRouter(adminControllers.adminOrderController));
+  router.use("/orders", orderRouter(adminControllers.adminOrderController, refundController));
   router.use("/inquiries", chattingRouter(chattingController));
   router.use("/contact", contactRouter(contactController))
   
