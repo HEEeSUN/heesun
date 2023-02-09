@@ -10,7 +10,7 @@ function chattingRouter(customerAuth, chattingController) {
   router.get("/", chattingController.getChattings);
   router.post("/", chattingController.joinRoom);
   router.get("/:id", chattingController.getMessages);
-  router.post("/:id", chattingController.sendMessage);
+  router.post("/:id", chattingController.validationCheck, chattingController.sendMessage);
   router.delete("/:id", chattingController.setDisabledChatting);
   router.get("/:id/new", chattingController.getNewMessage);
 

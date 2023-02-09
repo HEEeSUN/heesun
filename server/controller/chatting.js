@@ -101,7 +101,7 @@ export default class ChattingController {
     try {
       const roomname = req.params.id;
 
-      await this.chatting.setDisabledChatting(roomname);
+      this.chatting.setDisabledChatting(roomname);
 
       res.sendStatus(204);
     } catch (error) {
@@ -137,7 +137,9 @@ export default class ChattingController {
         chattingUser
       );
 
-      await this.chatting.updateNewChatting(roomname, chatting.chatting_id);
+      if (chatting) {
+        await this.chatting.updateNewChatting(roomname, chatting.chatting_id);
+      }
 
       return res.status(200).json({ username, newChatting: chatting });
 
@@ -251,10 +253,6 @@ export default class ChattingController {
       const roomname = req.params.id;
       const { uniqueId, message, readAMsg, socketId, chattingUser } = req.body;
 
-      if (!roomname) {
-        return res.status(400).json({ code: "" });
-      }
-
       const date = new Date();
 
       const chattingId = await this.chatting.saveChatting(
@@ -289,4 +287,27 @@ export default class ChattingController {
       res.sendStatus(400);
     }
   };
+
+  /* 메시지 전송시 클라이언트에서 받아오 값이 유효한지 확인 */
+  validationCheck  = async (req, res, next) => {
+    try {
+      const { uniqueId, message, readAMsg, socketId, chattingUser } = req.body;
+
+      if (!uniqueId || !message || !socketId) {
+        throw new Error();
+      } 
+
+      if (readAMsg !== true && readAMsg !==false) {
+        throw new Error();
+      }
+
+      if (chattingUser !== 'customer' && chattingUser !=='master') {
+        throw new Error();
+      }
+
+      next();
+    } catch (error) {
+      return res.sendStatus(400);
+    }
+  }
 }
