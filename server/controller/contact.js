@@ -59,6 +59,47 @@ export default class ContactController {
     }
   };
 
+  /* 문의 작성시 클라이언트에서 받아온 값이 유효한지 확인 */
+  validationCheck = async (req, res, next) => {
+    try {
+      const CONTACT_OPTION = ['phone','email'];
+      const REGEX = {
+        name: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{1,20}$/,
+        phone: /^[0-9]{9,12}$/,
+        email:
+          /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/,
+      };
+      const { name, content, option, contactInformation, locking } = req.body.inquiryInformation;
+
+      const find = CONTACT_OPTION.find(OPTION => OPTION === option);
+
+      if (!find) {
+        throw new Error(`연락 방법: ${option}`)
+      }
+
+      if (!REGEX.name.test(name)) {
+        throw new Error(`이름 : ${name}`)
+      }
+
+      if (!REGEX[option].test(contactInformation)) {
+        throw new Error(`${option} 형식 : ${contactInformation}`)
+      }
+
+      if (content.length < 1) {
+        throw new Error(`내용 : ${content}`)
+      }
+
+      if (locking !== true && locking !== false) {
+        throw new Error(`잠금 : ${locking}`)
+      }
+
+      next();
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400)
+    }
+  }
+
   /* 문의 내역 작성하기 */
   writeInquiry = async (req, res) => {
     try {
