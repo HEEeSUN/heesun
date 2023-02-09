@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   AdminOrderService,
-  Order,
-  RefundAmount,
-  OrderList,
+  RefundList
 } from "../../../model/order.model";
 import Page from "../../../components/Page";
 import RefundDetail from "./RefundDetail";
@@ -20,11 +18,14 @@ function Refund({ adminOrderService, updateRefundNum }: Props) {
   let [pageLength, setPageLength] = useState<number>(0);
   let [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   let [change, setChange] = useState<boolean>(false);
-  let [orderList, setOrderList] = useState<OrderList[]>([]);
-  let [refundList, setRefundList] = useState<Order[]>([]);
-  let [refundAmountList, setRefundAmountList] = useState<RefundAmount[]>([]);
-  let [refundAmount, setRefundAmount] = useState<RefundAmount>();
+  let [refundList, setRefundList] = useState<RefundList[]>([]);
   let [refundId, setRefundId] = useState<number>(0);
+
+  const closePopup = async () => {
+    await updatePendingRefund();
+    setShowStatusModal(false);
+    setRefundId(0);
+  };
 
   const updatePendingRefund = async () => {
     setPageNumber(0)
@@ -32,26 +33,22 @@ function Refund({ adminOrderService, updateRefundNum }: Props) {
 
   const refundDetailCmp = (
     <RefundDetail
-      setShowStatusModal={setShowStatusModal}
-      refundList={refundList}
-      refundAmount={refundAmount}
-      setRefundId={setRefundId}
       adminOrderService={adminOrderService}
-      updatePendingRefund={updatePendingRefund}
+      refundId={refundId}
+      closePopup={closePopup}
     />
   );
 
   /* 주문 목록 가져오기 */
   const getPendingRefund = async () => {
     try {
-      const { refundList, orderList, orderPageLength } =
-        await adminOrderService.getPendingRefund(pageNumber);
+      const { refundList, orderPageLength } =
+        await adminOrderService.getPendingRefundList(pageNumber);
 
-      setRefundAmountList(refundList);
+      setRefundList(refundList);
       setPageLength(orderPageLength);
       setChange(true);
-      setOrderList(orderList);
-      updateRefundNum(orderList.length);
+      updateRefundNum(refundList.length);
     } catch (error: any) {
       alert(error.message);
     }
@@ -59,15 +56,6 @@ function Refund({ adminOrderService, updateRefundNum }: Props) {
 
   useEffect(() => {
     if (refundId) {
-      const filter1 = orderList.filter(
-        (order) => order[0].refundId === refundId
-      );
-      const find = refundAmountList.find(
-        (refund) => refund.refundId === refundId
-      );
-
-      setRefundList(filter1[0]);
-      setRefundAmount(find);
       setShowStatusModal(true);
     }
   }, [refundId]);
@@ -82,24 +70,24 @@ function Refund({ adminOrderService, updateRefundNum }: Props) {
 
   return (
     <div className="refund-list">
-      {orderList.length < 1 ? (
+      {refundList.length < 1 ? (
         <div>환불요청이 없습니다</div>
       ) : (
-        orderList.map((refund) => {
+        refundList.map((refund) => {
           return (
             <div className="refund">
               <div className="refund-title">
-                <p>{`[${refund[0].merchantUID}] `}</p>
+                <p>{`[${refund.merchantUID}] `}</p>
                 <p>
-                  {`${refund[0].product_name} ${
-                    refund.length > 1 ? `외 ${refund.length - 1}` : " "
+                  {`${refund.product_name} ${
+                    refund.count > 1 ? `외 ${refund.count - 1}` : " "
                   }주문건 환불 요청`}
                 </p>
               </div>
               <Button
                 type="button"
                 title="상세보기"
-                handleClickEvent={() => setRefundId(refund[0].refundId)}
+                handleClickEvent={() => setRefundId(refund.pendingRefundId)}
               />
             </div>
           );
