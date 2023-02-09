@@ -88,9 +88,10 @@ export default class ContactController {
   answer = async (req, res) => {
     try {
       const { id } = req.params;
-      
+      const { text } = req.body;
+
       if (!id) {
-        return res.sendStatus(400);
+        return res.sendStatus(404);
       }
 
       const inquiryDetail = await this.contact.getInquiry(id);
@@ -99,12 +100,10 @@ export default class ContactController {
         return res.sendStatus(404)
       }
 
-      const { email, text, contactOption } = req.body;
-
       const date = new Date();
 
-      if (contactOption) {
-        await this.contact.answer(id, contactOption, date);
+      if (inquiryDetail.contactOption === 'phone') {
+        await this.contact.answer(id, text, date);
         return res.sendStatus(200);
       }
 
@@ -118,7 +117,7 @@ export default class ContactController {
 
       const mailOptions = {
         from: process.env.MAILER_USERNAME,
-        to: email,
+        to: inquiryDetail.contactInformation,
         subject: "[heesun] 문의하신 내용에 대한 답변입니다",
         html: `<h4></h4>
                 <div>
@@ -132,11 +131,11 @@ export default class ContactController {
       } catch (error) {
         // 메일 전송자체가 실패한경우
         // 수신자 확인할 것
-        return res.sendStatus(400);
+        throw new Error('ERROR60003')
       }
 
       if (!info) {
-        return res.sendStatus(400);
+        throw new Error('ERROR60004');
       }
 
       await this.contact.answer(id, text, date);
@@ -144,7 +143,7 @@ export default class ContactController {
       res.sendStatus(200);
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({ code: error.message });
     }
   };
 }
