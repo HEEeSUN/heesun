@@ -112,13 +112,7 @@ function ShowDetail(props: Props) {
     } else {
       if (imageFile) {
         formData.append("uploadedImage", imageFile, imageFile.name);
-      } else if (!imageFile && previewSrc) {
-        formData.append("imageSrc", initialImageSrc);
-      } else {
-        formData.append("imageSrc", "");
-      }
-      // image 변동없는데 보내주는이유 :  sql문 새로 안만드려고..(image변동있든 없든 하나의 sql문으로 넣으려고,, 그러면
-      //무조건 image를 넣어야 되니까..)
+      } 
 
       const products = {
         code,

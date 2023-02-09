@@ -1,3 +1,5 @@
+import path from "path";
+
 export default class AdminProductController {
   constructor(adminRepository) {
     this.db = adminRepository;
@@ -113,10 +115,15 @@ export default class AdminProductController {
       const products = JSON.parse(req.body.products);
       const { productCode, name, cost, price, description, options } = products;
 
+      let uploadImgName = "";
       let imgFileSrc = "";
 
       if (req.file) {
-        imgFileSrc = "/" + req.file.key;
+        const ext = path.extname(req.file.originalname);
+        uploadImgName = 'image/' + path.basename(req.file.originalname, ext) + Date.now() + ext;
+    
+        imgFileSrc = "/" + uploadImgName;
+        // imgFileSrc = "/" + req.file.key;
       }
 
       await this.db.addProduct(
@@ -129,7 +136,12 @@ export default class AdminProductController {
         options
       );
 
-      res.sendStatus(201);
+      if (!req.file) {
+        return res.sendStatus(201);
+      }
+
+      req.uploadImgName = uploadImgName;
+      next();
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
@@ -172,7 +184,7 @@ export default class AdminProductController {
   };
 
   /* 상품 업데이트 */
-  updateProduct = async (req, res) => {
+  updateProduct = async (req, res, next) => {
     try {
       const code = req.params.id;
 
@@ -183,15 +195,17 @@ export default class AdminProductController {
       }
 
       const { products } = req.body;
-
       const produtList = JSON.parse(products);
-
-      const { name, price, cost, description, imageSrc, options } = produtList;
-
-      let imgFileSrc = imageSrc;
+      const { name, price, cost, description, options } = produtList;
+      let imgFileSrc = product.main_img_src;
+      let uploadImgName = "";
 
       if (req.file) {
-        imgFileSrc = "/" + req.file.key;
+        const ext = path.extname(req.file.originalname);
+        uploadImgName = 'image/' + path.basename(req.file.originalname, ext) + Date.now() + ext;
+    
+        imgFileSrc = "/" + uploadImgName;
+        // imgFileSrc = "/" + req.file.key;
       }
 
       await this.db.updateProduct(
@@ -204,7 +218,12 @@ export default class AdminProductController {
         options
       );
 
-      res.sendStatus(204);
+      if (!req.file) {
+        return res.sendStatus(204);
+      }
+
+      req.uploadImgName = uploadImgName;
+      next();
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
