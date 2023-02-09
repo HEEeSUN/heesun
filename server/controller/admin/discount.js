@@ -46,6 +46,26 @@ export default class AdminDiscountController {
         await this.db.addSaleProduct(productList);
       } else {
         const { saleStartTime, saleEndTime } = saleTime;
+
+        let dateArr = [];
+        dateArr[dateArr.length] = new Date(saleStartTime);
+        dateArr[dateArr.length] = new Date(saleEndTime);
+
+        dateArr.forEach((date) => {
+          if (date == 'Invalid Date') {
+            throw new Error('날짜 형식을 확인해주세요')
+          }
+        })
+
+        if (dateArr[0] < new Date()) {
+          throw new Error('할인 시작 날짜가 현재 날짜보다 작을 수 없습니다')
+        }
+
+        if (dateArr[0] >= dateArr[1]) {
+          throw new Error('할인 시작 날짜가 할인 종료 날짜보다 크거나 같을 수 없습니다')
+        }
+
+        
         await this.db.addSaleProductAndTIme(
           productList,
           saleStartTime,

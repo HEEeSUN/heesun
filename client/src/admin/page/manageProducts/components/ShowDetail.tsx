@@ -56,7 +56,6 @@ function ShowDetail(props: Props) {
   };
 
   useEffect(() => {
-    console.log(props.selectedProduct);
     getDetail();
   }, []);
 
@@ -127,7 +126,7 @@ function ShowDetail(props: Props) {
         cost,
         price,
         description,
-        optionList
+        options: optionList
       }
 
       formData.append("products", JSON.stringify(products));
