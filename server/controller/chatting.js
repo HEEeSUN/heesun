@@ -74,8 +74,9 @@ export default class ChattingController {
   /* 새로운 채팅 생성 */
   joinRoom = async (req, res) => {
     try {
+      const { username } = req;
+      const { socketId } = req.body;
       let member;
-      let { username, socketId } = req.body;
 
       if (!socketId) {
         return res.sendStatus(400)

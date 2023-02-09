@@ -88,7 +88,7 @@ function Chattings(props: Props) {
     }
     try {
       if (newRoom && prevChatting.length < 1 && chatting.length < 1) {
-        await socketService.joinRoom(username, socketId);
+        await socketService.joinRoom(socketId);
       }
 
       const tempChattingId = String(new Date().valueOf()).substring(6, 13);
@@ -292,7 +292,7 @@ function Chattings(props: Props) {
 
   useEffect(() => {
     if (joinRoom) {
-      socketService.joinRoom(username, socketId, roomName).then(getMessage);
+      socketService.joinRoom(socketId, roomName).then(getMessage);
     }
 
     return () => {
