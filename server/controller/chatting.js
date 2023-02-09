@@ -3,6 +3,7 @@ export default class ChattingController {
     this.chatting = chattingRepository;
   }
 
+  /* 특정 채팅방에 접속시 해당 채팅방이름이 유효한지 확인 */
   checkRoomname = async (req, res, next) => {
     const roomname = req.params.id;
 
@@ -123,6 +124,7 @@ export default class ChattingController {
     }
   };
 
+  /* 신규 메시지 가져오기 */
   getNewMessage = async (req, res) => {
     try {
       const username = req.username;
@@ -144,7 +146,8 @@ export default class ChattingController {
       return res.sendStatus(400);
     }
   }
-  /* 채팅 내용 가져오기 */
+
+  /* 기존 채팅 내용 가져오기 */
   getMessages = async (req, res) => {
     try {
       const username = req.username;
@@ -181,6 +184,7 @@ export default class ChattingController {
     }
   };
 
+  /* 세션이 만료된 채팅 삭제 (고객의 세션 접속이 끊기는 경우 실행)*/
   deleteExpiredChatting = async (socketId) => {
     try {
       this.chatting.deleteExpiredChatting(socketId);
@@ -189,6 +193,7 @@ export default class ChattingController {
     }
   };
 
+  /* 사용자 ID와 소켓 ID를 매칭 */
   testInitSocket = async (username, socketId) => {
     if (username) {
       const user = await this.chatting.getPlayer(username);
@@ -209,6 +214,7 @@ export default class ChattingController {
     return;
   };
 
+  /* 신규 채팅방 개설 */
   createChatting = async (username, member) => {
     let chatListId;
 
@@ -238,6 +244,7 @@ export default class ChattingController {
     }
   };
 
+  /* 메시지 전송 */ 
   sendMessage = async (req, res) => {
     try {
       const username = req.username;
