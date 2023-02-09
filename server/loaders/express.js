@@ -13,7 +13,7 @@ import contactRouter from "../router/customer/contact.js";
 
 export default async ({ app, middleware, controllers }) => {
   const __dirname = path.resolve(); 
-  const { customerAuth, adminAuth, verifyClientUrl } = middleware;
+  const { customerAuth, adminAuth, verifyClientUrl, apiLimiter } = middleware;
   const {
     adminControllers,
     userController,
@@ -45,14 +45,14 @@ export default async ({ app, middleware, controllers }) => {
 
   app.use("/static", express.static(path.join(__dirname, "../static")));
   app.use("/image", express.static(path.join(__dirname, "../public/image")));
-  app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(openAPIDocument))
+  app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(openAPIDocument));
 
-  app.use("/home", verifyClientUrl, productRouter(productController));
-  app.use("/admin", verifyClientUrl, adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController, refundController));
-  app.use("/member", verifyClientUrl, userRouter(customerAuth, userController, orderController, refundController));
-  app.use("/community", verifyClientUrl, communityRouter(customerAuth, communityController));
-  app.use("/chatting", verifyClientUrl, chattingRouter(customerAuth, chattingController));
-  app.use("/contact", verifyClientUrl, contactRouter(contactController));
+  app.use("/home", apiLimiter, verifyClientUrl, productRouter(productController));
+  app.use("/admin", apiLimiter, verifyClientUrl, adminRouter(adminAuth, adminController, adminControllers, chattingController, contactController, refundController));
+  app.use("/member", apiLimiter, verifyClientUrl, userRouter(customerAuth, userController, orderController, refundController));
+  app.use("/community", apiLimiter, verifyClientUrl, communityRouter(customerAuth, communityController));
+  app.use("/chatting", apiLimiter, verifyClientUrl, chattingRouter(customerAuth, chattingController));
+  app.use("/contact", apiLimiter, verifyClientUrl, contactRouter(contactController));
 
   app.use((req, res, next) => {
     return res.sendStatus(404);
@@ -60,7 +60,7 @@ export default async ({ app, middleware, controllers }) => {
 
   app.use((error, req, res, next) => {
     console.error(error);
-    return res.sendStatus(500);
+    return res.sendStatus(error.statusCode || 500);
   });
 }
 

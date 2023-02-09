@@ -3,6 +3,7 @@ import Database from "./database.js";
 import initSocket from "../connection/socket.js";
 import { Auth, AdminAuth } from "../middleware/auth.js";
 import verifyClientUrl from "../middleware/verifyClientUrl.js";
+import apiLimiter from "../middleware/apiLimiter.js";
 import ChattingController from "../controller/chatting.js";
 import ContactController from "../controller/contact.js";
 import RefundController from "../controller/refund.js";
@@ -58,7 +59,8 @@ export default async ({ server, expressApp }) => {
   const middleware = {
     customerAuth,
     adminAuth,
-    verifyClientUrl
+    verifyClientUrl,
+    apiLimiter,
   };
 
   const adminControllers = {
