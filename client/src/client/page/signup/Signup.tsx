@@ -64,7 +64,7 @@ function Signup(props: Props) {
       email,
       phone: number,
       address: address,
-      extraAddress: extraAddress,
+      extra_address: extraAddress,
     };
 
     try {

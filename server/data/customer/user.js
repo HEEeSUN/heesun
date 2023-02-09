@@ -30,7 +30,7 @@ export default class UserRepository {
           "silver",
           phone,
           address,
-          extraAddress,
+          extraAddress || '',
         ])
       .then((result) => result[0].insertId);
   };
@@ -117,34 +117,34 @@ export default class UserRepository {
       .then((result) => result[0][0]);
   };
 
-  modifyUserInfo = async (userInfo) => {
+  modifyUserInfo = async (userInfo, userId) => {
     return this.#db
-      .execute(`UPDATE users SET name=?, phone=?, email=?, address=?, extra_address=? WHERE username=?`, [
+      .execute(`UPDATE users SET name=?, phone=?, email=?, address=?, extra_address=? WHERE id=?`, [
         userInfo.name,
         userInfo.phone,
         userInfo.email,
         userInfo.address,
         userInfo.extra_address,
-        userInfo.username,
+        userId,
       ]);
   };
 
-  modifyUserInfoAndPw = async (userInfo, hashed) => {
+  modifyUserInfoAndPw = async (userInfo, userId, hashed) => {
     return this.#db
-      .execute(`UPDATE users SET name=?, password=?, phone=?, email=?, address=?, extra_address=? WHERE username=?`, [
+      .execute(`UPDATE users SET name=?, password=?, phone=?, email=?, address=?, extra_address=? WHERE id=?`, [
         userInfo.name,
         hashed,
         userInfo.phone,
         userInfo.email,
         userInfo.address,
         userInfo.extra_address,
-        userInfo.username,
+        userId,
       ]);
   };
 
-  deleteProduct = async (cart_id) => {
+  deleteProduct = async (userId, cart_id) => {
     return this.#db
-      .execute(`DELETE FROM cart WHERE cart_id IN (${cart_id})`)
+      .execute(`DELETE FROM cart WHERE userId=? AND cart_id IN (${cart_id})`, [userId])
       .then((result) => result[0].affectedRows);
   };
 
@@ -180,6 +180,7 @@ export default class UserRepository {
       .execute("SELECT * FROM order_detail WHERE order_id=?", [id])
       .then((result) => result[0]);
   };
+
   getMyReview = async (username, amountOfSendData, prevPage) => {
     return this.#db
       .execute(`SELECT review_id, main_img_src, product_name, product_code, detail_id, content, count(*) OVER() AS full_count, DATE_FORMAT(createdAt, "%Y-%m-%d")AS "created" 

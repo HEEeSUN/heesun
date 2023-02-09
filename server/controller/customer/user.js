@@ -26,7 +26,40 @@ export default class UserController {
     }
   }
 
-  /* 회원가입 (idCheck 값이 true로 들어올 경우 중복체크만 해서 return함) */
+  /* 회원가입 및 회원정보 수정시 클라이언트에서 받아온 값이 유효한지 확인 */
+  validationCheck = (userinfo) => {
+    try {
+      const regex = {
+        username: /^[0-9a-zA-Z]{6,20}$/,
+        // password: /[0-9a-zA-Z]{1,}[^0-9a-zA-Z]{1,}/,
+        password: /^(?=.*[a-zA-z0-9])(?=.*[^0-9a-zA-Z]).{8,20}$/, 
+        name: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{1,20}$/,
+        phone: /^[0-9]{9,12}$/,
+        email:
+          /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/,
+        // address: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{0,100}$/,
+        // extra_address: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{0,100}$/,/^.{0,20}$/  
+        address: /^.{0,100}$/  ,
+        extra_address: /^.{0,100}$/  ,
+      };
+
+      const keys = Object.keys(userinfo);
+
+      keys.forEach((item)=>{
+        if (!regex[item].test(userinfo[item])) {
+          throw new Error();
+        }
+      })
+
+      return true;
+            
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+
+  /* 회원가입 */
   signup = async (req, res) => {
     try {
       const { signupInfo } = req.body;
@@ -37,8 +70,12 @@ export default class UserController {
         email,
         phone,
         address = "",
-        extraAddress = "",
+        extra_address = "",
       } = signupInfo;
+
+      if (!this.validationCheck(signupInfo)) {
+        throw new Error('ERROR61001');
+      }
 
       const hashed = await bcrypt.hash(
         password,
@@ -52,13 +89,13 @@ export default class UserController {
         email,
         phone,
         address,
-        extraAddress
+        extra_address
       );
 
       res.sendStatus(201);
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({ code: error.message || '' });
     }
   };
 
@@ -144,7 +181,7 @@ export default class UserController {
     res.cookie("token", token, options);
   };
 
-  /* 로그인, 카트 담기, 카트안 상품 삭제시 카트안의 총 수량을 체크 */
+  /* 로그인시 카트안의 총 수량을 체크 */
   cartSummary = async (id) => {
     const result = await this.user.getQuantityInCart(id).catch((err) => {
       return false;
@@ -171,7 +208,7 @@ export default class UserController {
         const result = await this.user.findByNameAndEmail(username, email);
 
         if (!result) {
-          return res.status(402).json({ code: "ERROR00004" });
+          return res.status(400).json({ code: "ERROR00004" });
         }
 
         const mailOptions = {
@@ -187,7 +224,7 @@ export default class UserController {
         const info = await transporter.sendMail(mailOptions);
 
         if (!info) {
-          return res.sendStatus(403);
+          return res.sendStatus(400);
         }
       }
 
@@ -232,8 +269,13 @@ export default class UserController {
   /* 장바구니 상품 삭제 */
   removeProductInCART = async (req, res) => {
     try {
+      const { userId } = req;
       const { id } = req.query;
-      await this.user.deleteProduct(id);
+      const affectedRows = await this.user.deleteProduct(userId, id);
+
+      if (!affectedRows) {
+        return res.sendStatus(403);
+      }
 
       res.sendStatus(204);
     } catch (error) {
@@ -242,7 +284,7 @@ export default class UserController {
     }
   };
 
-  /* 사용자 정보 불러오기 (my page의 my info 및 상품 주문시 사용자 정보 불러올 경우) */
+  /* 사용자 정보 불러오기 */
   getMyInfo = async (req, res) => {
     try {
       const { username } = req;
@@ -263,24 +305,29 @@ export default class UserController {
   /* 사용자 정보 수정 */
   modifyUserInfo = async (req, res) => {
     try {
+      const { userId } = req;
       const { userInfo } = req.body;
       const { password } = userInfo;
 
+      if (!this.validationCheck(userInfo)) {
+        throw new Error('ERROR61001');
+      }
+
       if (!password) {
-        await this.user.modifyUserInfo(userInfo);
+        await this.user.modifyUserInfo(userInfo, userId);
       } else {
         const hashed = await bcrypt.hash(
           password,
           parseInt(process.env.BCRYPT_SALT_ROUNDS)
         );
 
-        await this.user.modifyUserInfoAndPw(userInfo, hashed);
+        await this.user.modifyUserInfoAndPw(userInfo, userId, hashed);
       }
 
       res.sendStatus(200);
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({ code: error.message || '' });
     }
   };
 
@@ -292,7 +339,7 @@ export default class UserController {
 
       if (status.length < 1) {
         // id 값이 현재 존재하지 않는 id 일 경우
-        return res.status(400).json({ code: "ERROR20001" });
+        return res.status(404).json({ code: "ERROR20001" });
       }
 
       res.status(200).json({ status });
@@ -306,12 +353,18 @@ export default class UserController {
   writeReview = async (req, res) => {
     try {
       const username = req.username;
-      const { product_code, text, detail_id } = req.body;
+      const { text, detail_id } = req.body;
+
+      const order = await this.user.getOrderDetailByUsername(detail_id, username);
+
+      if (!order) {
+        return res.sendStatus(404);
+      }
 
       const reviewId = await this.user.writeReview(
         detail_id,
         username,
-        product_code,
+        order.product_code,
         text
       );
 
@@ -469,7 +522,11 @@ export default class UserController {
       );
 
       if (!product || !option) {
-        return res.status(409).json({ code: "ERROR10003" });
+        return res.status(404).json({ code: "ERROR10003" });
+      }
+
+      if (isNaN(Number(quantity)) || quantity < 1) {
+        return res.status(404).json({ code: "ERROR10003" });
       }
 
       const result = await this.duplicateCheck(
@@ -499,7 +556,7 @@ export default class UserController {
       res.status(201).json({ quantityInCart });
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({ code: error.message || '' });
     }
   };
 
@@ -520,6 +577,20 @@ export default class UserController {
       const amountOfSendData = 10; // 한번에 보낼 데이터의 양
       let { page, date1, date2 } = req.query;
 
+      let dateArr = [];
+      dateArr[dateArr.length] = new Date(date1);
+      dateArr[dateArr.length] = new Date(date2);
+
+      dateArr.forEach((date) => {
+        if (date == 'Invalid Date') {
+          throw new Error('날짜 형식을 확인해주세요')
+        }
+      })
+
+      if (dateArr[0] > dateArr[1]) {
+        throw new Error('검색 시작 날짜가 검색 종료 날짜보다 클 수 없습니다')
+      }
+
       if (isNaN(Number(page))) return res.sendStatus(404);
 
       let prevPage = 0;
@@ -535,8 +606,10 @@ export default class UserController {
 
       const orderList = await this.user.getOrder(
         username,
-        date1,
-        date2,
+        `${date1} 00:00:00`,
+        `${date2} 23:59:59`,
+        // date1,
+        // date2,
         amountOfSendData,
         prevPage
       );
