@@ -9,6 +9,7 @@ import {
 import Button from "../../components/Button";
 import OrderDetail from "./components/OrderDetail";
 import DateSearchBar from "./components/DateSearchBar";
+import Loading from "../../components/Loading";
 
 type Props = {
   memberService: MemberService;
@@ -172,11 +173,7 @@ function MyPage(props: Props) {
           }
         })
       )}
-      {error ? (
-        <div>Sorry, It isn't work.</div>
-      ) : loading ? (
-        <img className="loading" src="../image/loading.png" alt="loading"></img>
-      ) : null}
+      {error ? <div>Sorry, It isn't work.</div> : loading ? <Loading /> : null}
       {!hasmore ? <hr className="endline"></hr> : null}
     </div>
   );
