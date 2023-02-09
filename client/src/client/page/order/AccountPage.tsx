@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router";
 import { UseParams } from "../../model/model";
-import { MemberService, Order, OrderDetails } from "../../model/member.model";
+import { OrderService, Order, OrderDetails } from "../../model/order.model";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 
 type Props = {
-  memberService: MemberService;
+  orderService: OrderService;
 };
 
-function AccountPage({ memberService }: Props) {
+function AccountPage({ orderService }: Props) {
   let [order, setOrder] = useState<Order>();
   let [orderDetail, setOrderDetail] = useState<OrderDetails[]>([]);
   const orderId: string = useParams<UseParams>().id;
@@ -17,7 +17,7 @@ function AccountPage({ memberService }: Props) {
 
   const getOrder = async () => {
     try {
-      const { order, orderDetail } = await memberService.getOrder(orderId);
+      const { order, orderDetail } = await orderService.getNewOrder(orderId);
 
       setOrder(order);
       setOrderDetail(orderDetail);
@@ -146,7 +146,6 @@ function AccountPage({ memberService }: Props) {
             입금정보를 확인하신 후 기한내 입금해주시기 바랍니다.
           </div>
         )}
-
         <Button
           type="button"
           title="나의정보로"

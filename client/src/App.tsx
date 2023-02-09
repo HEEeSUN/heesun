@@ -4,6 +4,7 @@ import { Switch, useHistory } from "react-router";
 import HttpClient from "./network/http";
 import { AuthContext } from "./context/authcontext";
 import { regex } from "./client/util/regex";
+import OrderService from "./client/service/order";
 import ProductService from "./client/service/product";
 import MemberService from "./client/service/member";
 import CommunityService from "./client/service/community";
@@ -43,6 +44,7 @@ function App() {
     expiredSession
   );
   const memberService = new MemberService(httpClient, login, logout);
+  const orderService = new OrderService(httpClient);
   const productService = new ProductService(httpClient);
   const communityService = new CommunityService(httpClient);
   const chattingService = new ChattingService(httpClient);
@@ -67,6 +69,7 @@ function App() {
             communityService={communityService}
             chattingService={chattingService}
             contactService={contactService}
+            orderService={orderService}
             regex={regex}
           />
         </Route>

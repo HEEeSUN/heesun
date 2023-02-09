@@ -10,6 +10,7 @@ import { CommunityService } from "./model/community.model";
 import { MemberService } from "./model/member.model";
 import { ProductService } from "./model/product.model";
 import { ContactService } from "./model/contact.model";
+import { OrderService } from "./model/order.model";
 import Main from "./page/Main";
 import Signup from "./page/signup/Signup";
 import Login from "./page/login/Login";
@@ -35,6 +36,7 @@ type Props = {
   communityService: CommunityService;
   chattingService: ChattingService;
   contactService: ContactService;
+  orderService: OrderService;
   regex: Regex;
 };
 
@@ -52,6 +54,7 @@ function ClientHome(props: Props) {
     communityService,
     chattingService,
     contactService,
+    orderService,
     regex,
   } = props;
   const histroy = useHistory();
@@ -166,6 +169,7 @@ function ClientHome(props: Props) {
             ) : (
               <Member
                 memberService={memberService}
+                orderService={orderService}
                 setQuantityInCart={setQuantityInCart}
                 regex={regex}
               />

@@ -3,6 +3,7 @@ import { Route } from "react-router-dom";
 import { Switch } from "react-router";
 import { Regex } from "../model/model";
 import { MemberService, CartProducts } from "../model/member.model";
+import { OrderService } from "../model/order.model";
 import MyInfo from "./mypage/MyInfo";
 import MyPage from "./mypage/MyPage";
 import MyCommunity from "./mypage/MyCommunity";
@@ -15,12 +16,13 @@ import NotFound from "../components/NotFound";
 
 type Props = {
   memberService: MemberService;
+  orderService: OrderService;
   setQuantityInCart: React.Dispatch<React.SetStateAction<number>>;
   regex: Regex;
 };
 
 function Member(props: Props) {
-  const { memberService, setQuantityInCart, regex } = props;
+  const { memberService, orderService, setQuantityInCart, regex } = props;
   let [selectedProducts, setSelectedProducts] = useState<CartProducts[]>([]);
   let [totalPrice, setTotalPrice] = useState<number>(0);
   let [shippingFee, setShippingFee] = useState<number>(0);
@@ -53,7 +55,7 @@ function Member(props: Props) {
       </Route>
       <Route exact path="/home/member/order">
         <Order
-          memberService={memberService}
+          orderService={orderService}
           selectedProducts={selectedProducts}
           totalPrice={totalPrice}
           shippingFee={shippingFee}
@@ -61,10 +63,10 @@ function Member(props: Props) {
         />
       </Route>
       <Route exact path="/home/member/order/:id">
-        <AccountPage memberService={memberService} />
+        <AccountPage orderService={orderService} />
       </Route>
       <Route exact path="/home/member/refund/:id">
-        <Refund memberService={memberService} />
+        <Refund orderService={orderService} />
       </Route>
       <Route path="*">
         <NotFound />

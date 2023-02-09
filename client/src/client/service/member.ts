@@ -1,6 +1,5 @@
 import { AxiosRequestConfig } from "axios";
 import HttpClient from "../../network/http";
-import { RefundInfo, SavePoint } from "../model/member.model";
 
 export default class MemberService {
   http: HttpClient;
@@ -129,7 +128,7 @@ export default class MemberService {
     email: string;
     phone: string;
     address: string;
-    extraAddress: string;
+    extra_address: string;
   }): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
@@ -248,7 +247,7 @@ export default class MemberService {
     email?: string;
     address?: string;
     extra_address?: string;
-    password: string;
+    password?: string;
   }): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
@@ -261,163 +260,9 @@ export default class MemberService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async getUserInfoToOrder(): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "get",
-      url: `/member/order`,
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  /*결제요청시 merchantUID 생성을 위한 1차 결제 정보 저장*/
-  async requestPay(payInfo: {
-    paymentOption: string;
-    amount: number;
-    shippingFee: number;
-    productPrice: number;
-    orderList: any;
-    orderer: string;
-    phone: string;
-    address: string;
-    extra_address: string;
-  }): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/order`,
-      data: {
-        paymentOption: payInfo.paymentOption,
-        amount: payInfo.amount,
-        shippingFee: payInfo.shippingFee,
-        productPrice: payInfo.productPrice,
-        newArray: payInfo.orderList,
-        orderer: payInfo.orderer,
-        phone: payInfo.phone,
-        address: payInfo.address,
-        extra_address: payInfo.extra_address,
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  /* PG사를 이용한 결제 성공시 주문 상품 관련 정보 DB 저장*/
-  async payComplete(imp_uid: string, merchant_uid: string): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/order/paycomplete`,
-      data: {
-        imp_uid,
-        merchant_uid,
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  async cancelPayment(merchantUID: string, newArray: any): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/order/cancel`,
-      data: {
-        merchantUID,
-        newArray,
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
   async cancelOrder(orderId: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "delete",
-      url: `/member/refund/${orderId}`,
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  async requestRefund(
-    refundInfo: {
-      merchantUID: string;
-      impUID: string;
-      extraCharge: number;
-      prePayment: number;
-      refundProduct: any;
-      refundAmount: number;
-    },
-    immediatelyRefundInfo: {
-      refundAmountForProduct: number;
-      refundAmountForShipping: number;
-    },
-    pendingRefundInfo: {
-      pendingRefundAmountForProduct: number;
-      returnShippingFee: number;
-      pendingRefundAmountForShipping: number;
-    },
-    orderId: string
-  ): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/refund/${orderId}`,
-      data: {
-        refundInfo,
-        immediatelyRefundInfo,
-        pendingRefundInfo,
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  async requestRefundToImp(imp_uid: string | undefined, refundAmount: number, orderId: string): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/refund/${orderId}/imp`,
-      data: {
-        imp_uid,
-        refundAmount
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  /* PG사를 이용한 결제 성공시 주문 상품 관련 정보 DB 저장*/
-  async refundComplete(imp_uid: string, merchant_uid: string, orderId: string): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/refund/${orderId}/paycomplete`,
-      data: {
-        imp_uid,
-        merchant_uid,
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  async refundFail(
-    refundInfo: RefundInfo,
-    savePoint: SavePoint,
-    orderId: string
-  ): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/member/refund/${orderId}/cancel`,
-      data: {
-        refundInfo,
-        savePoint,
-      },
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  /* 환불페이지에 주문 내역 불러오기 */
-  async getOrder(orderId: string): Promise<any> {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "get",
       url: `/member/refund/${orderId}`,
     };
 
