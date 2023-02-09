@@ -134,7 +134,7 @@ function Cart(props: Props) {
       return;
     }
 
-    history.push("/home/member/order");
+    history.push("/home/member/order/sheet");
   };
 
   /* 전체 상품 체크 */

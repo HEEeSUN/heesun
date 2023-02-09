@@ -52,10 +52,18 @@ export default class AdminRepository {
 
   get6month = async (startDate, endDate) => {
     return this.#db
-      .execute(`SELECT mid(merchantUID, 1, 6) month, sum(amount) sales, sum(rest_refund_amount) revenue, sum(refund_amount) refund, cost
-                FROM (orders NATURAL JOIN (SELECT order_id, sum(cost) cost FROM order_detail NATURAL JOIN product GROUP BY order_id)b)
-                JOIN payment USING(payment_id)
-                WHERE mid(merchantUID, 1, 6) BETWEEN ${startDate} AND ${endDate}
+      .execute(`SELECT MID(merchantUID, 1, 6) month, sum(products_price) AS sales, IFNULL(SUM(refundaaaaamount),0) AS refund, IFNULL((SUM(products_price)-SUM(refundaaaaamount)),0) AS revenue
+                FROM ((
+                  SELECT *
+                  FROM payment)A 
+                    LEFT join (
+                  SELECT merchantUID, sum(productsPrice) AS refundaaaaamount
+                  FROM new_refund
+                  GROUP BY merchantUID
+                  )B
+                  USING (merchantUID)
+                )
+                WHERE MID(merchantUID, 1, 6) BETWEEN ${startDate} AND ${endDate}
                 GROUP BY month`)
       .then((result) => result[0]);
   };

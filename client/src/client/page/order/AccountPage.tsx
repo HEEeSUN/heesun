@@ -7,9 +7,11 @@ import Input from "../../components/Input";
 
 type Props = {
   orderService: OrderService;
+  showNextPage: boolean;
+  moveToForbiddenPage: () => Promise<void>
 };
 
-function AccountPage({ orderService }: Props) {
+function AccountPage({ orderService, showNextPage, moveToForbiddenPage }: Props) {
   let [order, setOrder] = useState<Order>();
   let [orderDetail, setOrderDetail] = useState<OrderDetails[]>([]);
   const orderId: string = useParams<UseParams>().id;
@@ -27,6 +29,10 @@ function AccountPage({ orderService }: Props) {
   };
 
   useEffect(() => {
+    if (!showNextPage) {
+      moveToForbiddenPage();
+      return;
+    }
     getOrder();
   }, []);
 

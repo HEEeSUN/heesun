@@ -9,7 +9,6 @@ import MyPage from "./mypage/MyPage";
 import MyCommunity from "./mypage/MyCommunity";
 import MyReview from "./mypage/MyReview";
 import Order from "./order/Order";
-import AccountPage from "./order/AccountPage";
 import Cart from "./cart/Cart";
 import Refund from "./refund/Refund";
 import NotFound from "../components/NotFound";
@@ -53,7 +52,7 @@ function Member(props: Props) {
       <Route exact path="/home/member/mypost">
         <MyCommunity memberService={memberService} />
       </Route>
-      <Route exact path="/home/member/order">
+      <Route path="/home/member/order">
         <Order
           orderService={orderService}
           selectedProducts={selectedProducts}
@@ -62,10 +61,7 @@ function Member(props: Props) {
           setQuantityInCart={setQuantityInCart}
         />
       </Route>
-      <Route exact path="/home/member/order/:id">
-        <AccountPage orderService={orderService} />
-      </Route>
-      <Route exact path="/home/member/refund/:id">
+      <Route path="/home/member/refund">
         <Refund orderService={orderService} />
       </Route>
       <Route path="*">
