@@ -5,6 +5,17 @@ export default class CommunityRepository {
     this.#db = db;
   }
 
+  checkExistPost = async (postId) => {
+    return this.#db
+      .execute(`
+        SELECT EXISTS (
+          SELECT * 
+          FROM posts 
+          WHERE post_id=?
+        ) as existence`, [postId])
+      .then((result) => result[0][0].existence)
+  }
+
   writePost = async (title, content, username) => {
     return this.#db
       .execute(`INSERT INTO posts (title, username, content, createdAt) VALUES (?, ?, ?, ?)`, [
@@ -16,12 +27,13 @@ export default class CommunityRepository {
       .then((result) => result[0].insertId);
   };
 
-  modifyPost = async (postId, title, content) => {
+  modifyPost = async (postId, username, title, content) => {
     return this.#db
-      .execute(`UPDATE posts SET title=? , content=?  WHERE post_id=?`, [
+      .execute(`UPDATE posts SET title=? , content=?  WHERE post_id=? AND username=?`, [
         title,
         content,
         postId,
+        username
       ])
       .then((result) => result[0].affectedRows);
   };

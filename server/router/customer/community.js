@@ -9,7 +9,7 @@ function communityRouter(customerAuth, communityController) {
   router.delete("/:id", customerAuth.isAuth, communityController.checkUniqueId, communityController.deletePost);
   router.patch("/:id", customerAuth.isAuth, communityController.checkUniqueId, communityController.modifyPost);
   
-  router.get("/:id/comments", communityController.getComments);
+  router.get("/:id/comments", communityController.checkUniqueId, communityController.getComments);
   router.post("/:id/comments", customerAuth.isAuth, communityController.checkUniqueId, communityController.writeComment);
   router.delete("/:id/comments", customerAuth.isAuth, communityController.checkUniqueId, communityController.deleteComment); 
 
