@@ -5,6 +5,17 @@ export default class AdminOrderRepository {
     this.#db = db;
   }
 
+  checkExistOrder = async (id) => {
+    return this.#db
+      .execute(`
+        SELECT EXISTS (
+          SELECT * 
+          FROM order_detail 
+          WHERE detail_id=?
+        ) as existence`, [id])
+      .then((result) => result[0][0].existence)
+  }
+
   getOrderAll = async (date1, date2, amountOfSendData, prevPage) => {
     return this.#db
       .execute(`SELECT createdAt, product_code, product_name, merchantUID, quantity, payment.username, status, detail_id, refundStatus, phone, address, extra_address, count(*) OVER() AS full_count, DATE_FORMAT(createdAt, "%Y-%m-%d") AS "created", orderer as name
@@ -36,7 +47,7 @@ export default class AdminOrderRepository {
     date1,
     date2,
     status,
-    searchWord,
+    searchWord='',
     amountOfSendData,
     prevPage
   ) => {
@@ -44,7 +55,7 @@ export default class AdminOrderRepository {
       .execute(`SELECT createdAt, product_code, product_name, merchantUID, quantity, payment.username, status, detail_id, refundStatus, phone, address, extra_address, count(*) OVER() AS full_count, DATE_FORMAT(createdAt, "%Y-%m-%d") AS "created", orderer as name
                 FROM (orders NATURAL JOIN order_detail) LEFT JOIN payment USING (payment_id)
                 WHERE (createdAt BETWEEN '${date1}' AND '${date2}') AND (status='${status}') AND (product_code LIKE '%${searchWord}%' OR product_name LIKE '%${searchWord}%'
-                  OR payment.username LIKE '%${searchWord}%' OR orderer LIKE '%${searchWord}%')
+                  OR payment.username LIKE '%${searchWord}%' OR orderer LIKE '%${searchWord}%' OR merchantUID LIKE '%${searchWord}%')
                 ORDER BY createdAt DESC
                 LIMIT ${amountOfSendData} OFFSET ${prevPage}`)
       .then((result) => result[0]);
@@ -110,7 +121,7 @@ export default class AdminOrderRepository {
           detail_id
         ]);
 
-      const results = await Promise.all([query1, query2]);
+      await Promise.all([query1, query2]);
 
       await conn.commit();
       return;
