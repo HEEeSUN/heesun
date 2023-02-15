@@ -1,4 +1,4 @@
-import Product from "../../controller/customer/product";
+import ProductController from "../../../controller/customer/product.js";
 import httpMocks from "node-mocks-http";
 
 describe("product", () => {
@@ -7,7 +7,127 @@ describe("product", () => {
 
   beforeEach(() => {
     productRepository = {};
-    productController = new Product(productRepository);
+    productController = new ProductController(productRepository);
+  });
+
+  describe("getReviews", () => {
+    it("성공", async () => {
+      const product_code = "code-00000001";
+      const pageNumber = 1;
+      const request = httpMocks.createRequest({
+        params: {
+          id: product_code,
+        },
+        query: {
+          reviewPage: pageNumber,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const reviews = [
+        {
+          content: "review content",
+          username: "username",
+          created: "2022-04-01",
+        },
+      ];
+      const amountOfReviews = reviews.length;
+
+      productRepository.getAmountOfReviews = () => amountOfReviews;
+      productRepository.getReviews = () => reviews;
+
+      await productController.getReviews(request, response);
+
+      expect(response.statusCode).toBe(200);
+    });
+
+    it("성공 : 리뷰가 없는 경우", async () => {
+      const product_code = "code-00000001";
+      const pageNumber = 1;
+      const request = httpMocks.createRequest({
+        params: {
+          id: product_code,
+        },
+        query: {
+          reviewPage: pageNumber,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const reviews = [];
+      const amountOfReviews = reviews.length;
+
+      productRepository.getAmountOfReviews = () => amountOfReviews;
+
+      await productController.getReviews(request, response);
+
+      expect(response.statusCode).toBe(200);
+      expect(response._getJSONData()).toEqual({ reviews, reviewPageLength: 1 });
+    });
+
+    it("실패 : 상품코드가 없는 경우", async () => {
+      const product_code = "";
+      const pageNumber = 1;
+      const request = httpMocks.createRequest({
+        params: {
+          id: product_code,
+        },
+        query: {
+          reviewPage: pageNumber,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const reviews = [];
+      const amountOfReviews = reviews.length;
+
+      productRepository.getAmountOfReviews = () => amountOfReviews;
+
+      await productController.getReviews(request, response);
+
+      expect(response.statusCode).toBe(404);
+    });
+
+    it("실패 : 페이지 번호가 숫자가 아닌 경우", async () => {
+      const product_code = "code-00000001";
+      const pageNumber = "number";
+      const request = httpMocks.createRequest({
+        params: {
+          id: product_code,
+        },
+        query: {
+          reviewPage: pageNumber,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const reviews = [];
+      const amountOfReviews = reviews.length;
+
+      productRepository.getAmountOfReviews = () => amountOfReviews;
+
+      await productController.getReviews(request, response);
+
+      expect(response.statusCode).toBe(404);
+    });
+
+    it("실패 : catch error", async () => {
+      const product_code = "code-00000001";
+      const pageNumber = 1;
+      const request = httpMocks.createRequest({
+        params: {
+          id: product_code,
+        },
+        query: {
+          reviewPage: pageNumber,
+        },
+      });
+      const response = httpMocks.createResponse();
+
+      productRepository.getAmountOfReviews = () => {
+        throw new Error();
+      };
+
+      await productController.getReviews(request, response);
+
+      expect(response.statusCode).toBe(400);
+    });
   });
 
   describe("getProduct", () => {
@@ -48,79 +168,23 @@ describe("product", () => {
         },
       });
       const response = httpMocks.createResponse();
-      productRepository.getByProduct_code = () => { return []};
+      productRepository.getByProduct_code = () => {
+        return [];
+      };
 
       await productController.getProduct(request, response);
 
       expect(response.statusCode).toBe(404);
     });
 
-    it("성공 : 리뷰 가져오기", async () => {
-      const product_code = "code-00000001";
-      const pageNumber = 1;
-      const request = httpMocks.createRequest({
-        params: {
-          id: product_code,
-        },
-        query: {
-          reviewPage: pageNumber,
-        },
-      });
-      const response = httpMocks.createResponse();
-      const reviews = [
-        {
-          content: "review content",
-          username: "username",
-          created: "2022-04-01",
-        },
-      ];
-      const amountOfReviews = reviews.length;
-
-      productRepository.getAmountOfReviews = () => amountOfReviews;
-      productRepository.getReviews = () => reviews;
-
-      await productController.getProduct(request, response);
-
-      expect(response.statusCode).toBe(200);
-    });
-
-    it("성공 : 리뷰가 없는 경우", async () => {
-      const product_code = "code-00000001";
-      const pageNumber = 1;
-      const request = httpMocks.createRequest({
-        params: {
-          id: product_code,
-        },
-        query: {
-          reviewPage: pageNumber,
-        },
-      });
-      const response = httpMocks.createResponse();
-      const reviews = [];
-      const amountOfReviews = reviews.length;
-
-      productRepository.getAmountOfReviews = () => amountOfReviews;
-
-      await productController.getProduct(request, response);
-
-      expect(response.statusCode).toBe(200);
-      expect(response._getJSONData()).toEqual({ reviews, reviewPageLength: 1 });
-    });
-
     it("실패 : catch error", async () => {
-      const product_code = "code-00000001";
-      const pageNumber = 1;
       const request = httpMocks.createRequest({
         params: {
-          id: product_code,
-        },
-        query: {
-          reviewPage: pageNumber,
+          id: "code-00000001",
         },
       });
       const response = httpMocks.createResponse();
-
-      productRepository.getAmountOfReviews = () => {
+      productRepository.getByProduct_code = () => {
         throw new Error();
       };
 

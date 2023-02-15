@@ -1,4 +1,4 @@
-import CommunityController from "../../controller/customer/community";
+import CommunityController from "../../../controller/customer/community.js";
 import httpMocks from "node-mocks-http";
 
 describe("community", () => {
@@ -19,6 +19,10 @@ describe("community", () => {
       });
       const response = httpMocks.createResponse();
       const next = jest.fn();
+      const existence = 1;
+      communityRepository.checkExistPost = jest.fn(() => {
+        return existence;
+      });
 
       await communityController.checkUniqueId(request, response, next);
 
@@ -26,16 +30,21 @@ describe("community", () => {
     });
 
     it("실패 : 게시글 id가 없는 경우", async () => {
-      const request = httpMocks.createRequest();
+      const request = httpMocks.createRequest({
+        params: {
+          id: 1,
+        },
+      });
       const response = httpMocks.createResponse();
       const next = jest.fn();
+      const existence = 0;
+      communityRepository.checkExistPost = jest.fn(() => {
+        return existence;
+      });
 
       await communityController.checkUniqueId(request, response, next);
 
       expect(response.statusCode).toBe(404);
-      expect(response._getJSONData().message).toBe(
-        "No unique id of post or comment"
-      );
       expect(next).not.toBeCalled();
     });
   });
@@ -129,19 +138,20 @@ describe("community", () => {
         },
       });
       const response = httpMocks.createResponse();
-      const post = { post_id: 1, title: "post title", content: "post content" };
-      communityRepository.getPostById = () => post;
-      communityRepository.modifyPost = jest.fn();
+      const affectedRow = 1;
+      communityRepository.modifyPost = jest.fn(() => {
+        return affectedRow;
+      });
 
       await communityController.modifyPost(reqeust, response);
 
       expect(response.statusCode).toBe(204);
     });
 
-    it("실패 : 존재하지 않는 게시글일 경우", async () => {
-      const title = "modify title..";
+    it("실패: 제목의 길이가 1보다 작은 경우", async () => {
+      const title = "";
       const content = "modify content..";
-      const request = httpMocks.createRequest({
+      const reqeust = httpMocks.createRequest({
         params: {
           id: 1,
         },
@@ -151,12 +161,62 @@ describe("community", () => {
         },
       });
       const response = httpMocks.createResponse();
-      communityRepository.getPostById = () => {};
+      const affectedRow = 1;
+      communityRepository.modifyPost = jest.fn(() => {
+        return affectedRow;
+      });
 
-      await communityController.modifyPost(request, response);
+      await communityController.modifyPost(reqeust, response);
 
-      expect(response.statusCode).toBe(404);
-      expect(response._getJSONData().message).toBe("no exists post");
+      expect(response.statusCode).toBe(400);
+      expect(response._getJSONData().code).toBe("ERROR61001");
+    });
+
+    it("실패: 내용의 길이가 1보다 작은 경우", async () => {
+      const title = "modify title..";
+      const content = "";
+      const reqeust = httpMocks.createRequest({
+        params: {
+          id: 1,
+        },
+        body: {
+          title,
+          content,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const affectedRow = 1;
+      communityRepository.modifyPost = jest.fn(() => {
+        return affectedRow;
+      });
+
+      await communityController.modifyPost(reqeust, response);
+
+      expect(response.statusCode).toBe(400);
+      expect(response._getJSONData().code).toBe("ERROR61001");
+    });
+
+    it("실패: affectedRow가 0인 경우", async () => {
+      const title = "modify title..";
+      const content = "modify content..";
+      const reqeust = httpMocks.createRequest({
+        params: {
+          id: 1,
+        },
+        body: {
+          title,
+          content,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const affectedRow = 0;
+      communityRepository.modifyPost = jest.fn(() => {
+        return affectedRow;
+      });
+
+      await communityController.modifyPost(reqeust, response);
+
+      expect(response.statusCode).toBe(403);
     });
 
     it("실패 : catch error", async () => {
@@ -187,16 +247,15 @@ describe("community", () => {
   describe("writeComment", () => {
     it("성공", async () => {
       const reqeust = httpMocks.createRequest({
-        query: {
-          postId: 1,
+        params: {
+          id: 1,
         },
         body: {
           comment: "comment...",
         },
       });
       const response = httpMocks.createResponse();
-      const post = { post_id: 1, title: "post title", content: "post content" };
-      communityRepository.getPostById = () => post;
+
       communityRepository.writeComment = jest.fn();
 
       await communityController.writeComment(reqeust, response);
@@ -204,36 +263,36 @@ describe("community", () => {
       expect(response.statusCode).toBe(204);
     });
 
-    it("실패 : 존재하지 않는 게시글일 경우", async () => {
+    it("실패: 댓글 내용이 없는 경우", async () => {
       const reqeust = httpMocks.createRequest({
-        query: {
-          postId: 1,
+        params: {
+          id: 1,
         },
         body: {
-          comment: "comment...",
+          comment: "",
         },
       });
       const response = httpMocks.createResponse();
-      communityRepository.getPostById = () => {};
+
+      communityRepository.writeComment = jest.fn();
 
       await communityController.writeComment(reqeust, response);
 
-      expect(response.statusCode).toBe(404);
-      expect(response._getJSONData().message).toBe("no exists post");
+      expect(response.statusCode).toBe(400);
+      expect(response._getJSONData().code).toBe("ERROR61001");
     });
 
     it("실패 : catch error", async () => {
       const reqeust = httpMocks.createRequest({
-        query: {
-          postId: 1,
+        params: {
+          id: 1,
         },
         body: {
           comment: "comment...",
         },
       });
       const response = httpMocks.createResponse();
-      const post = { post_id: 1, title: "post title", content: "post content" };
-      communityRepository.getPostById = () => post;
+
       communityRepository.writeComment = () => {
         throw new Error();
       };
@@ -252,12 +311,33 @@ describe("community", () => {
         },
       });
       const response = httpMocks.createResponse();
+      const affectedRow = 1;
 
-      communityRepository.deleteComment = jest.fn();
+      communityRepository.deleteComment = jest.fn(() => {
+        return affectedRow;
+      });
 
       await communityController.deleteComment(reqeust, response);
 
       expect(response.statusCode).toBe(204);
+    });
+
+    it("실패: affectedRow가 0인 경우", async () => {
+      const reqeust = httpMocks.createRequest({
+        params: {
+          id: 1,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const affectedRow = 0;
+
+      communityRepository.deleteComment = jest.fn(() => {
+        return affectedRow;
+      });
+
+      await communityController.deleteComment(reqeust, response);
+
+      expect(response.statusCode).toBe(403);
     });
 
     it("실패 : catch error", async () => {
@@ -285,12 +365,33 @@ describe("community", () => {
         },
       });
       const response = httpMocks.createResponse();
+      const affectedRow = 1;
 
-      communityRepository.deletePost = jest.fn();
+      communityRepository.deletePost = jest.fn(() => {
+        return affectedRow;
+      });
 
       await communityController.deletePost(reqeust, response);
 
       expect(response.statusCode).toBe(204);
+    });
+
+    it("실패: affectedRows가 0인 경우", async () => {
+      const reqeust = httpMocks.createRequest({
+        params: {
+          id: 1,
+        },
+      });
+      const response = httpMocks.createResponse();
+      const affectedRow = 0;
+
+      communityRepository.deletePost = jest.fn(() => {
+        return affectedRow;
+      });
+
+      await communityController.deletePost(reqeust, response);
+
+      expect(response.statusCode).toBe(403);
     });
 
     it("실패 : catch error", async () => {
@@ -470,22 +571,6 @@ describe("community", () => {
 
       expect(response.statusCode).toBe(200);
       expect(response._getJSONData()).toEqual({ post });
-    });
-
-    it("실패 : 존재하지 않는 게시글일 경우", async () => {
-      const request = httpMocks.createRequest({
-        params: {
-          id: 1,
-        },
-      });
-      const response = httpMocks.createResponse();
-
-      communityRepository.getPostById = () => {};
-
-      await communityController.getPost(request, response);
-
-      expect(response.statusCode).toBe(404);
-      expect(response._getJSONData().message).toBe("no exists post");
     });
 
     it("실패 : catch error", async () => {
