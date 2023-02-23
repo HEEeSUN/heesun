@@ -121,7 +121,16 @@ export function Products({ adminProductService }: Props) {
         formData.append("uploadedImage", imageFile, imageFile.name);
       }
 
-      formData.append("products", JSON.stringify(products));
+      const productInfo = {
+        productCode: code,
+        name,
+        description,
+        cost,
+        price,
+        options: products
+      }
+
+      formData.append("products", JSON.stringify(productInfo));
 
       try {
         await adminProductService.addProduct(formData);
@@ -223,14 +232,9 @@ export function Products({ adminProductService }: Props) {
       }
 
       const newProduct: Product = {
-        product_code: code,
-        name,
         option1,
         option2,
-        cost: Number(cost),
-        price: Number(price),
         stock: Number(stock),
-        description,
       };
 
       const newArray = [...products];
@@ -404,7 +408,6 @@ export function Products({ adminProductService }: Props) {
                 <td>번호</td>
                 <td>색상</td>
                 <td>사이즈</td>
-                <td>가격</td>
                 <td>재고</td>
               </tr>
               {products.map((item, key) => {
@@ -422,7 +425,6 @@ export function Products({ adminProductService }: Props) {
                     <td>{key + 1}</td>
                     <td>{item.option1}</td>
                     <td>{item.option2}</td>
-                    <td>{item.price}</td>
                     <td>{item.stock}</td>
                   </tr>
                 );

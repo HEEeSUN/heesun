@@ -66,7 +66,7 @@ export default class ProductService {
   async getReviews(product_code: string, pageNum: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/home/${product_code}?reviewPage=${pageNum}`,
+      url: `/home/${product_code}/reviews?reviewPage=${pageNum}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

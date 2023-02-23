@@ -49,16 +49,18 @@ export default class ProductRepository {
 
   testGetALL = async (today, orderBy, prevPage, amountOfSendData) => {
     return this.#db
-      .execute(`SELECT count(*) OVER() AS full_count, product_code, main_img_src, name, price, count(sale_id) AS sale, min(A.sale_price) AS sale_price, start, end 
+      .execute(`SELECT count(*) OVER() AS full_count, product_code, main_img_src, name, price, count(sale_id) AS sale, min(A.sale_price) AS sale_price, start, end, IFNULL(sale_price, price) as sortPrice 
                 FROM (product NATURAL JOIN product_option) LEFT JOIN (
-                  (SELECT * 
-                  FROM sale_product NATURAL JOIN time_sale_table
-                  WHERE start < '${today}' and end > '${today}')
+                  (
+                    SELECT * 
+                    FROM sale_product NATURAL JOIN time_sale_table
+                    WHERE start < '${today}' and end > '${today}')
                   UNION
-                  (SELECT * 
-                  FROM sale_product LEFT JOIN time_sale_table 
-                  USING(time_id)
-                  WHERE time_id IS null)
+                  (
+                    SELECT * 
+                    FROM sale_product LEFT JOIN time_sale_table 
+                    USING(time_id)
+                    WHERE time_id IS null)
                 )A
                 USING(product_code, option_number)
                 WHERE disabled is not true
@@ -70,16 +72,18 @@ export default class ProductRepository {
 
   testGetByName = async (name, today, orderBy, prevPage, amountOfSendData) => {
     return this.#db
-      .execute(`SELECT count(*) OVER() AS full_count, product_code, main_img_src, name, price, count(sale_id) AS sale, MAX(A.sale_price) AS sale_price, start, end 
+      .execute(`SELECT count(*) OVER() AS full_count, product_code, main_img_src, name, price, count(sale_id) AS sale, MAX(A.sale_price) AS sale_price, start, end, IFNULL(sale_price, price) as sortPrice 
                 FROM (product NATURAL JOIN product_option) LEFT JOIN (
-                  (SELECT * 
-                  FROM sale_product NATURAL JOIN time_sale_table
-                  WHERE start < '${today}' and end > '${today}')
+                  (
+                    SELECT * 
+                    FROM sale_product NATURAL JOIN time_sale_table
+                    WHERE start < '${today}' and end > '${today}')
                   UNION
-                  (SELECT * 
-                  FROM sale_product LEFT JOIN time_sale_table 
-                  USING(time_id)
-                  WHERE time_id IS null)
+                  (
+                    SELECT * 
+                    FROM sale_product LEFT JOIN time_sale_table 
+                    USING(time_id)
+                    WHERE time_id IS null)
                 )A
                 USING(product_code, option_number)
                 WHERE disabled is not true and name LIKE '%${name}%'

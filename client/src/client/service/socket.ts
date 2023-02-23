@@ -59,7 +59,6 @@ class Socket {
     });
 
     this.socket.on("disconnect", () => {
-      alert("서버와의 연결이 원활하지 않습니다\n잠시후 다시 시도해 주세요");
       callback("joinError");
     });
   }
@@ -73,12 +72,9 @@ class Socket {
     this.socket.emit("joinRoom", roomname);
   }
 
-  async createRoom(username: string, socketId: string) {
+  async createRoom(socketId: string) {
     try {
-      const { roomname } = await this.chattingService.createRoom(
-        username,
-        socketId
-      );
+      const { roomname } = await this.chattingService.createRoom(socketId);
 
       if (roomname) {
         this.roomname = roomname;
@@ -161,14 +157,13 @@ export const initSocket = async (
 };
 
 export const joinRoom = async (
-  username: string,
   socketId: string,
   roomname: string = ""
 ) => {
   if (roomname) {
     socket.joinRoom(roomname);
   } else {
-    await socket.createRoom(username, socketId);
+    await socket.createRoom(socketId);
     return;
   }
 };

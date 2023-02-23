@@ -4,10 +4,7 @@ export type ChattingService = {
     chattingUser: string
   ) => Promise<{ username: string; chatList: Chat[] }>;
   deleteChatting: (roomname: string) => Promise<void>;
-  createRoom: (
-    username: string,
-    socketId: string
-  ) => Promise<{ roomname: string }>;
+  createRoom: (socketId: string) => Promise<{ roomname: string }>;
   sendMessage: (
     uniqueId: string,
     text: string,

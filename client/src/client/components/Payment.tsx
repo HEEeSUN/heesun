@@ -8,7 +8,6 @@ declare global {
 
 type Props = {
   merchantUID: string;
-  orderId?: number | undefined;
   payInfo:
     | {
         amount: number;
@@ -17,12 +16,9 @@ type Props = {
     | undefined;
   setPayment: React.Dispatch<React.SetStateAction<boolean>>;
   paymentOption: string;
-  successPay: (
-    merchant_uid: string,
-    imp_uid: string,
-    orderId?: number
-  ) => Promise<void>;
-  failPay: (errorMsg: string) => void;
+  successPay: (impUID: string, merchantUID: string) => Promise<void>;
+  failPay: (merchantUID: string, errMsg: string) => Promise<void>;
+  mobileRedirectURL: string;
 };
 
 function Payment(props: Props) {
@@ -31,19 +27,18 @@ function Payment(props: Props) {
 
   let {
     merchantUID,
-    orderId,
     payInfo,
     setPayment,
     paymentOption,
     successPay,
     failPay,
+    mobileRedirectURL
   } = props;
 
   const requestPay = async () => {
     if (paymentOption !== "cash") {
       try {
         await payByIMP(merchantUID, successPay, failPay);
-        // await successPay(merchantUID, merchantUID, orderId);
         setPayment(false);
       } catch (error: any) {
         alert(error.message);
@@ -56,12 +51,8 @@ function Payment(props: Props) {
 
   const payByIMP = async (
     merchantUID: string,
-    successPay: (
-      merchantUID: string,
-      imp_uid: string,
-      orderId?: number
-    ) => Promise<void>,
-    failPay: (msg: string) => void
+    successPay: (impUID: string, merchantUID: string) => Promise<void>,
+    failPay: (merchantUID: string, errMsg: string) => Promise<void>
   ) => {
     IMP.request_pay(
       {
@@ -70,14 +61,16 @@ function Payment(props: Props) {
         merchant_uid: merchantUID, // 상점에서 관리하는 주문 번호
         name: payInfo?.productName,
         amount: payInfo?.amount,
+        m_redirect_url: `http://heesun.store${mobileRedirectURL}`
       },
       async (rsp: any) => {
         // callback 로직
         if (rsp.success) {
-          await successPay(merchantUID, rsp.imp_uid, orderId);
+          await successPay(rsp.imp_uid, merchantUID);
+          // await successPay(merchantUID, rsp.imp_uid, orderId);
           return;
         } else {
-          failPay(rsp.error_msg);
+          failPay(merchantUID, rsp.error_msg);
           return;
         }
       }

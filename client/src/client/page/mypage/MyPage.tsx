@@ -9,6 +9,7 @@ import {
 import Button from "../../components/Button";
 import OrderDetail from "./components/OrderDetail";
 import DateSearchBar from "./components/DateSearchBar";
+import Loading from "../../components/Loading";
 
 type Props = {
   memberService: MemberService;
@@ -32,24 +33,10 @@ function MyPage(props: Props) {
 
   /* 주문 목록 가져오기 */
   const getOrderList = async () => {
-    const offset = new Date().getTimezoneOffset() * 60000;
-    const curr = new Date(Date.now() - offset);
-    const today = curr.toISOString().substr(0, 10);
-    const time = curr.toISOString().substr(11, 8);
-
-    let date1 = prevDate + " 00:00:00";
-    let date2: string = "";
-
-    if (date < today) {
-      date2 = date + " 23:59:59";
-    } else {
-      date2 = date + " " + time;
-    }
-
     setLoading(true);
 
     try {
-      const result = await memberService.getOrderList(pageNumber, date1, date2);
+      const result = await memberService.getOrderList(pageNumber, prevDate, date);
       const { username, orderList, orderDetailList, hasmore } = result;
 
       let temp1: OrderList[];
@@ -186,11 +173,7 @@ function MyPage(props: Props) {
           }
         })
       )}
-      {error ? (
-        <div>Sorry, It isn't work.</div>
-      ) : loading ? (
-        <img className="loading" src="../image/loading.png" alt="loading"></img>
-      ) : null}
+      {error ? <div>Sorry, It isn't work.</div> : loading ? <Loading /> : null}
       {!hasmore ? <hr className="endline"></hr> : null}
     </div>
   );

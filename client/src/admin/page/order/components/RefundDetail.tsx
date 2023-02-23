@@ -1,43 +1,47 @@
 import { useEffect, useState } from "react";
 import {
   AdminOrderService,
-  Order,
-  RefundAmount,
+  RefundDetails,
+  PaymentInfo
 } from "../../../model/order.model";
 
 type Props = {
-  setShowStatusModal: React.Dispatch<React.SetStateAction<boolean>>;
-  refundList: Order[];
-  refundAmount: RefundAmount | undefined;
-  setRefundId: React.Dispatch<React.SetStateAction<number>>;
   adminOrderService: AdminOrderService;
-  updatePendingRefund: () => Promise<void>;
+  refundId: number;
+  closePopup: () => Promise<void>;
 };
 
+
 function RefundDetail(props: Props) {
-  let [refundProducts, setRefundProducts] = useState<Order[]>([]);
-  let [refundAll, setRefundAll] = useState<boolean>(false);
   let [realRefundProducts, setRealRefundProducts] = useState<number>(0);
   let [realRefundShippingFee, setRealRefundShippingFee] = useState<number>(0);
   let [realReturnShippingFee, setRealReturnShippingFee] = useState<number>(0);
   let [realRefundAmount, setRealRefundAmount] = useState<number>(0);
   let [차감액, set차감액] = useState<number>(0);
-  let [reflection, setRefelction] = useState<boolean>(false);
+  
+  let [refundProducts, setRefundProducts] = useState<RefundDetails[]>([]);
+  let [refundDetail, setRefundDetail] = useState<RefundDetails[]>([]);
+  let [paymentInfo, setPaymentInfo] = useState<PaymentInfo>();
+
+  let [setOff, setSetOff] = useState<number>(0);
+  let [extraPay, setExtraPay] = useState<number>(0);
 
   const {
-    setShowStatusModal,
-    refundList,
-    setRefundId,
-    refundAmount,
     adminOrderService,
-    updatePendingRefund
+    refundId,
+    closePopup
   } = props;
 
-  const onClose = async () => {
-    await updatePendingRefund();
-    setShowStatusModal(false);
-    setRefundId(0);
-  };
+  const getPendingRefundDetail = async () => {
+    try {
+      const { refundDetail, paymentInfo } = await adminOrderService.getPendingRefundDetail(refundId);
+
+      setRefundDetail(refundDetail)
+      setPaymentInfo(paymentInfo)
+    } catch (error: any) {
+      alert(error.message);
+    }
+  }
 
   const refund = async () => {
     let newArray: number[] = [];
@@ -47,21 +51,20 @@ function RefundDetail(props: Props) {
     });
 
     const refundInfo = {
-      paymentOption : refundList[0].paymentOption,
-      refundId: refundAmount?.refundId,
-      merchantUID: refundList[0].merchantUID,
-      impUID: refundList[0].imp_uid,
-      all: refundAll,
+      pendingRefundId: refundId,
+      merchantUID: paymentInfo?.merchantUID,
+      imp_uid: paymentInfo?.imp_uid,
       detailId: newArray,
       realRefundProducts,
       realRefundShippingFee,
       realReturnShippingFee,
-      reflection,
-      realRefundAmount
+      refundAmount: realRefundAmount,
+      setOff,
+      extraPay
     };
 
     try {
-      if (refundList[0].paymentOption === "cash") {
+      if (paymentInfo?.paymentOption === "cash") {
         const confirm = window.confirm('현금 결제건입니다.\환불을 먼저 하신 다음 확인을 눌러주세요.')
         
         if (!confirm) {
@@ -72,7 +75,7 @@ function RefundDetail(props: Props) {
       await adminOrderService.refund(refundInfo);
 
       alert("선택하신 상품에 대하여 환불이 완료되었습니다");
-      onClose();
+      closePopup();
     } catch (error: any) {
       alert(error.message)
     }
@@ -82,7 +85,7 @@ function RefundDetail(props: Props) {
     let newArray = [...refundProducts];
 
     if (event.target.checked) {
-      const find = refundList.find(
+      const find = refundDetail.find(
         (refund) => refund.detail_id === Number(event.target.value)
       );
 
@@ -109,50 +112,59 @@ function RefundDetail(props: Props) {
     const find =  refundProducts.find(product => product.deliverystatus !== "결제완료");
     
     let tempRealReturnShippingFee = 0;
+    let real차감액 = 0;
+
     if (refundProducts.length === 0) {
       setRealReturnShippingFee(0);
     } else {
-      if (refundAmount?.returnShippingFee) {
+      if (paymentInfo?.returnShippingFee) {
         if (find) {
-          setRealReturnShippingFee(refundAmount.returnShippingFee);
-          tempRealReturnShippingFee = refundAmount.returnShippingFee;
+          setRealReturnShippingFee(paymentInfo.returnShippingFee);
+          tempRealReturnShippingFee = paymentInfo.returnShippingFee;
+
+          setSetOff(paymentInfo.setOff);
+          setExtraPay(paymentInfo.extraPay);
+
+          set차감액(paymentInfo.extraPay + paymentInfo.setOff);
+          real차감액 = paymentInfo.extraPay + paymentInfo.setOff;
+
         } else {
           setRealReturnShippingFee(0);
           tempRealReturnShippingFee = 0;
+
+          setSetOff(0);
+          setExtraPay(0);
+
+          set차감액(0);
+          real차감액 = 0;
         }
       }
     }
 
     let tempRealRefundShippingFee = 0;
-    if (amount === refundAmount?.refundProductPrice) {
-      setRefundAll(true);
-      setRealRefundShippingFee(refundAmount.refundShippingFee);
-      tempRealRefundShippingFee = refundAmount.refundShippingFee;
+    if (amount === paymentInfo?.productsPrice) {
+      setRealRefundShippingFee(paymentInfo.shippingFee);
+      tempRealRefundShippingFee = paymentInfo.shippingFee;
     } else {
-      setRefundAll(false);
       setRealRefundShippingFee(0);
       tempRealRefundShippingFee = 0;
     }
     setRealRefundProducts(amount);
 
-    let real차감액 = 0;
-    if(refundProducts && !refundAmount?.reflection && refundAmount?.extraPay) {
-      set차감액(refundAmount.extraPay);
-      real차감액 = refundAmount.extraPay;
-      setRefelction(true);
-    } 
-    // else {
-    //   set차감액(0);
-    //   real차감액 = 0;
-    //   setRefelction(false);
-    // }
+    // let real차감액 = 0;
+    // if(refundProducts && paymentInfo?.extraPay || paymentInfo?.setOff) {
+    //   set차감액(paymentInfo.extraPay + paymentInfo.setOff);
+    //   real차감액 = paymentInfo.extraPay + paymentInfo.setOff;
+    // } 
     
     setRealRefundAmount(amount+tempRealRefundShippingFee-tempRealReturnShippingFee+real차감액)
   }, [refundProducts]);
 
   useEffect(() => {
+    getPendingRefundDetail();
+
     return () => {
-      setRefundId(0);
+      closePopup();
     };
   }, []);
 
@@ -162,19 +174,19 @@ function RefundDetail(props: Props) {
         <table>
           <tr>
             <td className="order-info-label">주문번호</td>
-            <td>{refundList[0].merchantUID}</td>
+            <td>{paymentInfo?.merchantUID}</td>
           </tr>
           <tr>
             <td className="order-info-label">주문자</td>
-            <td>{refundList[0].orderer}</td>
+            <td>{paymentInfo?.orderer}</td>
           </tr>
           <tr>
             <td className="order-info-label">연락처</td>
-            <td>{refundList[0].phone}</td>
+            <td>{paymentInfo?.phone}</td>
           </tr>
           <tr>
             <td className="order-info-label">배송지</td>
-            <td>{refundList[0].address + refundList[0].extra_address}</td>
+            <td>{String(paymentInfo?.address)+ String(paymentInfo?.extra_address)}</td>
           </tr>
         </table>
       </div>
@@ -189,14 +201,11 @@ function RefundDetail(props: Props) {
             <th>환불요청액</th>
           </tr>
           <tr>
-            <td>{refundList[0].paymentOption}</td>
-            <td>{refundList[0].amount}</td>
-            <td>{refundList[0].refund_amount}</td>
-            <td>{refundList[0].rest_refund_amount}</td>
-            <td>{refundAmount
-                ? refundAmount.refundProductPrice +
-                  refundAmount.refundShippingFee
-                : 0}</td>
+            <td>{paymentInfo?.paymentOption}</td>
+            <td>{paymentInfo?.payAmount}</td>
+            <td>{paymentInfo?.pastAmount}</td>
+            <td>{paymentInfo? paymentInfo.payAmount-paymentInfo.pastAmount : 0}</td>
+            <td>{paymentInfo? paymentInfo.amount : 0}</td>
           </tr>
           <tr>
             <th rowSpan={2}>환불요청정보</th>
@@ -207,14 +216,13 @@ function RefundDetail(props: Props) {
             <th>총환불액</th>
           </tr>
           <tr>
-            <td>{refundAmount?.refundProductPrice}</td>
-            <td>{refundAmount?.refundShippingFee}</td>
-            <td>{refundAmount?.returnShippingFee}</td>
-            <td>{refundAmount?.extraPay}</td>
+            <td>{paymentInfo?.productsPrice}</td>
+            <td>{paymentInfo?.shippingFee}</td>
+            <td>{paymentInfo?.returnShippingFee}</td>
+            <td>{paymentInfo? paymentInfo?.extraPay + paymentInfo?.setOff : 0}</td>
             <td>
-              {refundAmount
-                ? refundAmount.refundProductPrice +
-                  refundAmount.refundShippingFee
+              {paymentInfo
+                ? paymentInfo.amount
                 : 0}
             </td>
           </tr>
@@ -229,7 +237,7 @@ function RefundDetail(props: Props) {
             <th>수량</th>
             <th>주문상태</th>
           </tr>
-          {refundList.map((refund) => {
+          {refundDetail.map((refund) => {
             return (
               <tr>
                 <td>
@@ -237,7 +245,6 @@ function RefundDetail(props: Props) {
                     type="checkbox"
                     value={refund.detail_id}
                     onChange={checked}
-                    disabled={refund.refundStatus === "complete"}
                   ></input>
                 </td>
                 <td>{refund.product_name}</td>

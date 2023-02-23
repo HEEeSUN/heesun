@@ -13,7 +13,7 @@ export type CommunityService = {
     pageNumber: number
   ) => Promise<{ comments: Comments[]; commentPageLength: number }>;
   writeComment: (postId: string, comment: string) => Promise<void>;
-  deleteComment: (commentId: number) => Promise<void>;
+  deleteComment: (postId: string, commentId: number) => Promise<void>;
 };
 
 export type Comments = {

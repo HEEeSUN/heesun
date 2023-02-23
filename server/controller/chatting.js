@@ -3,6 +3,19 @@ export default class ChattingController {
     this.chatting = chattingRepository;
   }
 
+  /* 특정 채팅방에 접속시 해당 채팅방이름이 유효한지 확인 */
+  checkRoomname = async (req, res, next) => {
+    const roomname = req.params.id;
+
+    const existence = await this.chatting.checkRoomname(roomname);
+
+    if (!existence) {
+      return res.sendStatus(404)
+    }
+
+    next();
+  }
+
   /* 채팅 목록 가져오기 */
   getChattings = async (req, res) => {
     try {
@@ -61,8 +74,13 @@ export default class ChattingController {
   /* 새로운 채팅 생성 */
   joinRoom = async (req, res) => {
     try {
+      const { username } = req;
+      const { socketId } = req.body;
       let member;
-      let { username, socketId } = req.body;
+
+      if (!socketId) {
+        return res.sendStatus(400)
+      }
 
       username ? (member = 1) : (member = 0);
 
@@ -84,7 +102,7 @@ export default class ChattingController {
     try {
       const roomname = req.params.id;
 
-      await this.chatting.setDisabledChatting(roomname);
+      this.chatting.setDisabledChatting(roomname);
 
       res.sendStatus(204);
     } catch (error) {
@@ -107,8 +125,33 @@ export default class ChattingController {
     }
   };
 
-  /* 채팅 내용 가져오기 */
-  getMessage = async (req, res) => {
+  /* 신규 메시지 가져오기 */
+  getNewMessage = async (req, res) => {
+    try {
+      const username = req.username;
+      const roomname = req.params.id;
+      let { user } = req.query;
+      const chattingUser = user;
+
+      const chatting = await this.chatting.getNewChatting(
+        roomname,
+        chattingUser
+      );
+
+      if (chatting) {
+        await this.chatting.updateNewChatting(roomname, chatting.chatting_id);
+      }
+
+      return res.status(200).json({ username, newChatting: chatting });
+
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+  }
+
+  /* 기존 채팅 내용 가져오기 */
+  getMessages = async (req, res) => {
     try {
       const username = req.username;
       const roomname = req.params.id;
@@ -116,44 +159,35 @@ export default class ChattingController {
       let { page, user } = req.query;
       const chattingUser = user;
 
-      if (!page) {
-        const chatting = await this.chatting.getNewChatting(
-          roomname,
-          chattingUser
-        );
+      if (isNaN(Number(page))) return res.sendStatus(404);
 
-        await this.chatting.updateNewChatting(roomname, chatting.chatting_id);
+      let prevPage = (page - 1) * amountOfSendData;
+      let hasmore = true;
 
-        return res.status(200).json({ username, newChatting: chatting });
-      } else {
-        if (isNaN(Number(page))) return res.sendStatus(404);
+      const chatting = await this.chatting.getChatting(
+        roomname,
+        prevPage,
+        amountOfSendData
+      );
 
-        let prevPage = (page - 1) * amountOfSendData;
-        let hasmore = true;
-
-        const chatting = await this.chatting.getChatting(
-          roomname,
-          prevPage,
-          amountOfSendData
-        );
-
-        if (chatting.length < 1) {
-          hasmore = false;
-        }
-        const reverse = chatting.reverse();
-
-        await this.chatting.readAllMsg(roomname, chattingUser);
-
-        return res
-          .status(200)
-          .json({ username, newChatting: reverse, hasmore });
+      if (chatting.length < 1) {
+        hasmore = false;
       }
+      const reverse = chatting.reverse();
+
+      await this.chatting.readAllMsg(roomname, chattingUser);
+
+      return res
+        .status(200)
+        .json({ username, newChatting: reverse, hasmore });
+
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
     }
   };
 
+  /* 세션이 만료된 채팅 삭제 (고객의 세션 접속이 끊기는 경우 실행)*/
   deleteExpiredChatting = async (socketId) => {
     try {
       this.chatting.deleteExpiredChatting(socketId);
@@ -162,6 +196,7 @@ export default class ChattingController {
     }
   };
 
+  /* 사용자 ID와 소켓 ID를 매칭 */
   testInitSocket = async (username, socketId) => {
     if (username) {
       const user = await this.chatting.getPlayer(username);
@@ -182,6 +217,7 @@ export default class ChattingController {
     return;
   };
 
+  /* 신규 채팅방 개설 */
   createChatting = async (username, member) => {
     let chatListId;
 
@@ -211,15 +247,12 @@ export default class ChattingController {
     }
   };
 
+  /* 메시지 전송 */ 
   sendMessage = async (req, res) => {
     try {
       const username = req.username;
       const roomname = req.params.id;
       const { uniqueId, message, readAMsg, socketId, chattingUser } = req.body;
-
-      if (!roomname) {
-        return res.status(400).json({ code: "" });
-      }
 
       const date = new Date();
 
@@ -255,4 +288,27 @@ export default class ChattingController {
       res.sendStatus(400);
     }
   };
+
+  /* 메시지 전송시 클라이언트에서 받아오 값이 유효한지 확인 */
+  validationCheck  = async (req, res, next) => {
+    try {
+      const { uniqueId, message, readAMsg, socketId, chattingUser } = req.body;
+
+      if (!uniqueId || !message || !socketId) {
+        throw new Error();
+      } 
+
+      if (readAMsg !== true && readAMsg !==false) {
+        throw new Error();
+      }
+
+      if (chattingUser !== 'customer' && chattingUser !=='master') {
+        throw new Error();
+      }
+
+      next();
+    } catch (error) {
+      return res.sendStatus(400);
+    }
+  }
 }

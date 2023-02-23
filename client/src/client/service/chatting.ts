@@ -26,12 +26,11 @@ export default class ChattingService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async createRoom(username: string, socketId: string): Promise<any> {
+  async createRoom(socketId: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
       url: `/chatting`,
       data: {
-        username,
         socketId,
       },
     };
@@ -87,7 +86,7 @@ export default class ChattingService {
   async getNewMessage(roomname: string, chattingUser: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/chatting/${roomname}?user=${chattingUser}`,
+      url: `/chatting/${roomname}/new?user=${chattingUser}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

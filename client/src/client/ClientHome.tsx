@@ -9,6 +9,9 @@ import { ChattingService } from "./model/chatting.model";
 import { CommunityService } from "./model/community.model";
 import { MemberService } from "./model/member.model";
 import { ProductService } from "./model/product.model";
+import { ContactService } from "./model/contact.model";
+import { OrderService } from "./model/order.model";
+import Main from "./page/Main";
 import Signup from "./page/signup/Signup";
 import Login from "./page/login/Login";
 import SearchUser from "./page/search/SearchUser";
@@ -19,6 +22,7 @@ import Product from "./page/product/Product";
 import Community from "./page/community/Community";
 import Post from "./page/post/Post";
 import ChattingList from "./page/chatting/ChattingList";
+import Contact from "./page/contact/Contact";
 import Member from "./page/Member";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -31,6 +35,8 @@ type Props = {
   memberService: MemberService;
   communityService: CommunityService;
   chattingService: ChattingService;
+  contactService: ContactService;
+  orderService: OrderService;
   regex: Regex;
 };
 
@@ -47,6 +53,8 @@ function ClientHome(props: Props) {
     memberService,
     communityService,
     chattingService,
+    contactService,
+    orderService,
     regex,
   } = props;
   const histroy = useHistory();
@@ -135,13 +143,25 @@ function ClientHome(props: Props) {
             <InquiryButton showChattingList={showChattingList} />
           </Route>
           <Route exact path="/home/member/signup">
-            <Signup memberService={memberService} regex={regex} />
+            {loginState ? (
+              <Main />
+            ) : (
+              <Signup memberService={memberService} regex={regex} />
+            )}
           </Route>
           <Route exact path="/home/member/search">
-            <SearchUser memberService={memberService} />
+            {loginState ? (
+              <Main />
+            ) : (
+              <SearchUser memberService={memberService} />
+            )}
           </Route>
           <Route exact path="/home/member/login">
-            <Login memberService={memberService} regex={regex} />
+            {loginState ? (
+              <Main />
+            ) : (
+              <Login memberService={memberService} regex={regex} />
+            )}
           </Route>
           <Route path="/home/member">
             {!loginState ? (
@@ -149,6 +169,7 @@ function ClientHome(props: Props) {
             ) : (
               <Member
                 memberService={memberService}
+                orderService={orderService}
                 setQuantityInCart={setQuantityInCart}
                 regex={regex}
               />
@@ -163,6 +184,12 @@ function ClientHome(props: Props) {
           <Route exact path="/home/community/:id">
             <Post communityService={communityService} username={username} />
           </Route>
+          <Route exact path="/home/contact">
+            <Contact contactService={contactService} regex={regex} />
+          </Route>
+          <Route exact path="/home/api-docs">
+            <ApiDocs memberService={memberService}/>
+          </Route>
           <Route path="*">
             <NotFound />
           </Route>
@@ -174,3 +201,15 @@ function ClientHome(props: Props) {
 }
 
 export default ClientHome;
+
+type p = {
+  memberService: MemberService;
+}
+function ApiDocs({memberService}: p){
+  useEffect(()=>{
+    memberService.apiDOCS();
+
+  },[])
+
+  return null
+}

@@ -11,22 +11,31 @@ export type AdminOrderService = {
     orderPageLength: number;
     refundNum: number;
   }>;
-  getPendingRefund: (pageNumber: number) => Promise<{
-    refundList: RefundAmount[] | [];
-    orderList: OrderList[] | [];
-    orderPageLength: number;
-  }>;
-  refund: (refundInfo: RefundInfo) => Promise<void>;
-  refundFail: (savePoint: SavePoint) => Promise<void>;
+  changeState: (detail_id: number, state: string) => Promise<void>;
   getDeliveryStatus: (deliveryDetailId: number) => Promise<{
     status: DeliveryStatus[] | [];
   }>;
-  changeState: (detail_id: number, state: string) => Promise<void>;
+  getPendingRefundList: (pageNumber: number) => Promise<{
+    refundList: RefundList[] | [];
+    orderPageLength: number;
+  }>;
+  getPendingRefundDetail: (refundId: number) => Promise<{
+    refundDetail: RefundDetails[] | [];
+    paymentInfo: PaymentInfo;
+  }>;
+  refund: (refundInfo: RefundInfo) => Promise<void>;
 };
 
 export type ReturnDate = {
   startDate: string;
   endDate: string;
+};
+
+export type RefundList = {
+  pendingRefundId: number;
+  merchantUID: string;
+  product_name: string;
+  count: number;
 };
 
 export type Orders = {
@@ -44,17 +53,6 @@ export type Orders = {
   phone: string;
   address: string;
   extra_address: string;
-};
-
-export type RefundAmount = {
-  refundId: number;
-  merchantUID: string;
-  impUID: string;
-  refundShippingFee: number;
-  refundProductPrice: number;
-  returnShippingFee: number;
-  extraPay: number;
-  reflection: boolean;
 };
 
 export type Order = {
@@ -86,32 +84,42 @@ export type DeliveryStatus = {
   date: string;
 };
 
-export type SavePoint = {
-  payment: {
-    restRefundAmount: number;
-    refundAmount: number;
-    returnShippingFee: number;
-    shippingFee: number;
-  };
-  pending: Refund | undefined;
-};
-
 export type RefundInfo = {
-  refundId: number | undefined;
-  merchantUID: string;
-  impUID: string;
-  all: boolean;
+  pendingRefundId: number;
+  merchantUID: string | undefined;
+  imp_uid: string | undefined;
   detailId: number[];
   realRefundProducts: number;
   realRefundShippingFee: number;
   realReturnShippingFee: number;
+  refundAmount: number;
+  setOff: number;
+  extraPay: number;
 };
 
-export type Refund = {
-  refundId: number;
+export type PaymentInfo = {
   merchantUID: string;
-  impUID: string;
-  refundShippingFee: number;
-  refundProductPrice: number;
+  payAmount: number;
+  imp_uid: string;
+  paymentOption: string;
+  orderer: string;
+  address: string;
+  extra_address: string;
+  phone: string;
+  pendingRefundId: number;
+  amount: number;
+  productsPrice: number;
+  shippingFee: number;
   returnShippingFee: number;
+  setOff: number;
+  extraPay: number;
+  pastAmount: number;
+};
+
+export type RefundDetails = {
+  detail_id: number;
+  product_name: string;
+  price: number;
+  quantity: number;
+  deliverystatus: string;
 };

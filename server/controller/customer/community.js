@@ -5,16 +5,16 @@ export default class CommunityController {
 
   /* postId로 접근하는 것들에 대해 유효한 값인지 사전에 검사 */
   checkUniqueId = async (req, res, next) => {
-    const id = req.params.id;
+    const postId = req.params.id;
 
-    if (!id) {
-      return res
-        .status(404)
-        .json({ message: "No unique id of post or comment" });
+    const existence = await this.community.checkExistPost(postId);
+
+    if (!existence) {
+      return res.sendStatus(404)
     }
 
     next();
-  };
+  }
 
   /* 게시글 작성 */
   writePost = async (req, res) => {
@@ -22,10 +22,12 @@ export default class CommunityController {
       const { username } = req;
       const { title, content } = req.body;
 
-      if (!title | !content) {
-        return res
-          .status(400)
-          .json({ message: "failed to write post. fill your post." });
+      if (title.length < 1 || title.length > 100) {
+        throw new Error('ERROR61001');
+      }
+
+      if (content.length < 1) {
+        throw new Error('ERROR61001');
       }
 
       const postId = await this.community.writePost(title, content, username);
@@ -33,28 +35,35 @@ export default class CommunityController {
       res.status(201).json({ postId });
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({code: error.message || ''});
     }
   };
 
-  /* 게시물 수정 */
+  /* 게시글 수정 */
   modifyPost = async (req, res) => {
     try {
+      const { username } = req;
       const postId = req.params.id;
       const { title, content } = req.body;
 
-      const post = await this.community.getPostById(postId);
-
-      if (!post) {
-        return res.status(404).json({ message: "no exists post" });
+      if (title.length < 1 || title.length > 100) {
+        throw new Error('ERROR61001');
       }
 
-      await this.community.modifyPost(postId, title, content);
+      if (content.length < 1) {
+        throw new Error('ERROR61001');
+      }
+
+      const affectedRows  = await this.community.modifyPost(postId, username, title, content);
+
+      if (!affectedRows) {
+        return res.sendStatus(403);
+      }
 
       res.sendStatus(204);
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({code: error.message || ''});
     }
   };
 
@@ -65,11 +74,8 @@ export default class CommunityController {
       const postId = req.params.id;
       const { comment } = req.body;
 
-      const post = await this.community.getPostById(postId);
-
-      if (!post) {
-        return res.status(404).json({ message: "no exists post" });
-        // return res.status(409).json({ code: "ERROR40007" });
+      if (comment.length < 1) {
+        throw new Error('ERROR61001');
       }
 
       await this.community.writeComment(postId, comment, username);
@@ -77,17 +83,21 @@ export default class CommunityController {
       res.sendStatus(204);
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({code: error.message || ''});
     }
   };
 
-  /* 게시글 및 댓글 삭제 */
+  /* 댓글 삭제 */
   deleteComment = async (req, res) => {
     try {
       const { username } = req;
-      const commentId = req.params.id;
+      const commentId = req.query.commentId;
 
-      await this.community.deleteComment(commentId, username);
+      const affectedRows = await this.community.deleteComment(commentId, username);
+
+      if (!affectedRows) {
+        return res.sendStatus(403);
+      }
 
       res.sendStatus(204);
     } catch (error) {
@@ -102,7 +112,11 @@ export default class CommunityController {
       const postId = req.params.id;
       const username = req.username;
 
-      await this.community.deletePost(postId, username);
+      const affectedRow = await this.community.deletePost(postId, username);
+
+      if (!affectedRow) {
+        return res.sendStatus(403);
+      }
 
       res.sendStatus(204);
     } catch (error) {
@@ -114,7 +128,8 @@ export default class CommunityController {
   /* 게시글에 달려있는 댓글 불러오기 */
   getComments = async (req, res) => {
     try {
-      let { postId, pageNum } = req.query;
+      const postId = req.params.id;
+      let { pageNum } = req.query;
 
       if (isNaN(Number(pageNum))) return res.sendStatus(404);
 
@@ -147,16 +162,12 @@ export default class CommunityController {
     }
   };
 
-  /* 선택한 게시글 및 댓글 불러오기 */
+  /* 선택한 게시글 불러오기 */
   getPost = async (req, res) => {
     try {
       const postId = req.params.id;
 
-      const post = await this.community.getPostById(postId);
-
-      if (!post) {
-        return res.status(404).json({ message: "no exists post" });
-      }
+      const post = await this.community.getPostById(postId)
 
       res.status(200).json({ post });
     } catch (error) {
@@ -172,7 +183,7 @@ export default class CommunityController {
 
       if (isNaN(Number(pageNum))) return res.sendStatus(404);
 
-      const amountOfSendData = 5; // 한번에 보낼 게시글의 개수
+      const amountOfSendData = 10; // 한번에 보낼 게시글의 개수
       let prevPage = (pageNum - 1) * amountOfSendData;
       let posts;
       let postPageLength = 1;

@@ -1,5 +1,7 @@
 const verifyClientUrl = (req, res, next) => {
-  if (req.get("origin") !== process.env.CLIENT_URL) {
+  const referer  = req.get("referer")
+  const origin = req.get("origin")
+  if (origin !== process.env.CLIENT_URL && referer !== process.env.OPEN_API_URL) {
     return res.sendStatus(404);
   }
 

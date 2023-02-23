@@ -78,7 +78,7 @@ export default class communityService {
   async getComments(postId: string, commentPage: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
-      url: `/community/comment?postId=${postId}&pageNum=${commentPage}`,
+      url: `/community/${postId}/comments?pageNum=${commentPage}`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -88,7 +88,7 @@ export default class communityService {
   async writeComment(postId: string, comment: string): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: `/community/${postId}`,
+      url: `/community/${postId}/comments`,
       data: {
         comment,
       },
@@ -98,10 +98,10 @@ export default class communityService {
   }
 
   /* 게시글에 달린 댓글 지우기 */
-  async deleteComment(comment_id: number): Promise<any> {
+  async deleteComment(postId: string, comment_id: number): Promise<any> {
     const axiosAPI: AxiosRequestConfig = {
       method: "delete",
-      url: `/community/comment/${comment_id}`,
+      url: `/community/${postId}/comments?commentId=${comment_id}`,
     };
 
     return this.http.axiosAPI(axiosAPI);

@@ -8,53 +8,94 @@ export default class UserController {
     this.requestRefundToIMP = requestRefundToIMP;
   }
 
-  /* 회원가입 (idCheck 값이 true로 들어올 경우 중복체크만 해서 return함) */
-  signup = async (req, res) => {
+  /* id 중복 체크 */
+  idDuplicateCheck = async (req, res) => {
     try {
-      const { idCheck } = req.body;
+      const { username } = req.query;
 
-      if (idCheck) {
-        const { username } = req.body;
+      const result = await this.user.findByUsername(username);
 
-        const result = await this.user.findByUsername(username);
-
-        if (result) {
-          return res.status(409).json({ code: "ERROR00003" });
-        } else {
-          return res.sendStatus(200);
-        }
+      if (result) {
+        return res.status(409).json({ code: "ERROR00003" });
       } else {
-        const { signupInfo } = req.body;
-        const {
-          username,
-          password,
-          name,
-          email,
-          phone,
-          address = "",
-          extraAddress = "",
-        } = signupInfo;
-
-        const hashed = await bcrypt.hash(
-          password,
-          parseInt(process.env.BCRYPT_SALT_ROUNDS)
-        );
-
-        await this.user.createUser(
-          username,
-          hashed,
-          name,
-          email,
-          phone,
-          address,
-          extraAddress
-        );
-
-        res.sendStatus(201);
+        return res.sendStatus(200);
       }
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
+    }
+  }
+
+  /* 회원가입 및 회원정보 수정시 클라이언트에서 받아온 값이 유효한지 확인 */
+  validationCheck = (userinfo) => {
+    try {
+      const regex = {
+        username: /^[0-9a-zA-Z]{6,20}$/,
+        // password: /[0-9a-zA-Z]{1,}[^0-9a-zA-Z]{1,}/,
+        password: /^(?=.*[a-zA-z0-9])(?=.*[^0-9a-zA-Z]).{8,20}$/, 
+        name: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{1,20}$/,
+        phone: /^[0-9]{9,12}$/,
+        email:
+          /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/,
+        // address: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{0,100}$/,
+        // extra_address: /^[0-9a-zA-Zㄱ-ㅎㅏ-ㅣ가-힣]{0,100}$/,/^.{0,20}$/  
+        address: /^.{0,100}$/  ,
+        extra_address: /^.{0,100}$/  ,
+      };
+
+      const keys = Object.keys(userinfo);
+
+      keys.forEach((item)=>{
+        if (!regex[item].test(userinfo[item])) {
+          throw new Error();
+        }
+      })
+
+      return true;
+            
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+
+  /* 회원가입 */
+  signup = async (req, res) => {
+    try {
+      const { signupInfo } = req.body;
+      const {
+        username,
+        password,
+        name,
+        email,
+        phone,
+        address = "",
+        extra_address = "",
+      } = signupInfo;
+
+      if (!this.validationCheck(signupInfo)) {
+        throw new Error('ERROR61001');
+      }
+
+      const hashed = await bcrypt.hash(
+        password,
+        parseInt(process.env.BCRYPT_SALT_ROUNDS)
+      );
+
+      await this.user.createUser(
+        username,
+        hashed,
+        name,
+        email,
+        phone,
+        address,
+        extra_address
+      );
+
+      res.sendStatus(201);
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({ code: error.message || '' });
     }
   };
 
@@ -140,7 +181,7 @@ export default class UserController {
     res.cookie("token", token, options);
   };
 
-  /* 로그인, 카트 담기, 카트안 상품 삭제시 카트안의 총 수량을 체크 */
+  /* 로그인시 카트안의 총 수량을 체크 */
   cartSummary = async (id) => {
     const result = await this.user.getQuantityInCart(id).catch((err) => {
       return false;
@@ -151,8 +192,9 @@ export default class UserController {
   /* 사용자 id, pw 찾아서 메일로 전송 */
   searchUserInfo = async (req, res) => {
     try {
+      const { thing } = req.query;
       const { userInfo } = req.body;
-      const { id, pw } = req.query;
+      const { username, email } = userInfo;
 
       let transporter = nodemailer.createTransport({
         service: process.env.MAILER_SERVICE,
@@ -162,13 +204,11 @@ export default class UserController {
         },
       });
 
-      if (id) {
-        const { name, email } = userInfo;
-
-        const result = await this.user.findByNameAndEmail(name, email);
+      if (thing === 'id') {
+        const result = await this.user.findByNameAndEmail(username, email);
 
         if (!result) {
-          return res.status(402).json({ code: "ERROR00004" });
+          return res.status(400).json({ code: "ERROR00004" });
         }
 
         const mailOptions = {
@@ -184,14 +224,12 @@ export default class UserController {
         const info = await transporter.sendMail(mailOptions);
 
         if (!info) {
-          return res.sendStatus(403);
+          return res.sendStatus(400);
         }
       }
 
-      if (pw) {
-        const { id, email } = userInfo;
-
-        const result = await this.user.findByUsernameAndEmail(id, email);
+      if (thing === 'pw') {
+        const result = await this.user.findByUsernameAndEmail(username, email);
 
         if (!result) {
           return res.status(400).json({ code: "ERROR00004" });
@@ -206,7 +244,7 @@ export default class UserController {
         const mailOptions = {
           from: process.env.MAILER_USERNAME,
           to: email,
-          subject: `[heesun] ${id}님 임시 비밀번호 발송해드립니다.`,
+          subject: `[heesun] ${username}님 임시 비밀번호 발송해드립니다.`,
           html: `<h4>임시비밀번호 발송</h4>
                   <div>
                     <p>아래 임시비밀번호로 로그인하여 새로운 비밀번호로 변경하여 주세요.</p>
@@ -219,7 +257,7 @@ export default class UserController {
           return res.sendStatus(400);
         }
 
-        this.user.updatePassword(id, hashed);
+        this.user.updatePassword(username, hashed);
       }
       res.sendStatus(204);
     } catch (error) {
@@ -231,8 +269,13 @@ export default class UserController {
   /* 장바구니 상품 삭제 */
   removeProductInCART = async (req, res) => {
     try {
+      const { userId } = req;
       const { id } = req.query;
-      await this.user.deleteProduct(id);
+      const affectedRows = await this.user.deleteProduct(userId, id);
+
+      if (!affectedRows) {
+        return res.sendStatus(403);
+      }
 
       res.sendStatus(204);
     } catch (error) {
@@ -241,7 +284,7 @@ export default class UserController {
     }
   };
 
-  /* 사용자 정보 불러오기 (my page의 my info 및 상품 주문시 사용자 정보 불러올 경우) */
+  /* 사용자 정보 불러오기 */
   getMyInfo = async (req, res) => {
     try {
       const { username } = req;
@@ -262,87 +305,41 @@ export default class UserController {
   /* 사용자 정보 수정 */
   modifyUserInfo = async (req, res) => {
     try {
+      const { userId } = req;
       const { userInfo } = req.body;
       const { password } = userInfo;
 
+      if (!this.validationCheck(userInfo)) {
+        throw new Error('ERROR61001');
+      }
+
       if (!password) {
-        await this.user.modifyUserInfo(userInfo);
+        await this.user.modifyUserInfo(userInfo, userId);
       } else {
         const hashed = await bcrypt.hash(
           password,
           parseInt(process.env.BCRYPT_SALT_ROUNDS)
         );
 
-        await this.user.modifyUserInfoAndPw(userInfo, hashed);
+        await this.user.modifyUserInfoAndPw(userInfo, userId, hashed);
       }
 
       res.sendStatus(200);
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 환불 요청할 주문 정보 불러오기 */
-  getOrder = async (req, res) => {
-    try {
-      const id = req.params.id;
-
-      const order = await this.user.getRefundOrder(id);
-      const orderDetail = await this.user.getOrderDetail(id);
-
-      if (!order) {
-        return res.sendStatus(404);
-      }
-
-      res.status(200).json({ order, orderDetail });
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 결제 성공, 결제대행에서 받아온 고유 id db에 저장 */
-  paycomplete = async (req, res) => {
-    try {
-      const { imp_uid, merchant_uid } = req.body;
-
-      await this.user.updatePayment(imp_uid, merchant_uid);
-
-      const quantityInCart = await this.cartSummary(req.userId);
-
-      res.status(200).json({ quantityInCart });
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 결제 실패, 주문시 차감한 재고 다시 복구 */
-  cancelPayment = async (req, res, next) => {
-    try {
-      const { merchantUID, newArray } = req.body;
-      req.productArray = newArray;
-
-      await this.user.increaseStock(newArray);
-      await this.user.deletePayment(merchantUID);
-
-      next();
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({ code: error.message || '' });
     }
   };
 
   /* 주문 정보 (배송현황) 상세보기 */
   deliveryStatus = async (req, res) => {
     try {
-      const { id } = req.query;
+      const id = req.params.id;
       const status = await this.user.getDeliveryStatus(id);
 
       if (status.length < 1) {
         // id 값이 현재 존재하지 않는 id 일 경우
-        return res.status(400).json({ code: "ERROR20001" });
+        return res.status(404).json({ code: "ERROR20001" });
       }
 
       res.status(200).json({ status });
@@ -356,12 +353,18 @@ export default class UserController {
   writeReview = async (req, res) => {
     try {
       const username = req.username;
-      const { product_code, text, detail_id } = req.body;
+      const { text, detail_id } = req.body;
+
+      const order = await this.user.getOrderDetailByUsername(detail_id, username);
+
+      if (!order) {
+        return res.sendStatus(404);
+      }
 
       const reviewId = await this.user.writeReview(
         detail_id,
         username,
-        product_code,
+        order.product_code,
         text
       );
 
@@ -468,7 +471,7 @@ export default class UserController {
   /* 내가 작성한 or 내가 댓글을 작성한 게시글 목록 가져오기 */
   getMyPost = async (req, res) => {
     try {
-      let { post, comment, page } = req.query;
+      let { thing, page } = req.query;
 
       if (isNaN(Number(page))) return res.sendStatus(404);
 
@@ -476,16 +479,16 @@ export default class UserController {
       const amountOfSendData = 15; // 한번에 보낼 게시글의 개수
       let currPage = page * amountOfSendData;
       let prevPage = (page - 1) * amountOfSendData;
-      let newPosts;
+      let newPosts = [];
       let hasmore = 0;
 
-      if (post) {
+      if (thing === "post") {
         newPosts = await this.user.getMyPost(
           username,
           amountOfSendData,
           prevPage
         );
-      } else if (comment) {
+      } else if (thing === "comment") {
         newPosts = await this.user.getMyComment(
           username,
           amountOfSendData,
@@ -510,21 +513,6 @@ export default class UserController {
   addCart = async (req, res) => {
     try {
       const userId = req.userId;
-      const { productArray } = req; // 결제 취소시 addcart실행하여 다시 장바구니에 담으려고..
-
-      if (productArray) {
-        productArray.map((product, key) => {
-          this.user.addInCart(
-            product.product_code,
-            product.option_number,
-            product.quantity,
-            userId
-          );
-        });
-
-        return res.sendStatus(204);
-      }
-
       const { product_code, option_number, quantity } = req.body;
 
       let product = await this.user.getByProduct_code(product_code);
@@ -534,7 +522,11 @@ export default class UserController {
       );
 
       if (!product || !option) {
-        return res.status(409).json({ code: "ERROR10003" });
+        return res.status(404).json({ code: "ERROR10003" });
+      }
+
+      if (isNaN(Number(quantity)) || quantity < 1) {
+        return res.status(404).json({ code: "ERROR10003" });
       }
 
       const result = await this.duplicateCheck(
@@ -564,7 +556,7 @@ export default class UserController {
       res.status(201).json({ quantityInCart });
     } catch (error) {
       console.log(error);
-      return res.sendStatus(400);
+      return res.status(400).json({ code: error.message || '' });
     }
   };
 
@@ -585,6 +577,20 @@ export default class UserController {
       const amountOfSendData = 10; // 한번에 보낼 데이터의 양
       let { page, date1, date2 } = req.query;
 
+      let dateArr = [];
+      dateArr[dateArr.length] = new Date(date1);
+      dateArr[dateArr.length] = new Date(date2);
+
+      dateArr.forEach((date) => {
+        if (date == 'Invalid Date') {
+          throw new Error('날짜 형식을 확인해주세요')
+        }
+      })
+
+      if (dateArr[0] > dateArr[1]) {
+        throw new Error('검색 시작 날짜가 검색 종료 날짜보다 클 수 없습니다')
+      }
+
       if (isNaN(Number(page))) return res.sendStatus(404);
 
       let prevPage = 0;
@@ -600,8 +606,10 @@ export default class UserController {
 
       const orderList = await this.user.getOrder(
         username,
-        date1,
-        date2,
+        `${date1} 00:00:00`,
+        `${date2} 23:59:59`,
+        // date1,
+        // date2,
         amountOfSendData,
         prevPage
       );
@@ -625,353 +633,6 @@ export default class UserController {
     } catch (error) {
       console.log(error);
       return res.sendStatus(400);
-    }
-  };
-
-  /* 결제 정보 저장 */
-  payment = async (req, res, next) => {
-    let paymentId;
-
-    try {
-      const username = req.username;
-      const { amount, shippingFee, productPrice, newArray, paymentOption } = req.body;
-
-      const stock = await this.checkStock(newArray);
-
-      if (stock) {
-        return res.status(409).json({ code: "ERROR30002" });
-      }
-
-      paymentId = await this.user.insertInfoForPayment(
-        username,
-        amount,
-        shippingFee,
-        productPrice,
-        paymentOption
-      );
-
-      if (!paymentId) {
-        return res.status(409).json({ code: "ERROR30001" });
-      }
-
-      const paymentDate = new Date(
-        Date.now() - new Date().getTimezoneOffset() * 60000
-      )
-        .toISOString()
-        .substr(0, 10);
-      const paymentInfoDate = paymentDate.split("-").join("");
-      const paymentInfoId = String(paymentId).padStart(8, "0");
-      const merchantUID = paymentInfoDate.concat("-", paymentInfoId);
-
-      const result = await this.user.updateMarchantUID("newOrder", paymentId, merchantUID);
-
-      if (!result) {
-        await this.user.deletePaymentByPaymentId(paymentId);
-        return res.status(409).json({ code: "ERROR30001" });
-      }
-
-      req.paymentId = paymentId;
-      req.merchantUID = merchantUID;
-
-      next();
-
-      // upgradeClass(username);
-
-      // res.status(200).json({ merchantUID, orderId });
-    } catch (error) {
-      if (paymentId) {
-        await this.user.deletePaymentByPaymentId(paymentId);
-      }
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  cancelOrder = async (req, res) => {
-    try {
-      const orderId = req.params.id;
-      const paymentId = await this.user.findPaymentId(orderId);
-
-      if (!paymentId) {
-        return res.sendStatus(400);
-      }
-
-      await this.user.cancelOrder(paymentId, orderId);
-
-      res.sendStatus(204);
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400);
-    }
-  };
-
-  /* 환불 요청, 즉시 환불 or 관리자 확인후 환불 가능하게 요청 건 db 저장 */
-  refund = async (req, res) => {
-    let refundId;
-    let refundInformation;
-    let savePoint;
-
-    try {
-      const { refundInfo, immediatelyRefundInfo, pendingRefundInfo } = req.body;
-      const { merchantUID, impUID, extraCharge, prePayment, refundProduct, refundAmount } =
-        refundInfo;
-      refundInformation = refundInfo;
-      let newMerchantUID;
-      let product = []; // 배송이 되지 않은 것 (환불완료)
-      let pendingRefundProduct = []; // 배송이 진행된 것 || 현금결제건 (환불요청)
-
-      savePoint = await this.user.getSavePointBeforeRefund(merchantUID, refundId);
-
-      const {
-        rest_refund_amount,
-        products_price,
-        shippingfee,
-        return_shippingfee,
-      } = savePoint;
-
-      const { refundAmountForProduct, refundAmountForShipping } =
-        immediatelyRefundInfo;
-      const {
-        pendingRefundAmountForProduct,
-        returnShippingFee,
-        pendingRefundAmountForShipping,
-      } = pendingRefundInfo;
-
-      if (
-        refundAmount > rest_refund_amount ||
-        refundAmountForProduct + pendingRefundAmountForProduct >
-          products_price ||
-        refundAmountForShipping + pendingRefundAmountForShipping > shippingfee
-      ) {
-        // 클라이언트에서 임의로 환불액을 조정하여 실제 환불액보다 크게 환불을 요구한 경우
-        return res.status(400).json({ code: "환불 실패" });
-      }
-
-      const restOfProductPrice = products_price - refundAmountForProduct;
-      const restOfShippingFee = shippingfee - refundAmountForShipping;
-      const restOfreturnShippingFee = return_shippingfee + returnShippingFee;
-      const restOfRefundAmount =
-        rest_refund_amount - (refundAmountForProduct + refundAmountForShipping);
-
-      if (savePoint.paymentOption !== "cash") {
-        product = refundProduct.filter(
-          (product) =>
-            product.status === "결제완료" || product.status === "입금대기중"
-        );
-        // const product2 = refundProduct.filter(product=>product.status!=='결제완료');
-        pendingRefundProduct = refundProduct.filter(
-          (product) =>
-            product.status !== "결제완료" && product.status !== "입금대기중"
-        );
-      } else {
-        pendingRefundProduct = refundProduct;
-      }
-
-      // refundId = await this.user.getPendingRefundById(merchantUID);
-
-      // if (refundId) {
-      //   //기존 펜딩에 추가
-      // } else {
-
-      // }
-
-      // `SELECT refundId
-      // FROM refund
-      // WHERE merchantUID=? AND refundProductPrice !=0`, [merchantUID]
-      
-
-      refundId = await this.user.refund(
-        merchantUID,
-        impUID,
-        pendingRefundProduct,
-        pendingRefundAmountForProduct,
-        returnShippingFee,
-        pendingRefundAmountForShipping,
-        extraCharge + prePayment,
-        restOfProductPrice,
-        restOfShippingFee,
-        restOfRefundAmount,
-        restOfreturnShippingFee,
-        refundAmountForProduct + refundAmountForShipping,
-        product
-      );
-
-      refundInformation = {
-        ...refundInformation,
-        refundId
-      }
-
-      if (extraCharge > 0) {
-        const paymentDate = new Date(
-          Date.now() - new Date().getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .substr(0, 10);
-  
-        const paymentInfoDate = paymentDate.split("-").join("");
-        const paymentInfoId = String(refundId).padStart(8, "0");
-        newMerchantUID = paymentInfoDate.concat("-", paymentInfoId);
-
-        this.user.updateMarchantUID("refund", refundId, newMerchantUID);
-      }
-
-      return res.status(200).json({ newMerchantUID, refundId, savePoint });
-    } catch (error) {
-      console.log(error);
-      if (refundId) {
-        this.returnToStateBeforeExecuteRefund(refundInformation, savePoint)
-      }
-      return res.sendStatus(400);
-    }
-  };
-
-  returnToStateBeforeExecuteRefund = async (refundInfo, savePoint) => {
-    try {
-      const { merchantUID, refundId, refundProduct } = refundInfo;
-      const {
-        rest_refund_amount,
-        products_price,
-        shippingfee,
-        return_shippingfee,
-        refund_amount,
-        pending_refund,
-      } = savePoint;
-  
-      await this.user.cancelRefund(
-        refundId,
-        refundProduct,
-        pending_refund,
-        products_price,
-        shippingfee,
-        rest_refund_amount,
-        return_shippingfee,
-        refund_amount,
-        merchantUID
-      );
-      
-      return;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-  /* IMP에 실제 환불 요청 */
-  requestRefund = async (req, res) => {
-    try {
-      const { imp_uid, refundAmount } = req.body;
-
-      await this.requestRefundToIMP(imp_uid, refundAmount);
-
-      res.sendStatus(200);
-    } catch (error) {
-      console.log(error);
-      return res.sendStatus(400)
-    }
-  }
-
-  /* 환불 실패시 */
-  requestToCancelRefund = async (req, res) => {
-    try {
-      const { refundInfo, savePoint } = req.body;
-
-      await this.returnToStateBeforeExecuteRefund(refundInfo, savePoint);
-
-      return res.sendStatus(200);
-    } catch (error) {
-      console.log(error)
-      return res.sendStatus(400);
-    }
-  }  
-
-  /* 주문 정보 저장 */
-  order = async (req, res) => {
-    const { paymentOption, newArray, orderer, phone, address, extra_address } =
-      req.body;
-    const paymentId = req.paymentId;
-    const merchantUID = req.merchantUID;
-    const username = req.username;
-
-    let orderId;
-
-    try {
-      orderId = await this.user.order(
-        username,
-        paymentId,
-        orderer,
-        phone,
-        address,
-        extra_address
-      );
-
-      if (!orderId) {
-        await this.user.deletePaymentByPaymentId(paymentId);
-        return res.status(409).json({ code: "ERROR30001" });
-      }
-
-      let status = "";
-
-      if (paymentOption === "cash") {
-        status = "입금대기중";
-      } else {
-        status = "결제완료";
-      }
-
-      const result = await this.user.orderDetail(status, orderId, newArray);
-
-      if (!result) {
-        await this.user.deletePaymentByPaymentId(paymentId);
-        return res.status(409).json({ code: "ERROR30001" });
-      }
-
-      res.status(200).json({ merchantUID, orderId });
-    } catch (error) {
-      // orders가 payment 테이블의 payment_id를 참조 (casecade)
-      // payment_id만 지워주면 됨
-      console.log(error);
-      this.user.deletePaymentByPaymentId(paymentId);
-      return res.sendStatus(400);
-    }
-  };
-
-  // 결제 전 재고체크
-  checkStock = async (newArray) => {
-    for (let i = 0; i < newArray.length; i++) {
-      const result = await this.user
-        .checkStock(newArray[i].product_code, newArray[i].option_number)
-        .catch((error) => {
-          return true;
-        });
-
-      if (!result.stock) {
-        return true;
-      }
-    }
-  };
-
-  /* 주문시 고객의 총 주문가격에 따라 등급 조정 (아직 적용전) */
-  upgradeClass = async (username) => {
-    try {
-      let price = 0;
-      let orderDetailList = [];
-      const orderList = await this.user.getOrder(username);
-
-      for (let i = 0; i < orderList.length; i++) {
-        const orderDetail = await this.user.getOrderDetail(
-          orderList[i].order_id
-        );
-        orderDetailList = orderDetailList.concat(orderDetail);
-      }
-
-      orderDetailList.map((orderDetail, key) => {
-        price += orderDetail.price;
-      });
-
-      if (orderList.length >= 10 && price >= 1000) {
-        this.user.upgradeClass(username, "gold");
-      } else if (orderList.length >= 30 && price >= 3000) {
-        this.user.upgradeClass(username, "vip");
-      }
-    } catch (error) {
-      console.log(error);
     }
   };
 }

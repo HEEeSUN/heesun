@@ -2,6 +2,7 @@ import { useState } from "react";
 import { MemberService } from "../../../model/member.model";
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
+import Loading from "../../../components/Loading";
 
 type Props = {
   memberService: MemberService;
@@ -20,7 +21,7 @@ function SearchId({ memberService }: Props) {
 
     try {
       const userInfo = {
-        name,
+        username: name,
         email,
       };
 
@@ -52,11 +53,7 @@ function SearchId({ memberService }: Props) {
     <form className="search-form" onSubmit={searchId}>
       <Input type="text" name="name" labelName="NAME *" settings={settings} />
       <Input type="text" name="email" labelName="EMAIL *" settings={settings} />
-      {loading ? (
-        <img className="loading" src="/image/loading.png" alt="loading"></img>
-      ) : (
-        <Button title={"다음"} type={"submit"} />
-      )}
+      {loading ? <Loading /> : <Button title={"다음"} type={"submit"} />}
     </form>
   ) : (
     <div className="search-form">email로 전송되었습니다</div>

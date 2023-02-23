@@ -2,11 +2,12 @@ import express from "express";
 
 const router = express.Router();
 
-function discountRouter(adminController){
-  router.get("/", adminController.getSaleProducts);
-  router.post("/", adminController.addSaleProduct);
-  router.patch("/", adminController.updateSaleProduct);
-  router.delete("/:id", adminController.deleteSaleProduct);
+function discountRouter(adminDisocuntController){
+  router.get("/", adminDisocuntController.getSaleProducts);
+  router.post("/", adminDisocuntController.addSaleProduct);
+  router.patch("/", adminDisocuntController.updateSaleProduct);
+  router.delete("/:id", adminDisocuntController.deleteSaleProduct);
+  router.get("/products", adminDisocuntController.getAllProductsWithOption);
 
   return router;
 }

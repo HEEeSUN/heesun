@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { RefundInfo, SavePoint } from "../model/order.model";
+import { RefundInfo } from "../model/order.model";
 import HttpClient from "../../network/http";
 
 export default class AdminOrderService {
@@ -20,15 +20,6 @@ export default class AdminOrderService {
     const axiosAPI: AxiosRequestConfig = {
       method: "get",
       url: `/admin/orders?page=${pageNumber}&date1=${startDate}&date2=${endDate}&category=${category}&status=${status}&searchWord=${searchWord}`,
-    };
-
-    return this.http.axiosAPI(axiosAPI);
-  }
-
-  async getPendingRefund(pageNumber: number) {
-    const axiosAPI: AxiosRequestConfig = {
-      method: "get",
-      url: `/admin/orders/status?page=${pageNumber}&status=pending`,
     };
 
     return this.http.axiosAPI(axiosAPI);
@@ -55,24 +46,31 @@ export default class AdminOrderService {
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async refund(refundInfo: RefundInfo) {
+  async getPendingRefundList(pageNumber: number) {
     const axiosAPI: AxiosRequestConfig = {
-      method: "post",
-      url: `/admin/orders/refund`,
-      data: {
-        refundInfo,
-      },
+      method: "get",
+      url: `/admin/orders/refund?page=${pageNumber}`
     };
 
     return this.http.axiosAPI(axiosAPI);
   }
 
-  async refundFail(savePoint: SavePoint) {
+
+  async getPendingRefundDetail(refundId: number) {
+    const axiosAPI: AxiosRequestConfig = {
+      method: "get",
+      url: `/admin/orders/refund/${refundId}`,
+    };
+
+    return this.http.axiosAPI(axiosAPI);
+  }
+
+  async refund(refundInfo: RefundInfo) {
     const axiosAPI: AxiosRequestConfig = {
       method: "post",
-      url: `/admin/orders/refundFail`,
+      url: `/admin/orders/refund/${refundInfo.pendingRefundId}`,
       data: {
-        savePoint,
+        refundInfo,
       },
     };
 

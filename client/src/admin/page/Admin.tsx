@@ -5,6 +5,7 @@ import { AdminProductService } from "../model/product.model";
 import { AdminOrderService } from "../model/order.model";
 import { AdminDiscountService } from "../model/discount.model";
 import { AdminChattingService } from "../model/chatting.model";
+import { adminInquiryService } from "../model/inquiry.model";
 import { Regex } from "../model/model";
 import MenuList from "../components/MenuList";
 import Dashboard from "./dashboard/Dashboard";
@@ -14,6 +15,7 @@ import ManageProduct from "./manageProducts/ManageProduct";
 import Discount from "./discount/Discount";
 import CreateAdmin from "./createAccount/CreateAdmin";
 import ChattingList from "./chattings/ChattingList";
+import Inquiries from "./inquiry/Inquiry";
 import { AuthContext } from "../../context/authcontext";
 import Popup from "../components/Popup";
 import Login from "./login/Login";
@@ -24,6 +26,7 @@ type Props = {
   adminOrderService: AdminOrderService;
   adminDiscountService: AdminDiscountService;
   adminChattingService: AdminChattingService;
+  adminInquiryService: adminInquiryService;
   regex: Regex;
 };
 
@@ -33,6 +36,7 @@ function Admin({
   adminOrderService,
   adminDiscountService,
   adminChattingService,
+  adminInquiryService,
   regex,
 }: Props) {
   const sharedValue = useContext(AuthContext)
@@ -110,6 +114,9 @@ function Admin({
                         </Route>
                         <Route exact path="/admin/products/add">
                           <Products adminProductService={adminProductService} />
+                        </Route>
+                        <Route exact path="/admin/contact">
+                          <Inquiries adminInquiryService={adminInquiryService} />
                         </Route>
                         <Route path="*">
                           NOT FOUND

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { Product } from "../model/product.model";
+import ImageCmp from "./ImageCmp";
 
 type Props = {
   product: Product;
@@ -72,7 +73,11 @@ function ProductCard(props: Props) {
       }}
     >
       <div className="productThumbnailWrapper">
-        <img src={imgSrc} className="productThumbnail" alt="product image" />
+        <ImageCmp 
+          imgSrc={imgSrc}
+          alt="product image"
+          className="productThumbnail"
+        />
         {(timeSale || sale) && (
           <div className="sale-banner">
             {timeSale ? (

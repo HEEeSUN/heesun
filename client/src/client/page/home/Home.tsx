@@ -5,9 +5,10 @@ import {
   Product,
   SaleProduct,
 } from "../../model/product.model";
-import ProductCard from "../../components/ProductCard";
 import SaleCarousel from "./components/SaleCarousel";
+import ProductCard from "../../components/ProductCard";
 import NoticeNoContent from "../../components/NoticeNoContent";
+import ImageCmp from "../../components/ImageCmp";
 
 type Props = {
   productService: ProductService;
@@ -36,14 +37,13 @@ function Home(props: Props) {
   return (
     <div className="home">
       <div className="mainImage">
-        <img src="./image/main.jpg" alt="main image"></img>
+        <ImageCmp imgSrc="/image/main.jpg" alt="main image" />
       </div>
       <div className="mainPhrase">
         <p>Fresh, Seasonal, Beautiful</p>
         <p>Order Now and Get Same-Day-Delivery</p>
       </div>
       {timesaleList.length > 0 && <SaleCarousel mainProducts={timesaleList} />}
-
       {mainProducts.length === 0 ? (
         <NoticeNoContent
           message={"아직 등록된 상품이 없습니다"}
