@@ -1,10 +1,10 @@
 <br>
 
 #    :shopping: 쇼핑몰 서비스 [HEESUN]
-### 🔗 사이트 URL: [heesun.store](http://heesun.store/home)
+### ~~🔗 사이트 URL: [heesun.store](http://heesun.store/home)~~
 #### <p> 기본적인 쇼핑몰의 기능을 갖추고 있는 서비스입니다. <br> 경로에 따라 고객 페이지와 관리자 페이지로 구분되며 상단 URL 클릭시 쇼핑몰 서비스의 고객 페이지로 연결됩니다. <br><br> 
-- <strong>고객페이지</strong> <br> - <strong>URL</strong> : [heesun.store/home](http://heesun.store/home) <br> - <strong>테스트계정</strong> : ID : guest1 / PW : guest1@@ <br> 
-- <strong>관리자페이지</strong> <br> - <strong>URL</strong> : [heesun.store/admin](http://heesun.store/admin)   <br> - <strong>테스트계정</strong> : ID : master / PW : 1234 <br>  </p>
+- ~~<strong>고객페이지</strong> <br> - <strong>URL</strong> : [heesun.store/home](http://heesun.store/home) <br> - <strong>테스트계정</strong> : ID : guest1 / PW : guest1@@ <br>~~ 
+- ~~<strong>관리자페이지</strong> <br> - <strong>URL</strong> : [heesun.store/admin](http://heesun.store/admin)   <br> - <strong>테스트계정</strong> : ID : master / PW : 1234 <br>  </p>~~
 
 ##### <p> </p>
 <br>
@@ -186,7 +186,7 @@ execute 함수의 내부를 보니 getConnection을 이용해 가져온 conencti
 ###### 프로젝트 산출 문서
 
 ### 1. API명세서
-#### [http://api.heesun.store](http://api.heesun.store/api-docs)
+#### ~~[http://api.heesun.store](http://api.heesun.store/api-docs)~~
 Swagger를 이용하여 API를 명세화하였습니다. 상단 URL 클릭시 API를 테스트 할 수 있는 사이트로 이동합니다.
 
 ## 
